@@ -1,0 +1,83 @@
+version: '3.9'
+
+x-service-base: &service-base
+     init: true
+     restart: unless-stopped
+
+x-volume-base: &volume-base
+     driver: local
+
+services:
+     postgres:
+          <<: *service-base
+          image: postgres:latest
+          volumes:
+               - db-volume:/var/lib/postgresql/data
+          environment:
+               TZ: "Europe/Paris"
+          env_file:
+               - ./docker/postgres.env
+          ports:
+            - 5432:5432
+          networks:
+               - backend-network
+
+     pgadmin:
+          <<: *service-base
+          image: dpage/pgadmin4:latest
+          volumes:
+            - ./docker/pgadmin_servers.json:/pgadmin4/servers.json
+          environment:
+               TZ: "Europe/Paris"
+          env_file:
+               - ./docker/pgadmin.env
+          ports:
+               - 5050:80
+          networks:
+               - backend-network
+          depends_on:
+               - postgres
+
+                 #backend:
+                 #     <<: *service-base
+                 #     build:
+                 #          context: ./backend
+                 #     image: backend
+                 #     volumes:
+                 #          - ./backend:/app
+                 #     environment:
+                 #          TZ: "Europe/Paris"
+                 #     env_file:
+                 #          - ./env_files/backend.env
+                 #     expose:
+                 #          - 3000
+                 #     networks:
+                 #          - backend-network
+                 #     depends_on:
+                 #          - postgres
+
+                 #frontend:
+                 #     <<: *service-base
+                 #     build:
+                 #          context: ./frontend
+                 #     image: frontend
+                 #     volumes:
+                 #          - ./frontend:/app
+                 #     environment:
+                 #          TZ: "Europe/Paris"
+                 #     env_file:
+                 #          - ./env_files/frontend.env
+                 #     ports:
+                 #          - 8080:8080
+                 #     networks:
+                 #          - frontend-network
+                 #     depends_on:
+                 #          - backend
+
+volumes:
+     db-volume:
+          <<: *volume-base
+
+networks:
+     frontend-network:
+     backend-network:
