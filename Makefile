@@ -37,4 +37,7 @@ prune:
 	docker volume prune --force
 	docker network prune --force
 
+test:
+	@bash ./unit-test/unit-test.sh
+
 .PHONY: all re data build up stop ps clean fclean volume_rm prune
