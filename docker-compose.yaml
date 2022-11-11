@@ -40,9 +40,7 @@ services:
 
      backend:
           <<: *service-base
-          build:
-               context: ./backend
-          image: backend
+          image: node:lts-alpine
           volumes:
                - ./backend:/app
           environment:
@@ -55,6 +53,8 @@ services:
                - backend-network
           depends_on:
                - postgres
+          working_dir: /app
+          command: sh -c "apk add bash && npm install && npm run start:dev"
 
                  #frontend:
                  #     <<: *service-base
