@@ -1,10 +1,10 @@
 name: CI
 
 on:
-        workflow_dispatch:
-                push:
-                        branch:
-                                - '*'
+  workflow_dispatch:
+    push:
+      branch:
+        - '*'
 
 jobs:
   unit-tests:
@@ -14,4 +14,4 @@ jobs:
         working-directory: ./
     steps:
       - uses: actions/checkout@v2
-      - run: make up
+      - run: make test
