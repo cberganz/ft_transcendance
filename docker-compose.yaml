@@ -3,6 +3,8 @@ version: '3.9'
 x-service-base: &service-base
      init: true
      restart: unless-stopped
+     environment:
+          TZ: "Europe/Paris"
 
 x-volume-base: &volume-base
      driver: local
@@ -13,8 +15,6 @@ services:
           image: postgres:latest
           volumes:
                - db-volume:/var/lib/postgresql/data
-          environment:
-               TZ: "Europe/Paris"
           env_file:
                - ./docker/postgres.env
           ports:
@@ -27,8 +27,6 @@ services:
           image: dpage/pgadmin4:latest
           volumes:
             - ./docker/pgadmin_servers.json:/pgadmin4/servers.json
-          environment:
-               TZ: "Europe/Paris"
           env_file:
                - ./docker/pgadmin.env
           ports:
@@ -43,36 +41,33 @@ services:
           image: node:lts-alpine
           volumes:
                - ./backend:/app
-          environment:
-               TZ: "Europe/Paris"
           env_file:
                - ./docker/backend.env
           ports:
             - 3000:3000
           networks:
                - backend-network
+               - frontend-network
           depends_on:
                - postgres
           working_dir: /app
           command: sh -c "apk add bash && npm install && npm run start:dev"
 
-                 #frontend:
-                 #     <<: *service-base
-                 #     build:
-                 #          context: ./frontend
-                 #     image: frontend
-                 #     volumes:
-                 #          - ./frontend:/app
-                 #     environment:
-                 #          TZ: "Europe/Paris"
-                 #     env_file:
-                 #          - ./env_files/frontend.env
-                 #     ports:
-                 #          - 8080:8080
-                 #     networks:
-                 #          - frontend-network
-                 #     depends_on:
-                 #          - backend
+     frontend:
+          <<: *service-base
+          image: node:lts-alpine
+          volumes:
+               - ./client:/app
+          env_file:
+               - ./docker/frontend.env
+          ports:
+               - 8080:8080
+          networks:
+               - frontend-network
+          depends_on:
+               - backend
+          working_dir: /app
+          command: sh -c "apk add bash && npm install && npm run start:dev"
 
 volumes:
      db-volume:
