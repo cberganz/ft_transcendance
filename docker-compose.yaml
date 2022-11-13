@@ -53,24 +53,26 @@ services:
           working_dir: /app
           command: sh -c "apk add bash && npm install && npm run start:dev"
 
-     frontend:
-          <<: *service-base
-          image: node:lts-alpine
-          volumes:
-               - ./client:/app
-          env_file:
-               - ./docker/frontend.env
-          ports:
-               - 8080:8080
-          networks:
-               - frontend-network
-          depends_on:
-               - backend
-          working_dir: /app
-          command: sh -c "apk add bash && npm install && npm run start:dev"
+            #frontend:
+            #     <<: *service-base
+            #     image: node:lts-alpine
+            #     volumes:
+            #          - ./client:/app
+            #     env_file:
+            #          - ./docker/frontend.env
+            #     ports:
+            #          - 8080:8080
+            #     networks:
+            #          - frontend-network
+            #     depends_on:
+            #          - backend
+            #     working_dir: /app
+            #     command: sh -c "apk add bash && npm install && npm run start:dev"
 
 volumes:
      db-volume:
+          <<: *volume-base
+     backend-volume:
           <<: *volume-base
 
 networks:
