@@ -25,7 +25,6 @@ ps:
 # CLEAN RULES
 
 fclean: clean prune
-	rm -rf */node_modules */dist */*lock*
 
 clean:
 	${COMPOSE} down

@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  login         String    @unique
+  username      String    @unique
+  friends       Int[]
+  backlist      Int[]
+  messages      Message[]
+  channels      Channel[] @relation("channel::members")
+  admin_of      Channel[] @relation("channel::admins")
+  backlisted_of Channel[] @relation("channel::blacklist")
+}
+
+model Channel {
+  id       Int       @id @default(autoincrement())
+  members  User[]    @relation("channel::members")
+  type     String?
+  password String?
+  admin    User[]    @relation("channel::admins")
+  backlist User[]    @relation("channel::blacklist")
+  Message  Message[]
+}
+
+model Game {
+  id            Int      @id @default(autoincrement())
+  player1Id     Int
+  player2Id     Int
+  player1_score Int?
+  player2_score Int?
+  winner        Int?
+  loser         Int?
+  date          DateTime @default(now())
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  channel   Channel  @relation(fields: [channelId], references: [id])
+  author    User?    @relation(fields: [authorId], references: [id])
+  authorId  Int
+  date      DateTime @default(now())
+  content   String
+  channelId Int
+}
