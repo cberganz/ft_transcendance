@@ -5,5 +5,8 @@ export declare class AppController {
     login(req: any): Promise<{
         access_token: string;
     }>;
+    validAuth(req: any): {
+        message: string;
+    };
     getProfile(req: any): any;
 }

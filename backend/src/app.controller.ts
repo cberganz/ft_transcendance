@@ -14,6 +14,12 @@ export class AppController {
 	}
 
 	@UseGuards(JwtAuthGuard)
+	@Get('auth/validate')
+	validAuth(@Request() req) {
+		return {message: 'success'};
+	}
+	
+	@UseGuards(JwtAuthGuard)
 	@Get('profile')
 	getProfile(@Request() req) {
 		return req.user;
