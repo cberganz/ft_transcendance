@@ -38,9 +38,9 @@ services:
 
      backend:
           <<: *service-base
-          image: node:lts-alpine
-          volumes:
-               - ./backend:/app
+          build:
+               context: backend/
+          image: backend
           env_file:
                - ./docker/backend.env
           ports:
@@ -48,10 +48,9 @@ services:
           networks:
                - backend-network
                - frontend-network
+          working_dir: /app
           depends_on:
                - postgres
-          working_dir: /app
-          command: sh -c "apk add bash && npm install && npm run start:dev"
 
             #frontend:
             #     <<: *service-base
@@ -71,8 +70,6 @@ services:
 
 volumes:
      db-volume:
-          <<: *volume-base
-     backend-volume:
           <<: *volume-base
 
 networks:
