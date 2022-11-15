@@ -1,0 +1,19 @@
+body {
+	background-color: whitesmoke
+}
+
+.data-grid-title {
+	height:			150px;
+	width:			100%;
+	display:		flex;
+	align-items:	center
+}
+
+.data-grid {
+	height:	400px;
+	width:	100%;
+}
+
+.grid {
+	background-color: white;
+}

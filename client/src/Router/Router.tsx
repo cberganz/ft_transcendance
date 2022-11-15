@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes, Outlet } from 'react-router-dom';
-import Login from '../Login/Login'
+import Login from '../Pages/Login/Login'
+import ConnectedUsers from '../Pages/ConnectedUsers/ConnectedUsers'
 import {Dashboard, Page1, Page2} from './test'
 import useToken from '../Hooks/hook_access_token'
 import CircularProgress from '@mui/material/CircularProgress';
@@ -37,7 +38,7 @@ export default function Router() {
 				<Route path="/login" element={<Login />} />
 				<Route path='/' element={<PrivateRoutes />}>
 					<Route path="/" element={<Dashboard />} />
-					<Route path="/page1" element={<Page1 />} />
+					<Route path="/connected-users" element={<ConnectedUsers />} />
 					<Route path="/page2" element={<Page2 />} />
 				</Route>
 				<Route path="*" element={<Login />} />{/* Handle 404 */}

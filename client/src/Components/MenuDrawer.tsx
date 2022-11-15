@@ -17,16 +17,17 @@ type Anchor = 'top' | 'left' | 'bottom' | 'right';
 interface DrawerItemProp {
 	text: string,
 	icon: JSX.Element
+	href: string,
 }
 
-function DrawerItem(Props: DrawerItemProp) {
+function DrawerItem(props: DrawerItemProp) {
 	return (
-		<ListItem key={Props.text} disablePadding>
-			<ListItemButton>
-			<ListItemIcon>
-				{Props.icon}
-			</ListItemIcon>
-			<ListItemText primary={Props.text} />
+		<ListItem key={props.text} disablePadding>
+			<ListItemButton href={props.href}>
+				<ListItemIcon>
+					{props.icon}
+				</ListItemIcon>
+				<ListItemText primary={props.text} />
 			</ListItemButton>
 		</ListItem>
 	)
@@ -35,9 +36,9 @@ function DrawerItem(Props: DrawerItemProp) {
 function DrawerList() {
 	return (
 		<List>
-			<DrawerItem text='PLay Game' icon={<SportsEsportsIcon />} />
-			<DrawerItem text='Chat' icon={<TelegramIcon />} />
-			<DrawerItem text='Connected Users' icon={<Groups2Icon />} />
+			<DrawerItem href="/" text='PLay Game' icon={<SportsEsportsIcon />} />
+			<DrawerItem href="/chat" text='Chat' icon={<TelegramIcon />} />
+			<DrawerItem href="/connected-users" text='Connected Users' icon={<Groups2Icon />} />
 		</List>
 	)
 }
