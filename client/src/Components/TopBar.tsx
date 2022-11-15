@@ -16,8 +16,8 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Divider from '@mui/material/Divider';
 import { Stack } from '@mui/system';
-import SettingsIcon from '@mui/icons-material/Settings';
 import Grid from '@mui/material/Grid';
+import SettingsDialog from './SettingsDialog';
 
 const Search = styled('div')(({ theme }) => ({
 	position: 'relative',
@@ -90,7 +90,7 @@ function ProfileBox() {
 		onClose={handleMenuClose}
 		>
 			<MenuItem>
-				<Stack>
+				<Stack >
 					<Typography fontWeight='bold'>
 						Username
 					</Typography>
@@ -98,17 +98,12 @@ function ProfileBox() {
 				</Stack>
 			</MenuItem>
 			<Divider />
+			<SettingsDialog/>
 			<MenuItem>
-			<ListItemIcon>
-				<SettingsIcon/>
-			</ListItemIcon>
-			<ListItemText>Settings</ListItemText>
-			</MenuItem>
-			<MenuItem>
-			<ListItemIcon>
-				<AccountCircle/>
-			</ListItemIcon>
-			<ListItemText>Profile</ListItemText>
+				<ListItemIcon>
+					<AccountCircle/>
+				</ListItemIcon>
+				<ListItemText>Profile</ListItemText>
 			</MenuItem>
 			<Divider />
 			<MenuItem>

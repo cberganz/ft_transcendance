@@ -11,6 +11,7 @@ import TelegramIcon from '@mui/icons-material/Telegram';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Groups2Icon from '@mui/icons-material/Groups2';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 
 type Anchor = 'top' | 'left' | 'bottom' | 'right';
 
@@ -36,6 +37,7 @@ function DrawerItem(props: DrawerItemProp) {
 function DrawerList() {
 	return (
 		<List>
+			<DrawerItem href="/" text='Dashboard' icon={<DashboardIcon />} />
 			<DrawerItem href="/" text='PLay Game' icon={<SportsEsportsIcon />} />
 			<DrawerItem href="/chat" text='Chat' icon={<TelegramIcon />} />
 			<DrawerItem href="/connected-users" text='Connected Users' icon={<Groups2Icon />} />
