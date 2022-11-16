@@ -11,25 +11,25 @@ model User {
   id          Int          @id @default(autoincrement())
   login       String       @unique
   username    String       @unique
-  friends     friendship[] @relation("friendship")
-  blacklisted blacklist[]  @relation("blacklisted")
+  friends     Friendship[] @relation("friendship")
+  blacklisted Blacklist[]  @relation("blacklisted")
   messages    Message[]
   channels    Channel[]    @relation("channel::members")
   admin_of    Channel[]    @relation("channel::admins")
-  blacklist   blacklist[]
   p1_games    Game[]       @relation("player1")
   p2_games    Game[]       @relation("player2")
-  friendship  friendship[]
+  friendship  Friendship[]
+  blacklist   Blacklist[]
 }
 
 model Channel {
   id        Int         @id @default(autoincrement())
   members   User[]      @relation("channel::members")
-  type      C_type
+  type      String
   password  String?
   admin     User[]      @relation("channel::admins")
   Message   Message[]
-  blacklist blacklist[]
+  blacklist Blacklist[]
 }
 
 model Game {
@@ -54,7 +54,7 @@ model Message {
   content   String
 }
 
-model friendship {
+model Friendship {
   id       Int      @id @default(autoincrement())
   user1    User     @relation("friendship", fields: [user1_id], references: [id])
   user1_id Int
@@ -64,26 +64,15 @@ model friendship {
   approved Boolean  @default(false)
 }
 
-model blacklist {
+model Blacklist {
   id        Int      @id @default(autoincrement())
   target    User     @relation("blacklisted", fields: [target_id], references: [id])
   target_id Int
-  type      B_type
+  type      String
   date      DateTime @default(now())
   delay     Int?
   channel   Channel? @relation(fields: [channelId], references: [id])
   channelId Int?
-  creator   User     @relation(fields: [userId], references: [id])
-  userId    Int
-}
-
-enum B_type {
-  CHANNEL
-  USER
-}
-
-enum C_type {
-  PRIVATE
-  PUBLIC
-  ONE_TO_ONE
+  creator   User     @relation(fields: [creatorId], references: [id])
+  creatorId Int
 }
