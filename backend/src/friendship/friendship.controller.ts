@@ -19,12 +19,15 @@ export class FriendshipController {
 		return this.friendshipService.friendship({ id: Number(id) });
 	}
 
-	//@Post()
-	//async newFriendship (
-	//	@Body() friendshipData: { user1_id: string; user2_id: string }
-	//): Promise<FriendshipMode1> {
-	//	return this.friendshipService.createFriendship(friendshipData);
-	//}
+	@Post()
+	async newFriendship (
+		@Body() friendshipData: { user1_id: string; user2_id: string }
+	): Promise<FriendshipMode1> {
+		return this.friendshipService.createFriendship({
+			user1: { connect: { id: Number(friendshipData.user1_id) } },
+			user2: { connect: { id: Number(friendshipData.user2_id) } },
+		});
+	}
 
 	@Delete(':id')
 	async deleteFriendship(@Param('id') id: string): Promise<FriendshipMode1> {

@@ -11,6 +11,10 @@ export class FriendshipService {
 	): Promise<Friendship | null> {
 		return this.prisma.friendship.findUnique({
 			where: friendshipWhereUniqueInput,
+			include: {
+				user1: true,
+				user2: true,
+			},
 		});
 	}
 

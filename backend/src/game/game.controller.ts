@@ -19,12 +19,15 @@ export class GameController {
 		return this.gameService.game({ id: Number(id) });
 	}
 
-	//@Post()
-	//async newGame (
-	//	@Body() gameData: { player1Id: string; player2Id: string }
-	//): Promise<GameMode1> {
-	//	return this.gameService.createGame(gameData);
-	//}
+	@Post()
+	async newGame (
+		@Body() gameData: { player1Id: string; player2Id: string }
+	): Promise<GameMode1> {
+		return this.gameService.createGame({
+			player1: { connect: { id: Number(gameData.player1Id) } },
+			player2: { connect: { id: Number(gameData.player2Id) } },
+		});
+	}
 
 	@Delete(':id')
 	async deleteGame(@Param('id') id: string): Promise<GameMode1> {
