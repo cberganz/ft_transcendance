@@ -19,12 +19,16 @@ export class MessageController {
 		return this.messageService.message({ id: Number(id) });
 	}
 
-	//@Post()
-	//async newMessage (
-	//	@Body() messageData: { channelId: string; authorId: string; content: string }
-	//): Promise<MessageMode1> {
-	//	return this.messageService.createMessage(messageData);
-	//}
+	@Post()
+	async newMessage (
+		@Body() messageData: { channelId: string; authorId: string; content: string }
+	): Promise<MessageMode1> {
+		return this.messageService.createMessage({
+			content: messageData.content,
+			channel: { connect: { id: Number(messageData.channelId) } },
+			author: { connect: { id: Number(messageData.authorId) } },
+		});
+	}
 
 	@Delete(':id')
 	async deleteMessage(@Param('id') id: string): Promise<MessageMode1> {

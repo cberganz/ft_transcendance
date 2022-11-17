@@ -11,6 +11,10 @@ export class MessageService {
 	): Promise<Message | null> {
 		return this.prisma.message.findUnique({
 			where: messageWhereUniqueInput,
+			include: {
+				channel: true,
+				author: true,
+			},
 		});
 	}
 

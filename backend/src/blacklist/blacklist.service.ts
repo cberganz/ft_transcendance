@@ -11,6 +11,10 @@ export class BlacklistService {
 	): Promise<Blacklist | null> {
 		return this.prisma.blacklist.findUnique({
 			where: blacklistWhereUniqueInput,
+			include: {
+				target: true,
+				creator: true,
+			},
 		});
 	}
 
