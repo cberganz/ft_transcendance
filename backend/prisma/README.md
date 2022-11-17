@@ -62,7 +62,8 @@ Prisma will generate three tables and create specific relationships between them
 - One-to-one: A user can only have one profile and a profile can only correspond to one user. In the prisma schema, the relationship is set up by passing a 'userId' item and specifying the relationship using the '@relation(fields: [userId], references: [id])' parameter.
 - One-to-Many: A channel can contain several messages but a message is only present in one channel. The implementation of this relationship in the prisma schema is done in the same way as a One-to-One relationship, except that the channel will contain an array of messages ('Message[]').
 - Many-to-many: A user can be in several channels and a channel can contain several users. This case is specific: to implement this relationship in a relational data schema we need to create an additional table to link the two other tables. In our example, the table will contain 2 columns: userId and channelId. This will allow us to find all the rows that correspond to a user or a channel. Prisma automatically generates this table.
--> WARNING: For these three types of relationships, rows with '@relation' do not actually exist in the table. However, we can use our query formatting to ensure that the generated SQL code returns this information. See the Prisma module readme for more information, but here's a quick example:
+
+#### WARNING: For these three types of relationships, rows with '@relation' do not actually exist in the table. However, we can use our query formatting to ensure that the generated SQL code returns this information. See the Prisma module readme for more information, but here's a quick example:
 
 To get the information of a channel and the information of the users who are members of it, we will have to use the 'include' property:
 ```js
