@@ -12,20 +12,23 @@ function Game() {
   const factor: number = 1.32;
   const heightRef = useRef(window.innerHeight / factor);
   const widthRef = useRef(window.innerWidth / factor);
-  const boardHeightRef = useRef(Math.round(heightRef.current / 6));
-  const boardWidthRef = useRef(Math.round(heightRef.current / 50));
-  const ballSizeRef = useRef(Math.round(heightRef.current / 50));
+  const boardHeightRef = useRef(heightRef.current / 6);
+  const boardWidthRef = useRef(heightRef.current / 50);
+  const ballSizeRef = useRef(heightRef.current / 50);
   let startRef = useRef(false);
   let timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const p1Ref = useRef(
-    new Player([20, heightRef.current / 2 - boardHeightRef.current / 2])
+    new Player([20, heightRef.current / 2 - boardHeightRef.current / 2], 1)
   );
   const p2Ref = useRef(
-    new Player([
-      widthRef.current - boardWidthRef.current - 20,
-      heightRef.current / 2 - boardHeightRef.current / 2,
-    ])
+    new Player(
+      [
+        widthRef.current - boardWidthRef.current - 20,
+        heightRef.current / 2 - boardHeightRef.current / 2,
+      ],
+      2
+    )
   );
   const ballRef = useRef(
     new Ball([widthRef.current / 2, heightRef.current / 2], ballSizeRef.current)
@@ -70,7 +73,7 @@ function Game() {
       socket.emit("msgToServer", "n");
     };
 
-    const emitMessage = (val: string) => {
+    const updatePlayerDirection = (val: string) => {
       switch (val) {
         case "u1": {
           p1.setDirection("u");
@@ -99,16 +102,40 @@ function Game() {
       }
     };
 
-    socket.on("msgToClient", emitMessage);
+    const updateBallDir = (arr: Array<number>) => {
+      ball.setDirectionX(arr[0]);
+      ball.setDirectionY(arr[1]);
+    };
+
+    const updatePlayerPos = (param: { pos: number; id: number }) => {
+      if (param.id === 1) {
+        p1.setY(param.pos * heightRef.current);
+      } else {
+        p2.setY(param.pos * heightRef.current);
+      }
+    };
+
+    const updateBallPos = (param: { posX: number; posY: number }) => {
+      ball.setX(param.posX * widthRef.current);
+      ball.setY(param.posY * heightRef.current);
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
     window.addEventListener("blur", handleBlur);
+    socket.on("msgToClient", updatePlayerDirection);
+    socket.on("updateBallDirClient", updateBallDir);
+    socket.on("updatePlayerPosClient", updatePlayerPos);
+    socket.on("updateBallPosClient", updateBallPos);
 
     return () => {
-      socket.off("msgToClient", emitMessage);
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", handleBlur);
+      socket.off("msgToClient", updatePlayerDirection);
+      socket.off("updateBallDirClient", updateBallDir);
+      socket.off("updatePlayerPosClient", updatePlayerPos);
+      socket.off("updateBallPosClient", updateBallPos);
     };
   });
 
@@ -129,14 +156,14 @@ function Game() {
       canvas.height = canvas.width / factor;
       heightRef.current = canvas.offsetHeight;
       widthRef.current = canvas.offsetWidth;
-      boardHeightRef.current = Math.round(heightRef.current / 6);
-      boardWidthRef.current = Math.round(heightRef.current / 50);
-      ballSizeRef.current = Math.round(heightRef.current / 50);
-      p1.setY(boardHeightRef.current * p1.getRelativePosition());
-      p2.setY(boardHeightRef.current * p2.getRelativePosition());
+      boardHeightRef.current = heightRef.current / 6;
+      boardWidthRef.current = heightRef.current / 50;
+      ballSizeRef.current = heightRef.current / 50;
+      p1.setY(heightRef.current * p1.getRelativePosition());
+      p2.setY(heightRef.current * p2.getRelativePosition());
       p2.setX(widthRef.current - boardWidthRef.current - 20);
-      ball.setX(boardWidthRef.current * ball.getRelativePosition()[0]);
-      ball.setY(boardHeightRef.current * ball.getRelativePosition()[1]);
+      ball.setX(widthRef.current * ball.getRelativePosition()[0]);
+      ball.setY(heightRef.current * ball.getRelativePosition()[1]);
       ball.setStartingPosition([
         widthRef.current / 2 - ballSizeRef.current / 2,
         heightRef.current / 2 - ballSizeRef.current / 2,
@@ -170,18 +197,18 @@ function Game() {
   function initGame(): void {
     p1.setY(heightRef.current / 2 - boardHeightRef.current / 2);
     p2.setY(heightRef.current / 2 - boardHeightRef.current / 2);
-    p1.setRelativePosition(p1.getY() / boardHeightRef.current);
-    p2.setRelativePosition(p2.getY() / boardHeightRef.current);
-    p1.setY(boardHeightRef.current * p1.getRelativePosition());
-    p2.setY(boardHeightRef.current * p2.getRelativePosition());
+    p1.setRelativePosition(p1.getY() / heightRef.current);
+    p2.setRelativePosition(p2.getY() / heightRef.current);
+    p1.setY(heightRef.current * p1.getRelativePosition());
+    p2.setY(heightRef.current * p2.getRelativePosition());
     ball.setX(widthRef.current / 2 - ballSizeRef.current / 2);
     ball.setY(heightRef.current / 2 - ballSizeRef.current / 2);
     ball.setRelativePosition([
-      ball.getX() / boardWidthRef.current,
-      ball.getY() / boardHeightRef.current,
+      ball.getX() / widthRef.current,
+      ball.getY() / heightRef.current,
     ]);
-    ball.setX(boardWidthRef.current * ball.getRelativePosition()[0]);
-    ball.setY(boardHeightRef.current * ball.getRelativePosition()[1]);
+    ball.setX(widthRef.current * ball.getRelativePosition()[0]);
+    ball.setY(heightRef.current * ball.getRelativePosition()[1]);
   }
 
   function drawMap(ctx: CanvasRenderingContext2D): void {
@@ -217,22 +244,40 @@ function Game() {
 
   function updatePlayerPosition(player: Player): void {
     if (player.getDirection() === "u" && player.getY() > 0) {
-      player.setY(player.getY() - player.getSpeed());
+      socket.emit("updatePlayerPosServer", {
+        pos:
+          (player.getY() - heightRef.current / player.getSpeed()) /
+          heightRef.current,
+        id: player.id,
+      });
     } else if (
       player.getDirection() === "d" &&
       player.getY() < heightRef.current - boardHeightRef.current
     ) {
-      player.setY(player.getY() + player.getSpeed());
+      socket.emit("updatePlayerPosServer", {
+        pos:
+          (player.getY() + heightRef.current / player.getSpeed()) /
+          heightRef.current,
+        id: player.id,
+      });
     }
-    player.setRelativePosition(player.getY() / boardHeightRef.current);
+    player.setRelativePosition(player.getY() / heightRef.current);
   }
 
   function updateBallPosition(): void {
-    ball.setX(ball.getX() + ball.getDirectionX() * ball.getSpeed());
-    ball.setY(ball.getY() + ball.getDirectionY() * ball.getSpeed());
+    socket.emit("updateBallPosServer", {
+      posX:
+        (ball.getX() +
+          (ball.getDirectionX() * widthRef.current) / ball.getSpeed()) /
+        widthRef.current,
+      posY:
+        (ball.getY() +
+          (ball.getDirectionY() * heightRef.current) / ball.getSpeed()) /
+        heightRef.current,
+    });
     ball.setRelativePosition([
-      ball.getX() / boardWidthRef.current,
-      ball.getY() / boardHeightRef.current,
+      ball.getX() / widthRef.current,
+      ball.getY() / heightRef.current,
     ]);
   }
 
@@ -365,7 +410,7 @@ function Game() {
     if (startButton) {
       if (scorePoint(p1, p2)) {
         timerRef.current = setTimeout(() => {
-          ball.initializeDirection();
+          socket.emit("updateBallDirServer", ball.initializeDirection());
         }, 1000);
       }
       updatePlayerPosition(p1);

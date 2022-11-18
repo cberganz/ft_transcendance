@@ -1,4 +1,5 @@
 class Player {
+  public id: number;
   private startingPosition: Array<number>;
   private position: Array<number>;
   private speed: number;
@@ -7,10 +8,11 @@ class Player {
   private canHit: boolean;
   private relativePosition: number;
 
-  constructor(position: Array<number>) {
+  constructor(position: Array<number>, id: number) {
+    this.id = id;
     this.startingPosition = [...position];
     this.position = [...position];
-    this.speed = 7;
+    this.speed = 100;
     this.score = 0;
     this.direction = "n";
     this.canHit = true;

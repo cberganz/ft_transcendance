@@ -13,10 +13,10 @@ class Ball {
     this.startingPosition[0] = this.startingPosition[0] - this.ballSize / 2;
     this.startingPosition[1] = this.startingPosition[1] - this.ballSize / 2;
     this.position = [...this.startingPosition];
-    this.speed = 0;
-    this.dx = 0;
-    this.dy = 0;
-    this.initializeDirection();
+    this.speed = 100;
+    this.dx = this.initializeDirection()[0];
+    this.dy = this.initializeDirection()[1];
+    // this.initializeDirection();
     this.relativePosition = [1, 1];
   }
 
@@ -24,11 +24,21 @@ class Ball {
     return Math.random() * (max - min) + min;
   }
 
-  initializeDirection(): void {
-    this.dx = this.getRandomRange(0.4, 0.8);
-    this.dy = 1 - this.dx;
-    Math.random() < 0.5 ? (this.dx *= 1) : (this.dx *= -1);
-    Math.random() < 0.5 ? (this.dy *= 1) : (this.dy *= -1);
+  //   initializeDirection(): void {
+  //     this.dx = this.getRandomRange(0.4, 0.8);
+  //     this.dy = 1 - this.dx;
+  //     Math.random() < 0.5 ? (this.dx *= 1) : (this.dx *= -1);
+  //     Math.random() < 0.5 ? (this.dy *= 1) : (this.dy *= -1);
+  //   }
+
+  initializeDirection(): Array<number> {
+    const arr: Array<number> = [];
+
+    arr[0] = this.getRandomRange(0.4, 0.8);
+    arr[1] = 1 - arr[0];
+    Math.random() < 0.5 ? (arr[0] *= 1) : (arr[0] *= -1);
+    Math.random() < 0.5 ? (arr[1] *= 1) : (arr[1] *= -1);
+    return arr;
   }
 
   resetPosition(): void {
