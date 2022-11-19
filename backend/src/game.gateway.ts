@@ -63,6 +63,13 @@ P2 ID: ${room.p2Id}`
     return -1;
   }
 
+  isPlayerOne(client: Socket): boolean {
+    if (this.rooms[this.findCurrentRoom(client.id)].p1Id === client.id) {
+      return true;
+    }
+    return false;
+  }
+
   @SubscribeMessage("msgToServer")
   handleMessage(client: Socket, message: string): void {
     if (this.rooms[this.findCurrentRoom(client.id)].p1Id === client.id) {
@@ -164,5 +171,32 @@ P2 ID: ${room.p2Id}`
       }
     }
     this.logRoom();
+  }
+
+  @SubscribeMessage("updatePlayerPosServer")
+  handleUpdatePlayerPos(client: Socket, { pos, id }): void {
+    if (this.isPlayerOne(client)) {
+      this.server
+        .to(this.rooms[this.findCurrentRoom(client.id)].roomId.toString())
+        .emit("updatePlayerPosClient", { pos, id });
+    }
+  }
+
+  @SubscribeMessage("updateBallPosServer")
+  handleUpdateBallPos(client: Socket, { posX, posY }): void {
+    if (this.isPlayerOne(client)) {
+      this.server
+        .to(this.rooms[this.findCurrentRoom(client.id)].roomId.toString())
+        .emit("updateBallPosClient", { posX, posY });
+    }
+  }
+
+  @SubscribeMessage("updateBallDirServer")
+  handleUpdateBallDirection(client: Socket, arr: Array<number>): void {
+    if (this.isPlayerOne(client)) {
+      this.server
+        .to(this.rooms[this.findCurrentRoom(client.id)].roomId.toString())
+        .emit("updateBallDirClient", [...arr]);
+    }
   }
 }
