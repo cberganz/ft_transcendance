@@ -1,12 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Channels } from '../database/channels.entity';
-import { Blacklist } from '../database/blacklist.entity';
-import { Messages } from '../database/messages.entity';
-import { User } from '../database/user.entity';
 
-@Injectable()
+// @Injectable()
 export class ChatService {
     // constructor(
     //     @InjectRepository(Blacklist) 

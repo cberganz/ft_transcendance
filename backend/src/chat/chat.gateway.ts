@@ -1,59 +1,58 @@
-import {
-  SubscribeMessage,
-  WebSocketGateway,
-  OnGatewayInit,
-  WebSocketServer,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-} from '@nestjs/websockets';
+// import {
+//   SubscribeMessage,
+//   WebSocketGateway,
+//   OnGatewayInit,
+//   WebSocketServer,
+//   OnGatewayConnection,
+//   OnGatewayDisconnect,
+// } from '@nestjs/websockets';
 
-import { Socket, Server } from 'socket.io';
-import { SocketService } from '../socket/socket.service';
-import { Channels } from '../database/channels.entity';
+// import { Socket, Server } from 'socket.io';
+// import { SocketService } from '../socket/socket.service';
 
-@WebSocketGateway({
-  cors: {
-    origin: '*',
-  },
-})
-export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+// @WebSocketGateway({
+//   cors: {
+//     origin: '*',
+//   },
+// })
+export class ChatGateway/*  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect */
 {
-  constructor(private socketService: SocketService) {}
+  // constructor(private socketService: SocketService) {}
 
-  @WebSocketServer() public server: Server;
+  // @WebSocketServer() public server: Server;
 
-  @SubscribeMessage('sendMessage')
-  async handleSendMessage(client: Socket, payload: Channels): Promise<void>    {
-    // handles message from clients
-  }
+  // @SubscribeMessage('sendMessage')
+  // async handleSendMessage(client: Socket, payload: string): Promise<void>    {
+  //   // handles message from clients
+  // }
 
-  afterInit(server: Server) {
-    this.socketService.socket = server;
-  }
+  // afterInit(server: Server) {
+  //   this.socketService.socket = server;
+  // }
 
-  handleDisconnect(client: Socket) {
-    // handles disconnexion client
-  }
+  // handleDisconnect(client: Socket) {
+  //   // handles disconnexion client
+  // }
 
-  handleConnection(client: Socket, ...args: any[]) {
-    // handles connexion client ?
-  }
+  // handleConnection(client: Socket, ...args: any[]) {
+  //   // handles connexion client ?
+  // }
 
-  @SubscribeMessage('joinChatRoom')
-  JoinRoomSocket(client: Socket, room: string): void {
-    // add member to chan
-    client.join(room);
-  }
+  // @SubscribeMessage('joinChatRoom')
+  // JoinRoomSocket(client: Socket, room: string): void {
+  //   // add member to chan
+  //   client.join(room);
+  // }
 
-  @SubscribeMessage('leaveChatRoom')
-  leaveRoomSocket(client: Socket, room: string): void {
-    // remove member to chan
-    client.leave(room);
-  }
+  // @SubscribeMessage('leaveChatRoom')
+  // leaveRoomSocket(client: Socket, room: string): void {
+  //   // remove member to chan
+  //   client.leave(room);
+  // }
 
-  @SubscribeMessage('addNewMsg')
-  addNewMessage(client: Socket, room: string): void {
-    // add msg
-    // emit to room
-  }
+  // @SubscribeMessage('addNewMsg')
+  // addNewMessage(client: Socket, room: string): void {
+  //   // add msg
+  //   // emit to room
+  // }
 }
