@@ -1,4 +1,3 @@
-
 function getChan(id: number, props: any) {
   for (let i = 0; i < props.state.joinedChans.length; i++) {
     if (props.state.joinedChans[i].id === id)
@@ -9,8 +8,8 @@ function getChan(id: number, props: any) {
 export default function ChatHeader(props:any) {
   const chan = getChan(props.state.user.openedConvID, props)
   return (
-    <p>
+    <div style={{marginTop: '15px', color: 'black'}}>
       {chan?.name}
-    </p>
+    </div>
   )
 }

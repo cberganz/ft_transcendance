@@ -22,10 +22,9 @@ function Channel(name: string, panel: string, type: string, props: any) {
           expandIcon={<ExpandMoreIcon />}
           aria-controls={panel + "bh-content"}
           id={panel + "bh-header"}
-          sx={{paddingTop: '10px'}}
         >
           <Typography sx={{ width: '100%', flexShrink: 0 }} component="span">
-            {name}
+            <b>{name}</b>
           </Typography>
         </AccordionSummary>
 

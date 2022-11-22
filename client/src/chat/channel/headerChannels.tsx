@@ -50,9 +50,8 @@ function CreateChannelButton(props: any) {
                 variant="standard"
               />
               <TextField
-                autoFocus
                 margin="dense"
-                id="name"
+                id="password"
                 label="Password (optionnal)"
                 type="password"
                 fullWidth

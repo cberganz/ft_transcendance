@@ -150,15 +150,15 @@ export class Chat extends React.Component<Props, ChatState> {
 
   render() {
     return (
-    <div className="container">
+    <div className="chatContainer">
       <div className="ChannelMenu">
         <HeaderChannels newChannel={this.newChannel} />
         <ChannelDisplay state={this.state} userHandler={this.userHandler} openConvHandler={this.openConvHandler}
               userIsNotInChan={this.userIsNotInChan} joinChan={this.joinChan} newChannel={this.newChannel} />
       </div>
-      <div className="ChatHeader"><ChatHeader state={this.state} /></div>
+      {this.state.user.openedConvID === -1 ? null : <div className="ChatHeader"><ChatHeader state={this.state} /></div> }
       <div className="MessageDisplay"><MessageDisplay state={this.state} userHandler={this.userHandler} /></div>
-      <div className="SendMessage"><SendBox state={this.state} newMessage={this.newMessage} /></div>
+      {this.state.user.openedConvID === -1 ? null : <div className="SendMessage"><SendBox state={this.state} newMessage={this.newMessage} /></div>}
     </div>
     )
   }

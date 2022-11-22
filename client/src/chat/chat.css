@@ -1,4 +1,4 @@
-.container {  display: grid;
+.chatContainer {  display: grid;
     grid-template-columns: 0.6fr 2.8fr;
     grid-template-rows: 0.2fr 3.0fr 0.3fr;
     gap: 0px 0px;

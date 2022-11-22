@@ -23,7 +23,8 @@ export default function SendBox(props: any) {
     <Box>
       <TextField
         onKeyPress={(e) => onKeyPress(e, props)} 
-        fullWidth id="fullWidth" />
+        fullWidth id="fullWidth" 
+        sx={{background: 'white'}} />
     </Box>
   );
 }

@@ -2,6 +2,7 @@ import { Avatar } from "@mui/material";
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import AlertTitle from '@mui/material/AlertTitle';
+import { Player } from '@lottiefiles/react-lottie-player';
 import '../../chat.css'
 
 function MessageItemReceiver(avatar: string, name: string, text: string) {
@@ -34,7 +35,17 @@ function MessageItemSender(avatar: string, name: string, text: string) {
 
 export default function MessageDisplay(props: any) {
   if (props.state.user.openedConvID === -1)
-    return (<div></div>)
+    return (
+    <div>
+      <Player
+        autoplay={true}
+        loop={true}
+        controls={true}
+        src="https://assets9.lottiefiles.com/packages/lf20_fa1iw49j.json"
+        style={{ height: '400px', width: '400px' }}
+      ></Player>
+    </div>
+    )
   else {
     return (
       <Stack sx={{ width: '100%' }} spacing={2}>
