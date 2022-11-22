@@ -11,7 +11,12 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-async function loginUser(credentials: any) {
+type Credentials = {
+	username: FormDataEntryValue | null,
+	password: FormDataEntryValue | null,
+}
+
+async function loginUser(credentials: Credentials) {
 	const resp = await fetch('http://localhost:4000/auth/login', {
 	  method: 'POST',
 	  headers: {

@@ -1,7 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes, Outlet } from 'react-router-dom';
 import Login from '../Pages/Login/Login'
 import ConnectedUsers from '../Pages/ConnectedUsers/ConnectedUsers'
-import {Dashboard, Page1, Page2} from './test'
+import {Dashboard, Page2} from './test'
 import useToken from '../Hooks/hook_access_token'
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
