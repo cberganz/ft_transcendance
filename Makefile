@@ -6,7 +6,7 @@ COMPOSE=docker-compose -p transcendance
 
 all: data build up
 
-re: fclean volume_rm all
+re: fclean all
 
 # DOCKER RULES
 
