@@ -17,20 +17,17 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 {
   @WebSocketServer() public server: Server;
 
-  @SubscribeMessage('sendMessage')
-  async handleSendMessage(client: Socket, payload: string): Promise<void>    {
-    // handles message from clients
-  }
-
   afterInit(server: Server) {
   }
 
   handleDisconnect(client: Socket) {
-    // handles disconnexion client
   }
 
   handleConnection(client: Socket, ...args: any[]) {
-    // handles connexion client ?
+  }
+
+  @SubscribeMessage('sendChatMessage')
+  handleSendMessage(client: Socket, room: string, message: string) : void {
   }
 
   @SubscribeMessage('joinChatRoom')
@@ -43,11 +40,5 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   leaveRoomSocket(client: Socket, room: string): void {
     // remove member to chan
     client.leave(room);
-  }
-
-  @SubscribeMessage('addNewMsg')
-  addNewMessage(client: Socket, room: string): void {
-    // add msg
-    // emit to room
   }
 }
