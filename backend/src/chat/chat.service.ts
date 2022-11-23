@@ -20,7 +20,7 @@ export class ChatService {
     //         .getMany()
     // }
 
-    // async addMessage(channelID: number, login: string, content: string) {
+    async addMessage(channelID: number, login: string, content: string) {
     //     const count = await this.messagesRepository.count();
     //     const message = new Messages()
 
@@ -32,7 +32,7 @@ export class ChatService {
     //     message.date = new Date();
     //     message.id = count;
     //     await this.messagesRepository.save(message)
-    // }
+    }
 
     // /** CHANNELS **/
     // async createChannel(password: string, creator: string) {
