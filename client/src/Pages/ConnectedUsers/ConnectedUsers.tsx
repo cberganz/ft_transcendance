@@ -25,7 +25,7 @@ const columns: GridColDef[] = [
 		align:'left',
 		renderCell: (params) => {
 			let chip_color: "primary" | "warning";
-			(params.value == 'connected')
+			(params.value === 'connected')
 				? chip_color = "primary"
 				: chip_color = "warning"
 			return <Chip color={chip_color} label={params.value}></Chip>;
@@ -40,7 +40,7 @@ const columns: GridColDef[] = [
 		align:'left',
 		renderCell: (params) => {
 			let chip_color: "primary" | "warning";
-			(params.value == 'Play')
+			(params.value === 'Play')
 				? chip_color = "primary"
 				: chip_color = "warning"
 			return <Button color={chip_color} > {params.value} </Button>;

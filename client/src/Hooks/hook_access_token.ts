@@ -22,7 +22,7 @@ export default function useToken() {
 			}
 		})
 		.then((data) => {
-			if (data.status != 401) {
+			if (data.status !== 401) {
 				setIsTokenValidated('valid'); // in case there is no token
 				return ;
 			}
