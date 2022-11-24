@@ -1,9 +1,9 @@
-import Game from "./Game/Game";
+import Chat from "./chat/chat"
 
 function App() {
   return (
-    <div className="main-div">
-      <Game />
+    <div >
+      <Chat />
     </div>
   );
 }
