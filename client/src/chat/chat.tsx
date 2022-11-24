@@ -5,9 +5,10 @@ import SendBox from "./message/sendMsg/SendBox";
 import HeaderChannels from "./channel/headerChannels";
 import './chat.css'
 import React from "react";
-import { actualUser, ChatState, User, Channel, Message, Friendship, Blacklist } from "./stateInterface";
+import { actualUser, ChatState, Channel, Message } from "./stateInterface";
 import io from "socket.io-client";
 import { InfoDialog } from "./channel/infoDialog"
+import { cdine } from "./bdd"
 
 interface Props {
 }
@@ -40,12 +41,12 @@ export class Chat extends React.Component<Props, ChatState> {
   private ChatData: ChatState
   private socket = io("http://localhost:3000/chat") 
 
-  /** REQUEST **/
+  /** INIT REQUEST **/
   getMessages() : Message[] {
       return []
   }
-  getActualUser() : User {
-    return ()
+  getActualUser() : actualUser {
+    return ({user: cdine, openedConvID: -1})
   }
   getJoinedChans() : Channel[] {
     return []

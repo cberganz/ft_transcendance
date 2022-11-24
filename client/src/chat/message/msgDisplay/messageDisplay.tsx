@@ -35,7 +35,7 @@ function MessageItemSender(avatar: string, name: string, text: string) {
 }
 
 export default function MessageDisplay(props: any) {
-  if (props.state.user.openedConvID === -1)
+  if (props.state.actualUser.openedConvID === -1)
     return (
     <div>
       <Player
