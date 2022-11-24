@@ -7,7 +7,50 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Tooltip from '@mui/material/Tooltip';
-import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+
+interface Column {
+    id: 'command' | 'description';
+    label: string;
+    minWidth?: number;
+    align?: 'right';
+    format?: (value: number) => string;
+  }
+
+const columns: readonly Column[] = [
+{ id: 'command', label: 'Command', minWidth: 170 },
+{ id: 'description', label: 'Description', minWidth: 170 },
+];
+
+interface Data {
+    command: string;
+    description: string;
+  }
+
+function createData(
+command: string,
+description: string,
+): Data {
+return { command, description };
+}
+
+const rows = [
+    createData('/leave', 'Leave chan.'),
+    createData('/block [username]', 'Blocks [username].'),
+    createData('/unblock [username]', 'Unblocks [username].'),
+    createData('/setpwd [password]', 'Sets password for channel (only if owner).'),
+    createData('/rmpwd', 'Removes password of channel (only if owner).'),
+    createData('/addadmin [username]', 'Adds new administrator (only if administrator).'),
+    createData('/ban [username] [time]', 'Bans [username] for [time] minutes.'),
+    createData('/mute [username] [time]', 'Mutes [username] for [time] minutes.'),
+    createData('/game [username]', 'Sends game invitation to [username].'),
+  ];
 
 export function InfoDialog() {
     const [open, setOpen] = React.useState(false);
@@ -33,18 +76,45 @@ export function InfoDialog() {
             <DialogTitle>Chat commands</DialogTitle>
             <DialogContent>
 
-                <Box sx={{ minWidth: 120, marginTop: '10px' }}>
-                    <p><b>/leave</b>                 Leave chan.</p><br />
-                    <p><b>/block [username]</b>      Blocks [username].</p><br />
-                    <p><b>/unblock [username]</b> Unblocks [username]. </p><br />
-                    <p><b>/setpwd [password]</b> Sets password for channel (only if owner).</p><br />
-                    <p><b>/rmpwd</b> Removes password of channel (only if owner).</p><br />
-                    <p><b>/addadmin [username]</b> Adds new administrator (only if administrator).</p><br />
-                    <p><b>/ban [username] [time]</b> Bans [username] for [time] minutes.</p><br />
-                    <p><b>/mute [username] [time]</b> Mutes [username] for [time] minutes.</p><br />
-                    <p><b>/game [username]</b> Sends game invitation to [username].</p><br />
-                </Box>
-
+            <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+                <TableContainer sx={{ maxHeight: 440 }}>
+                    <Table stickyHeader aria-label="sticky table">
+                    <TableHead>
+                        <TableRow>
+                        {columns.map((column) => (
+                            <TableCell
+                            key={column.id}
+                            align={column.align}
+                            style={{ minWidth: column.minWidth, backgroundColor: '#e1e9f5' }}
+                            >
+                            <b>{column.label}</b>
+                            </TableCell>
+                        ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {rows
+                        .map((row) => {
+                            return (
+                            <TableRow hover role="checkbox" tabIndex={-1} key={row.command}>
+                                {columns.map((column) => {
+                                const value = row[column.id];
+                                return (
+                                    <TableCell key={column.id} align={column.align}>
+                                    {column.format && typeof value === 'number'
+                                        ? column.format(value)
+                                        : value}
+                                    </TableCell>
+                                );
+                                })}
+                            </TableRow>
+                            );
+                        })}
+                    </TableBody>
+                    </Table>
+                </TableContainer>
+            </Paper>
+            
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose}>Got it</Button>
