@@ -59,8 +59,8 @@ export function DialogChannelItem(props: any) {
                     {lastMsg?.author.login}
                   </Typography>
                   <span> </span>
-                    {lastMsg?.content.substring(0, 20)}
-                    {lastMsg?.content.length && lastMsg?.content.length > 20 ? <span>...</span> : null}
+                    {lastMsg?.content.substring(0, 15)}
+                    {lastMsg?.content.length && lastMsg?.content.length > 15 ? <span>...</span> : null}
                   
                 </React.Fragment>
               }
@@ -128,8 +128,8 @@ export function ChannelItem(chan: Chan, chanName: string, avatar: string, props:
                     {lastMsg?.author.login}
                   </Typography>
                   <span> </span>
-                    {lastMsg?.content.substring(0, 20)}
-                    {lastMsg?.content.length && lastMsg?.content.length > 20 ? <span>...</span> : null}
+                    {lastMsg?.content.substring(0, 15)}
+                    {lastMsg?.content.length && lastMsg?.content.length > 15 ? <span>...</span> : null}
                   
                 </React.Fragment>
               }

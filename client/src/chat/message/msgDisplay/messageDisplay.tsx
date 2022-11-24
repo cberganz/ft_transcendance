@@ -8,9 +8,9 @@ import '../../chat.css'
 function MessageItemReceiver(avatar: string, name: string, text: string) {
   return (
     <div className="leftChat">
-      <div className="leftChatAvatar"><Avatar src={avatar} sx={{ marginRight: '10px', marginTop:'15px'}}></Avatar></div>
+      <div className="leftChatAvatar"><Avatar src={avatar}></Avatar></div>
       <div className="leftChatContent">
-        <Alert severity="success" icon={false} sx={{width:'70%'}}>
+        <Alert severity="success" icon={false}>
           <AlertTitle><b>{name}</b></AlertTitle>
           {text}
         </Alert>
@@ -28,7 +28,7 @@ function MessageItemSender(avatar: string, name: string, text: string) {
           {text}
         </Alert>
       </div>
-      <div className="rightChatAvatar"><Avatar src={avatar} sx={{marginLeft: '10px', marginRight: '10px', marginTop:'15px'}}></Avatar></div>
+      <div className="rightChatAvatar"><Avatar src={avatar}></Avatar></div>
     </div>
   )
 }

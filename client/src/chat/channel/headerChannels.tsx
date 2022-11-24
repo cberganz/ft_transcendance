@@ -7,12 +7,14 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import CreateSharpIcon from '@mui/icons-material/CreateSharp';
+import AddCircleOutlineSharpIcon from '@mui/icons-material/AddCircleOutlineSharp';
+import Tooltip from '@mui/material/Tooltip';
 
 function CreateChannelButton(props: any) {
     const [open, setOpen] = React.useState(false);
@@ -32,14 +34,18 @@ function CreateChannelButton(props: any) {
 
     return (
       <div>
-        <Button onClick={handleClickOpen} variant="outlined" color="info" sx={{fontSize: '12px', backgroundColor: '#e6f1f7', float: 'right'}}><b>Create channel</b></Button>
+        <Tooltip title="Create channel">
+          <AddCircleOutlineSharpIcon
+            onClick={handleClickOpen}
+            fontSize='medium'
+            sx={{color: 'black', cursor: 'pointer', marginTop: '10px'}} />
+          </Tooltip>
         <form  onSubmit={(e) => {createChannel(e)}}>
           <Dialog open={open} onClose={handleClose} disablePortal>
             <DialogTitle>New channel</DialogTitle>
             <DialogContent>
               <DialogContentText>
               </DialogContentText>
-              <Checkbox id='isPrivate' /> Private
               <TextField
                 autoFocus
                 margin="dense"
@@ -48,6 +54,7 @@ function CreateChannelButton(props: any) {
                 type="name"
                 fullWidth
                 variant="standard"
+                inputProps={{ maxLength: 20 }}
               />
               <TextField
                 margin="dense"
@@ -85,7 +92,12 @@ function SendMessageButton(props: any) {
   
     return (
       <div>
-        <Button onClick={handleClickOpen} variant="outlined" color="success" sx={{fontSize: '12px', backgroundColor: '#f0f7e6', marginRight: '5px'}}><b>Send message</b></Button>
+        <Tooltip title="Send message">
+          <CreateSharpIcon
+            onClick={handleClickOpen}
+            fontSize='medium'
+            sx={{color: 'black', cursor: 'pointer', marginLeft: '15px', marginTop: '10px'}} />
+        </Tooltip>
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>New DM</DialogTitle>
           <DialogContent>

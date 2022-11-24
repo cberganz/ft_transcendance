@@ -8,6 +8,7 @@ import React from "react";
 import { messages, user, joinedChans, notJoinedChans, openedConversation } from "./bdd";
 import { Chan, ChatState, Message } from "./stateInterface";
 import io from "socket.io-client";
+import { InfoDialog } from "./channel/infoDialog"
 
 interface Props {
 }
@@ -35,7 +36,7 @@ export class Chat extends React.Component<Props, ChatState> {
     };
 
   }
-  socket = io("http://localhost:3001") 
+  private socket = io("http://localhost/chat:3000") 
 
   /** SOCKET **/
   joinRoomSocket(chanID: number) {
@@ -47,8 +48,14 @@ export class Chat extends React.Component<Props, ChatState> {
   }
 
   listenNewMessage() {
-    this.socket.on("msgToClient", (val) => {
+    this.socket.on("chatToClient", (val) => {
       console.log(val);
+    });
+  }
+
+  listendNewChan() {
+    this.socket.on("newChan", (val) => {
+      console.log(val)
     });
   }
 
@@ -135,7 +142,7 @@ export class Chat extends React.Component<Props, ChatState> {
     // get new list
   }
 
-  async joinChan(chan: Chan) {
+  joinChan(chan: Chan) {
     for (let i = 0; i < notJoinedChans.length; i++) {
       if (chan.id === notJoinedChans[i].id) {
         notJoinedChans.splice(i, 1)
@@ -151,14 +158,15 @@ export class Chat extends React.Component<Props, ChatState> {
   render() {
     return (
     <div className="chatContainer">
-      <div className="ChannelMenu">
-        <HeaderChannels newChannel={this.newChannel} />
-        <ChannelDisplay state={this.state} userHandler={this.userHandler} openConvHandler={this.openConvHandler}
-              userIsNotInChan={this.userIsNotInChan} joinChan={this.joinChan} newChannel={this.newChannel} />
-      </div>
-      {this.state.user.openedConvID === -1 ? null : <div className="ChatHeader"><ChatHeader state={this.state} /></div> }
-      <div className="MessageDisplay"><MessageDisplay state={this.state} userHandler={this.userHandler} /></div>
-      {this.state.user.openedConvID === -1 ? null : <div className="SendMessage"><SendBox state={this.state} newMessage={this.newMessage} /></div>}
+        <div className="ChannelMenu">
+            <HeaderChannels newChannel={this.newChannel} />
+            <ChannelDisplay state={this.state} userHandler={this.userHandler} openConvHandler={this.openConvHandler}
+                  userIsNotInChan={this.userIsNotInChan} joinChan={this.joinChan} newChannel={this.newChannel} />
+            <InfoDialog />
+        </div>
+        {this.state.user.openedConvID === -1 ? null : <div className="ChatHeader"><ChatHeader state={this.state} /></div> }
+        <div className="MessageDisplay"><MessageDisplay state={this.state} userHandler={this.userHandler} /></div>
+        {this.state.user.openedConvID === -1 ? null : <div className="SendMessage"><SendBox state={this.state} newMessage={this.newMessage} /></div>}
     </div>
     )
   }

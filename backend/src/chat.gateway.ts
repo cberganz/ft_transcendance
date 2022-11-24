@@ -7,8 +7,10 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
+import { Logger } from '@nestjs/common'
 
 @WebSocketGateway({
+  namespace: '/chat',
   cors: {
     origin: '*',
   },
@@ -16,29 +18,42 @@ import { Socket, Server } from 'socket.io';
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer() public server: Server;
+  private logger: Logger = new Logger('ChatGateway')
 
   afterInit(server: Server) {
   }
 
-  handleDisconnect(client: Socket) {
+  handleConnection(client: Socket) {
+    client.join('connectedUserPool')
+    this.logger.log('New connection')
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
+  handleDisconnect(client: Socket) {
+    client.leave('connectedUserPool')
+    this.logger.log('New disconnection')
+  }
+
+  @SubscribeMessage('newChan')
+  handleNewChannel(client: Socket, payload: any) : void {
+    this.server.to('connectedUserPool').emit('newChan', payload)
   }
 
   @SubscribeMessage('sendChatMessage')
-  handleSendMessage(client: Socket, room: string, message: string) : void {
+  handleSendMessage(client: Socket, message: {room: string, message: string}) : void {
+    // check if user not MUTE
+    this.server.to(message.room).emit('chatToClient', message.message)
+    // add msg to bdd
   }
 
   @SubscribeMessage('joinChatRoom')
-  JoinRoomSocket(client: Socket, room: string): void {
-    // add member to chan
+  handleJoinRoom(client: Socket, room: string): void {
     client.join(room);
+    // add member to chan members
   }
 
   @SubscribeMessage('leaveChatRoom')
-  leaveRoomSocket(client: Socket, room: string): void {
-    // remove member to chan
+  handleLeaveRoom(client: Socket, room: string): void {
     client.leave(room);
+    // remove member from chan members (BAN)
   }
 }
