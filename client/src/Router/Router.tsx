@@ -6,6 +6,7 @@ import useToken from '../Hooks/hook_access_token'
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import PrimarySearchAppBar from "../Components/TopBar"
+import Game from "../Game/Game";
 
 function	OutletRoute() {
 	return (
@@ -36,10 +37,10 @@ export default function Router() {
 		<BrowserRouter>
 			<Routes>
 				<Route path="/login" element={<Login />} />
-				<Route path='/' element={<PrivateRoutes />}>
+				<Route path='/' element={<OutletRoute/>}/* {<PrivateRoutes />} */>
 					<Route path="/" element={<Dashboard />} />
 					<Route path="/connected-users" element={<ConnectedUsers />} />
-					<Route path="/page2" element={<Page2 />} />
+					<Route path="/game" element={<Game />} />
 				</Route>
 				<Route path="*" element={<Login />} />{/* Handle 404 */}
 			</Routes>

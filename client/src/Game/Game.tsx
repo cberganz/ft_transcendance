@@ -3,6 +3,7 @@ import Ball from "./ball";
 import Player from "./player";
 import StartingScreen from "./StartingScreen";
 import io from "socket.io-client";
+import "./game.css"
 
 function Game() {
   const socket = io("http://localhost:3000");
@@ -422,19 +423,21 @@ function Game() {
   };
 
   return (
-    <div className={`game`}>
-      {!startButton ? (
-        <StartingScreen
-          setStartButton={setStartButton}
-          setWin={setWin}
-          win={win}
-        />
-      ) : null}
-      <canvas
-        className={`${!startButton ? "display-none" : ""}`}
-        ref={canvasRef}
-      ></canvas>
-    </div>
+	<div className={'gameContainer'}>
+		<div className={/* `game`  */'gameWidth'}>
+			{!startButton ? (
+				<StartingScreen
+				setStartButton={setStartButton}
+				setWin={setWin}
+				win={win}
+				/>
+				) : null}
+			<canvas
+				className={`${!startButton ? "display-none" : ""}`}
+				ref={canvasRef}
+				></canvas>
+		</div>
+	</div>
   );
 }
 

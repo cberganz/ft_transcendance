@@ -14,7 +14,7 @@ export default function useToken() {
 			setIsTokenValidated('invalid')
 			return ;
 		}
-		fetch('http://localhost:4000/auth/validate', {
+		fetch('http://localhost:3000/auth/validate', {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',

@@ -17,7 +17,7 @@ type Credentials = {
 }
 
 async function loginUser(credentials: Credentials) {
-	const resp = await fetch('http://localhost:4000/auth/login', {
+	const resp = await fetch('http://localhost:3000/auth/login', {
 	  method: 'POST',
 	  headers: {
 		'Content-Type': 'application/json'
@@ -25,7 +25,7 @@ async function loginUser(credentials: Credentials) {
 	  body: JSON.stringify(credentials)
 	})
 	  .then(data => data)
-	
+
 	if (resp.status != 401) {
 		const content = await resp.json();
 		localStorage.setItem('access_token', content.access_token);
