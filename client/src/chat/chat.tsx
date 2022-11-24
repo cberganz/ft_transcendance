@@ -27,10 +27,10 @@ export class Chat extends React.Component<Props, ChatState> {
     
     // FILL WITH API REQUESTS
     this.ChatData = {
-      messages: [],
-      actualUser: ,
-      joinedChans: [],
-      notJoinedChans: [],
+      messages: this.getMessages(),
+      actualUser: this.getActualUser(),
+      joinedChans: this.getJoinedChans(),
+      notJoinedChans: this.getNotJoinedChans(),
       openedConversation: [],
     };
 
@@ -39,6 +39,20 @@ export class Chat extends React.Component<Props, ChatState> {
 
   private ChatData: ChatState
   private socket = io("http://localhost:3000/chat") 
+
+  /** REQUEST **/
+  getMessages() : Message[] {
+      return []
+  }
+  getActualUser() : User {
+    return ()
+  }
+  getJoinedChans() : Channel[] {
+    return []
+  }
+  getNotJoinedChans() : Channel[] {
+    return []
+  }
 
   /** RENDERING FUNCTIONS */
   userHandler(openedChan: number) : void {
@@ -89,7 +103,6 @@ export class Chat extends React.Component<Props, ChatState> {
     }
     return (false)
   }
-
 
   /** CREATE **/
   newMessage(content: string, channel: Channel) : void {
@@ -152,7 +165,6 @@ export class Chat extends React.Component<Props, ChatState> {
   }
 
   listenSockets() {
-
   }
 
   render() {
