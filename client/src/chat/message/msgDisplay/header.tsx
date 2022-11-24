@@ -11,12 +11,14 @@ function getChan(id: number, props: any) {
   }
 }
 
+// check dans blacklist de l'user si blocked
 function isBlocked(props: any) : boolean {
   return (false)
 }
 
+// invite for a game, leave chan ou block/unblock
 export default function ChatHeader(props:any) {
-  const chan = getChan(props.state.user.openedConvID, props)
+  const chan = getChan(props.state.actualUser.openedConvID, props)
   return (
     <div style={{
         marginTop: '15px', 

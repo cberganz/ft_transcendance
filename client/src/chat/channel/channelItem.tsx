@@ -12,7 +12,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
-import {Chan} from '../stateInterface'
+import { Channel } from '../stateInterface'
 
 function getLastMessage(id: number, props: any) {
   for (let i = props.state.messages.length - 1; i >= 0; i--) {
@@ -99,11 +99,11 @@ export function DialogChannelItem(props: any) {
 )
 }
 
-export function ChannelItem(chan: Chan, chanName: string, avatar: string, props: any) {
+export function ChannelItem(chan: Channel, chanName: string, avatar: string, props: any) {
     const lastMsg = getLastMessage(chan.id, props);
     let bckgColor
   
-    if (props.state.user.openedConvID === chan.id)
+    if (props.state.actualUser.openedConvID === chan.id)
       bckgColor = '#f5f5f5'
     else
       bckgColor = 'white'

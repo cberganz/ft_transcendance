@@ -7,7 +7,6 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
-import { Logger } from '@nestjs/common'
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -18,19 +17,16 @@ import { Logger } from '@nestjs/common'
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer() public server: Server;
-  private logger: Logger = new Logger('ChatGateway')
 
   afterInit(server: Server) {
   }
 
   handleConnection(client: Socket) {
     client.join('connectedUserPool')
-    this.logger.log('New connection')
   }
 
   handleDisconnect(client: Socket) {
     client.leave('connectedUserPool')
-    this.logger.log('New disconnection')
   }
 
   @SubscribeMessage('newChan')

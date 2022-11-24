@@ -4,6 +4,7 @@ import Stack from '@mui/material/Stack';
 import AlertTitle from '@mui/material/AlertTitle';
 import { Player } from '@lottiefiles/react-lottie-player';
 import '../../chat.css'
+import { Message } from '../../stateInterface'
 
 function MessageItemReceiver(avatar: string, name: string, text: string) {
   return (
@@ -49,7 +50,7 @@ export default function MessageDisplay(props: any) {
   else {
     return (
       <Stack sx={{ width: '100%' }} spacing={2}>
-          {props.state.openedConversation.map((msg: any) => (
+          {props.state.openedConversation.map((msg: Message) => (
             <div key={msg.id}>
               {msg.author.login === props.state.user.login ? MessageItemSender(msg.author.avatar, msg.author.login, msg.content) : 
                 MessageItemReceiver(msg.author.avatar, msg.author.login, msg.content)}

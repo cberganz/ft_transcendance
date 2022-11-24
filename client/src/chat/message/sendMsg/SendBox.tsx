@@ -9,6 +9,7 @@ function getCurrentChan(props: any) {
   }
 }
 
+// code all
 function onKeyPress(e: any, props: any) {
   if (e.key === 'Enter') {
     const chan = getCurrentChan(props)

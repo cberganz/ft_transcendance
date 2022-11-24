@@ -16,6 +16,8 @@ import CreateSharpIcon from '@mui/icons-material/CreateSharp';
 import AddCircleOutlineSharpIcon from '@mui/icons-material/AddCircleOutlineSharp';
 import Tooltip from '@mui/material/Tooltip';
 
+// CREATE CHANNEL AND NEW MESSAGE FUNCTIONS
+
 function CreateChannelButton(props: any) {
     const [open, setOpen] = React.useState(false);
   
@@ -29,7 +31,6 @@ function CreateChannelButton(props: any) {
   
     const createChannel = (e: any) => {
       e.preventDefault()
-      props.functionHandler(e.target.isPrivate.value, e.target.name.value, e.target.password.value)
     }
 
     return (
