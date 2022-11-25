@@ -29,6 +29,7 @@ export interface User {
   
 export interface Channel {
     id:        number,
+    owner:     User,
     title:     string,
     members:   User[],
     type:      string,

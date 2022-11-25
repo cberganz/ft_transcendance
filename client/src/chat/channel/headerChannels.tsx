@@ -15,6 +15,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import CreateSharpIcon from '@mui/icons-material/CreateSharp';
 import AddCircleOutlineSharpIcon from '@mui/icons-material/AddCircleOutlineSharp';
 import Tooltip from '@mui/material/Tooltip';
+import { Channel } from '../stateInterface'
 
 // CREATE CHANNEL AND NEW MESSAGE FUNCTIONS
 
@@ -31,6 +32,28 @@ function CreateChannelButton(props: any) {
   
     const createChannel = (e: any) => {
       e.preventDefault()
+      let chanType
+
+      if (e.target.password.value === "")
+        chanType = "public"
+      else
+        chanType = "private"
+      const newChan: Channel = {
+        id:        0, // ??????????????????????????????????????????????
+        owner:     props.props.actualUser.user,
+        title:     e.target.name.value,
+        members:   [],
+        type:      chanType,
+        password:  e.target.password.value,
+        admin:     [],
+        Message:   [],
+        blacklist: [],
+      }
+      newChan.members[0] = props.props.actualUser.user
+      newChan.admin[0] = props.props.actualUser.user
+
+      props.props.socket.emit("newChan", newChan)
+      // add chan to bdd
     }
 
     return (
@@ -90,6 +113,27 @@ function SendMessageButton(props: any) {
     const handleChange = (event: SelectChangeEvent) => {
         setLogin(event.target.value as string);
     };
+    
+    const newDM = (e: any) => {
+      e.preventDefault()
+
+      const newChan: Channel = {
+        id:        0, // ??????????????????????????????????????????????
+        owner:     props.props.actualUser.user,
+        title:     e.target.login.value,
+        members:   [],
+        type:      "dm",
+        password:  "",
+        admin:     [],
+        Message:   [],
+        blacklist: [],
+      }
+      newChan.members[0] = props.props.actualUser.user
+      newChan.admin[1] = e.target.login.value
+
+      props.props.socket.emit("newChan", newChan)
+      // add chan to bdd
+    }
   
     return (
       <div>
@@ -99,16 +143,18 @@ function SendMessageButton(props: any) {
             fontSize='medium'
             sx={{color: 'black', cursor: 'pointer', marginLeft: '15px', marginTop: '10px'}} />
         </Tooltip>
+
+        <form  onSubmit={(e) => {newDM(e)}}>
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>New DM</DialogTitle>
           <DialogContent>
 
             <Box sx={{ minWidth: 120, marginTop: '10px' }}>
                 <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">Login</InputLabel>
+                    <InputLabel id="login">Login</InputLabel>
                     <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
+                    labelId="login"
+                    id="login"
                     value={login}
                     label="login"
                     onChange={handleChange}
@@ -126,6 +172,7 @@ function SendMessageButton(props: any) {
             <Button onClick={handleClose}>Open discussion</Button>
           </DialogActions>
         </Dialog>
+        </form>
       </div>
     );
 }
@@ -133,8 +180,8 @@ function SendMessageButton(props: any) {
 export default function HeaderChannels(props: any) {
     return (
         <div className='ChannelHeader'>
-            <SendMessageButton state={props} />
-            <CreateChannelButton state={props} />
+            <SendMessageButton props={props} />
+            <CreateChannelButton props={props} />
         </div>
     )
 }

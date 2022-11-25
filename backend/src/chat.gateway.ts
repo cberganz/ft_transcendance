@@ -30,26 +30,22 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('newChan')
-  handleNewChannel(client: Socket, payload: any) : void {
-    this.server.to('connectedUserPool').emit('newChan', payload)
+  handleNewChannel(client: Socket, chan: any) : void {
+    client.join("chat" + chan.id);
+    if (chan.type === "dm"){}
+    else
+      this.server.to('connectedUserPool').emit('newChan', chan)
   }
 
-  @SubscribeMessage('sendChatMessage')
-  handleSendMessage(client: Socket, message: {room: string, message: string}) : void {
+  @SubscribeMessage('newMessage')
+  handleNewMessage(client: Socket, message: {room: string, message: string}) : void {
     // check if user not MUTE
     this.server.to(message.room).emit('chatToClient', message.message)
-    // add msg to bdd
-  }
-
-  @SubscribeMessage('joinChatRoom')
-  handleJoinRoom(client: Socket, room: string): void {
-    client.join(room);
-    // add member to chan members
   }
 
   @SubscribeMessage('leaveChatRoom')
-  handleLeaveRoom(client: Socket, room: string): void {
-    client.leave(room);
+  handleLeaveRoom(client: Socket, chanID: string): void {
+    client.leave("chat" + chanID);
     // remove member from chan members (BAN)
   }
 }

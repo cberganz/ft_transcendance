@@ -25,6 +25,7 @@ model User {
 
 model Channel {
   title     String?
+  owner     User?       User     @relation(fields: [authorId], references: [id])
   id        Int         @id @default(autoincrement())
   members   User[]      @relation("channel::members")
   type      String
