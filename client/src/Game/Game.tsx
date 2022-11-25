@@ -4,6 +4,7 @@ import Player from "./player";
 import StartingScreen from "./StartingScreen";
 import io from "socket.io-client";
 import WaitingStart from "./WaitingStart";
+import "./game.css"
 
 function Game() {
   const socket = io("http://localhost:3000/game");
@@ -476,23 +477,25 @@ function Game() {
   }
 
   return (
-    <div className={`game`}>
-      {!startButton ? (
-        <StartingScreen
-          setStartButton={setStartButton}
-          setWin={setWin}
-          win={win}
-          updateReady={updateReady}
-          ready={ready}
-        />
-      ) : !ready ? (
-        <WaitingStart />
-      ) : null}
-      <canvas
-        className={`${!startButton && "display-none"}`}
-        ref={canvasRef}
-      ></canvas>
-    </div>
+	<div className={'gameContainer'}>
+		<div className={/* `game`  */'gameWidth'}>
+		{!startButton ? (
+			<StartingScreen
+			setStartButton={setStartButton}
+			setWin={setWin}
+			win={win}
+			updateReady={updateReady}
+			ready={ready}
+			/>
+		) : !ready ? (
+			<WaitingStart />
+		) : null}
+		<canvas
+			className={`${!startButton && "display-none"}`}
+			ref={canvasRef}
+		></canvas>
+		</div>
+	</div>
   );
 }
 
