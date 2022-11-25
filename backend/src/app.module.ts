@@ -10,10 +10,20 @@ import { FriendshipModule } from './friendship/friendship.module';
 import { GameModule } from './game/game.module';
 import { MessageModule } from './message/message.module';
 import { GameGateway } from './game.gateway';
+import { AuthModule } from './auth/auth.module';
 import { ChatGateway } from './chat.gateway';
 
 @Module({
-  imports: [PrismaModule, UserModule, ChannelModule, BlacklistModule, FriendshipModule, GameModule, MessageModule],
+  imports: [
+		PrismaModule,
+		UserModule,
+		ChannelModule,
+		BlacklistModule,
+		FriendshipModule,
+		GameModule,
+		MessageModule,
+		AuthModule
+	],
   controllers: [AppController],
   providers: [AppService, PrismaService, GameGateway, ChatGateway],
 })

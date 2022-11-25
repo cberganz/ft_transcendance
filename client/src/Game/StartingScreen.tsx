@@ -2,10 +2,14 @@ function StartingScreen({
   setStartButton,
   setWin,
   win,
+  updateReady,
+  ready,
 }: {
   setStartButton: (value: boolean) => void;
   setWin: (value: number) => void;
   win: number;
+  updateReady: (ready: boolean) => void;
+  ready: boolean;
 }) {
   return (
     <div className="starting-screen d-flex flex-column justify-content-center align-items-center">
