@@ -53,7 +53,7 @@ function CreateChannelButton(props: any) {
       newChan.admin[0] = props.props.actualUser.user
 
       props.props.socket.emit("newChan", newChan)
-      // add chan to bdd
+      // post chan to bdd
     }
 
     return (
@@ -129,10 +129,10 @@ function SendMessageButton(props: any) {
         blacklist: [],
       }
       newChan.members[0] = props.props.actualUser.user
-      newChan.admin[1] = e.target.login.value
+      // newChan.members[1] = get user 
 
       props.props.socket.emit("newChan", newChan)
-      // add chan to bdd
+      // posrt chan to bdd
     }
   
     return (

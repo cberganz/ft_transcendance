@@ -41,7 +41,7 @@ export class Chat extends React.Component<Props, ChatState> {
   private ChatData: ChatState
   private socket = io("http://localhost:3000/chat") 
 
-  /** INIT REQUEST **/
+  /** INIT REQUESTS **/
   getMessages() : Message[] {
       return []
   }
@@ -104,6 +104,9 @@ export class Chat extends React.Component<Props, ChatState> {
     }
     return (false)
   }
+  userIsInChan(chan: Channel) {
+    return (true) ////////////////////////////////////////
+  }
 
   /** CREATE **/
   newMessage(content: string, channel: Channel) : void {
@@ -141,35 +144,22 @@ export class Chat extends React.Component<Props, ChatState> {
   }
   
   /** SOCKET **/
-  joinRoomSocket(chanID: number) {
-    this.socket.emit("joinChatRoom", "chan" + chanID);
-  }
-  
-  leaveRoomSocket(chanID: number) {
-    this.socket.emit("leaveChatRoom", "chan" + chanID);
-  }
-
-  listenNewMessage() {
-    this.socket.on("chatToClient", (val) => {
-      console.log(val);
-    });
-  }
-
-  listendNewChan() {
-    this.socket.on("newChan", (val) => {
-      console.log(val)
-    });
-  }
-
-  sendNewMessage(msg: Message) {
-    this.socket.emit("addNewMsg", msg)
-  }
-
-  listenSockets() {
-  }
 
   render() {
-    this.listenSockets()
+    this.socket.on("newChan", (chan: Channel) => {
+      if (this.userIsInChan(chan))
+        this.ChatData.joinedChans.push(chan)
+      else
+        this.ChatData.notJoinedChans.push(chan)
+      this.setState(this.ChatData)    
+    });
+    this.socket.on("newMsg", (msg: Message) => {
+        this.ChatData.messages.push(msg)
+        if (msg.channel.id === this.ChatData.actualUser.openedConvID)
+          this.ChatData.openedConversation.push(msg)
+        this.setState(this.ChatData)
+    });
+
     return (
     <div className="chatContainer">
         <div className="ChannelMenu">

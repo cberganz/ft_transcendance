@@ -16,17 +16,18 @@ import { Socket, Server } from 'socket.io';
 })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
+  private userSockets: Map<string, Socket>
   @WebSocketServer() public server: Server;
 
   afterInit(server: Server) {
   }
 
-  handleConnection(client: Socket) {
-    client.join('connectedUserPool')
+  handleConnection(socket: Socket) {
+    socket.join('connectedUserPool')
   }
 
-  handleDisconnect(client: Socket) {
-    client.leave('connectedUserPool')
+  handleDisconnect(socket: Socket) {
+    socket.leave('connectedUserPool')
   }
 
   @SubscribeMessage('newChan')
@@ -40,7 +41,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('newMessage')
   handleNewMessage(client: Socket, message: {room: string, message: string}) : void {
     // check if user not MUTE
-    this.server.to(message.room).emit('chatToClient', message.message)
+    this.server.to(message.room).emit('newMsg', message.message)
   }
 
   @SubscribeMessage('leaveChatRoom')
