@@ -10,7 +10,6 @@ datasource db {
 model User {
   id          Int          @id @default(autoincrement())
   login       String       @unique
-  avatar      String
   username    String       @unique
   friends     Friendship[] @relation("friendship")
   blacklisted Blacklist[]  @relation("blacklisted")
@@ -24,8 +23,6 @@ model User {
 }
 
 model Channel {
-  title     String?
-  owner     User?       User     @relation(fields: [authorId], references: [id])
   id        Int         @id @default(autoincrement())
   members   User[]      @relation("channel::members")
   type      String
