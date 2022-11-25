@@ -30,7 +30,7 @@ export default function ChatHeader(props:any) {
         gap: '0px 0px',
         gridAutoFlow: 'row',
         }}>
-      <div>{chan?.name} {isBlocked(props) ? <i style={{fontSize: '10px'}}>[blocked]</i> : null} </div>
+      <div style={{textAlign: 'left', marginLeft: '25px'}}>{chan?.title} {isBlocked(props) ? <i style={{fontSize: '10px'}}>[blocked]</i> : null} </div>
       <div>
         {chan.type === 'dm' && !isBlocked(props) ? <div><Tooltip title="Invite for a pong"><SportsEsportsIcon sx={{cursor: 'pointer', color: 'grey', marginRight: '20px'}} /></Tooltip><Tooltip title="Block user"><BlockIcon sx={{cursor: 'pointer', color: 'grey'}} /></Tooltip></div> : null}
         {chan.type === 'dm' && isBlocked(props) ? <Tooltip title="Unblock user"><LockOpenIcon sx={{cursor: 'pointer', color: 'grey', marginLeft: '45px'}} /></Tooltip> : null}

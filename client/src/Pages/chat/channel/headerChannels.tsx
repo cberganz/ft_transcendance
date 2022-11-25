@@ -17,7 +17,20 @@ import AddCircleOutlineSharpIcon from '@mui/icons-material/AddCircleOutlineSharp
 import Tooltip from '@mui/material/Tooltip';
 import { Channel } from '../stateInterface'
 
-// CREATE CHANNEL AND NEW MESSAGE FUNCTIONS
+
+// API REQUESTS ////////////////////////////////////
+function postChan(chan: Channel) {
+}
+
+function getChanID() : number {
+  return (1)
+}
+
+function getUserList() {
+  return ([{login: "cdine", id: 0}, {login: "rbicanic", id: 1}])
+}
+
+////////////////////////////////////////////////////
 
 function CreateChannelButton(props: any) {
     const [open, setOpen] = React.useState(false);
@@ -32,15 +45,17 @@ function CreateChannelButton(props: any) {
   
     const createChannel = (e: any) => {
       e.preventDefault()
+      if (e.target.name.value === "")
+        return (alert("Please a channel title."))
+        
       let chanType
-
       if (e.target.password.value === "")
         chanType = "public"
       else
         chanType = "private"
       const newChan: Channel = {
-        id:        0, // ??????????????????????????????????????????????
-        owner:     props.props.actualUser.user,
+        id:        getChanID(),
+        ownerId:   props.props.state.actualUser.user.id,
         title:     e.target.name.value,
         members:   [],
         type:      chanType,
@@ -49,20 +64,19 @@ function CreateChannelButton(props: any) {
         Message:   [],
         blacklist: [],
       }
-      newChan.members[0] = props.props.actualUser.user
-      newChan.admin[0] = props.props.actualUser.user
+      newChan.members[0] = props.props.state.actualUser.user
+      newChan.admin[0] = props.props.state.actualUser.user
 
       props.props.socket.emit("newChan", newChan)
-      // post chan to bdd
+      postChan(newChan)
     }
-
     return (
       <div>
         <Tooltip title="Create channel">
           <AddCircleOutlineSharpIcon
             onClick={handleClickOpen}
             fontSize='medium'
-            sx={{color: 'black', cursor: 'pointer', marginTop: '10px'}} />
+            sx={{color: 'black', cursor: 'pointer', marginTop: '10px', marginLeft: '70%'}} />
           </Tooltip>
         <form  onSubmit={(e) => {createChannel(e)}}>
           <Dialog open={open} onClose={handleClose} disablePortal>
@@ -113,14 +127,16 @@ function SendMessageButton(props: any) {
     const handleChange = (event: SelectChangeEvent) => {
         setLogin(event.target.value as string);
     };
+
+    const userList = getUserList()
     
     const newDM = (e: any) => {
       e.preventDefault()
 
       const newChan: Channel = {
-        id:        0, // ??????????????????????????????????????????????
-        owner:     props.props.actualUser.user,
-        title:     e.target.login.value,
+        id:        getChanID(),
+        ownerId:     props.props.state.actualUser.user.id,
+        title:     "",
         members:   [],
         type:      "dm",
         password:  "",
@@ -128,11 +144,11 @@ function SendMessageButton(props: any) {
         Message:   [],
         blacklist: [],
       }
-      newChan.members[0] = props.props.actualUser.user
+      newChan.members[0] = props.props.state.actualUser.user
       // newChan.members[1] = get user 
 
       props.props.socket.emit("newChan", newChan)
-      // posrt chan to bdd
+      postChan(newChan)
     }
   
     return (
@@ -141,7 +157,7 @@ function SendMessageButton(props: any) {
           <CreateSharpIcon
             onClick={handleClickOpen}
             fontSize='medium'
-            sx={{color: 'black', cursor: 'pointer', marginLeft: '15px', marginTop: '10px'}} />
+            sx={{color: 'black', cursor: 'pointer', marginTop: '10px'}} />
         </Tooltip>
 
         <form  onSubmit={(e) => {newDM(e)}}>
@@ -159,9 +175,7 @@ function SendMessageButton(props: any) {
                     label="login"
                     onChange={handleChange}
                     >
-                    <MenuItem value={10}>Ten</MenuItem>
-                    <MenuItem value={20}>Twenty</MenuItem>
-                    <MenuItem value={30}>Thirty</MenuItem>
+                    {userList.map((user) => (<MenuItem value={user.id}>{user.login}</MenuItem>))}
                     </Select>
                 </FormControl>
             </Box>

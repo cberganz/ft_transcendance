@@ -20,9 +20,7 @@ export class Chat extends React.Component<Props, ChatState> {
     this.userHandler = this.userHandler.bind(this)
     this.openConvHandler = this.openConvHandler.bind(this)
     this.newMessage = this.newMessage.bind(this)
-    this.newChannel = this.newChannel.bind(this)
     this.updateChannelMenu = this.updateChannelMenu.bind(this)
-    this.newChannel = this.newChannel.bind(this)
     this.userIsNotInChan = this.userIsNotInChan.bind(this)
     this.joinChan = this.joinChan.bind(this)
     
@@ -35,11 +33,14 @@ export class Chat extends React.Component<Props, ChatState> {
       openedConversation: [],
     };
 
+    this.socket = io("http://localhost:3000/chat") 
     this.state = this.ChatData
+
+    this.socket.emit('initTable', this.ChatData.actualUser.user.login)
   }
 
+  private socket
   private ChatData: ChatState
-  private socket = io("http://localhost:3000/chat") 
 
   /** INIT REQUESTS **/
   getMessages() : Message[] {
@@ -67,7 +68,7 @@ export class Chat extends React.Component<Props, ChatState> {
     if (!this.userIsNotInChan(chanID)) {
       this.ChatData.openedConversation.splice(0, this.state.openedConversation.length);
       for (let i = 0; i < this.state.messages.length; i++) {
-        if (this.state.messages[i].channel.id === chanID) {
+        if (this.state.messages[i].channelId === chanID) {
           this.ChatData.openedConversation.push(this.state.messages[i])
         }
       }
@@ -126,11 +127,6 @@ export class Chat extends React.Component<Props, ChatState> {
     this.updateChannelMenu(channel.id)
   }
 
-  newChannel(isPrivate: boolean, name: string, password: string) {
-    // post chan to bdd
-    // get new list
-  }
-
   joinChan(chan: Channel) {
     for (let i = 0; i < this.ChatData.notJoinedChans.length; i++) {
       if (chan.id === this.ChatData.notJoinedChans[i].id) {
@@ -143,19 +139,19 @@ export class Chat extends React.Component<Props, ChatState> {
     this.setState({joinedChans: this.ChatData.joinedChans, notJoinedChans: this.ChatData.notJoinedChans})
   }
   
-  /** SOCKET **/
-
   render() {
-    this.socket.on("newChan", (chan: Channel) => {
+    this.socket.on("newChan", (chan: any) => {
+      alert("ok")
       if (this.userIsInChan(chan))
         this.ChatData.joinedChans.push(chan)
       else
         this.ChatData.notJoinedChans.push(chan)
       this.setState(this.ChatData)    
     });
-    this.socket.on("newMsg", (msg: Message) => {
+    this.socket.on("newMsg", (msg: any) => {
+      alert(msg.content)
         this.ChatData.messages.push(msg)
-        if (msg.channel.id === this.ChatData.actualUser.openedConvID)
+        if (msg.channelId === this.ChatData.actualUser.openedConvID)
           this.ChatData.openedConversation.push(msg)
         this.setState(this.ChatData)
     });
@@ -165,12 +161,12 @@ export class Chat extends React.Component<Props, ChatState> {
         <div className="ChannelMenu">
             <HeaderChannels state={this.state} socket={this.socket} />
             <ChannelDisplay state={this.state} userHandler={this.userHandler} openConvHandler={this.openConvHandler}
-                  userIsNotInChan={this.userIsNotInChan} joinChan={this.joinChan} newChannel={this.newChannel} />
+                  userIsNotInChan={this.userIsNotInChan} joinChan={this.joinChan} />
             <InfoDialog />
         </div>
         {this.state.actualUser.openedConvID === -1 ? null : <div className="ChatHeader"><ChatHeader state={this.state} /></div> }
         <div className="MessageDisplay"><MessageDisplay state={this.state} userHandler={this.userHandler} /></div>
-        {this.state.actualUser.openedConvID === -1 ? null : <div className="SendMessage"><SendBox state={this.state} newMessage={this.newMessage} /></div>}
+        {this.state.actualUser.openedConvID === -1 ? null : <div className="SendMessage"><SendBox state={this.state} socket={this.socket} /></div>}
     </div>
     )
   }

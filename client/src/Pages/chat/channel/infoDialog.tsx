@@ -68,7 +68,7 @@ export function InfoDialog() {
                 <InfoIcon
                     onClick={handleClickOpen}
                     fontSize='large'
-                    sx={{cursor: 'pointer', marginLeft: '45%', marginTop: '30px'}}
+                    sx={{cursor: 'pointer', marginTop: '30px', color: 'grey'}}
                 />
             </Tooltip>
             <Dialog open={open} onClose={handleClose}>

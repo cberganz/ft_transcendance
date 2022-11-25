@@ -9,6 +9,7 @@ datasource db {
 
 model User {
   id          Int          @id @default(autoincrement())
+  avatar      String
   login       String       @unique
   username    String       @unique
   friends     Friendship[] @relation("friendship")
@@ -30,6 +31,7 @@ model Channel {
   admin     User[]      @relation("channel::admins")
   Message   Message[]
   blacklist Blacklist[]
+  title     String
 }
 
 model Game {

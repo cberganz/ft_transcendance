@@ -11,6 +11,33 @@ export interface actualUser {
     openedConvID: number
 }    
 
+export interface Channel {
+  id:        number,
+  owner?:    User,
+  ownerId:   number,
+  title:     string,
+  members:   User[],
+  type:      string,
+  password:  string,
+  admin:     User[],
+  Message:   Message[],
+  blacklist: Blacklist[],
+}
+
+export interface Message {
+    id:        number,
+    channel?:  Channel,
+    channelId: number,
+    author:    User,
+    authorId:  number,
+    date?:      Date,
+    content:   string,
+}
+
+
+
+
+
 export interface User {
     id:          number,
     login:       string,
@@ -27,18 +54,6 @@ export interface User {
     blacklist:   Blacklist[]
   }
   
-export interface Channel {
-    id:        number,
-    owner:     User,
-    title:     string,
-    members:   User[],
-    type:      string,
-    password:  string,
-    admin:     User[],
-    Message:   Message[],
-    blacklist: Blacklist[],
-}
-  
 export interface Game {
     id:            number,
     player1:       User,
@@ -49,16 +64,6 @@ export interface Game {
     player2_score: number,
     winner:        number,
     date:          Date,
-}
-  
-export interface Message {
-    id:        number,
-    channel:   Channel,
-    channelId: number,
-    author:    User,
-    authorId:  number,
-    date:      Date,
-    content:   string,
 }
   
 export interface Friendship {
