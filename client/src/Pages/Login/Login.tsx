@@ -27,8 +27,6 @@ async function loginUser(credentials: Credentials) {
 	  .then(data => data)
 
 	if (resp.status !== 401) {
-		const content = await resp.json();
-		localStorage.setItem('access_token', content.access_token);
 		window.location.replace('/')
 	}
 }
