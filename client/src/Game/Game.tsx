@@ -3,12 +3,14 @@ import Ball from "./ball";
 import Player from "./player";
 import StartingScreen from "./StartingScreen";
 import io from "socket.io-client";
+import WaitingStart from "./WaitingStart";
 
 function Game() {
-  const socket = io("http://localhost:3000");
+  const socket = io("http://localhost:3000/game");
 
   const [startButton, setStartButton] = useState<boolean>(false);
   const [win, setWin] = useState<number>(0);
+  const [ready, setReady] = useState<boolean>(false);
   const factor: number = 1.32;
   const heightRef = useRef(window.innerHeight / factor);
   const widthRef = useRef(window.innerWidth / factor);
@@ -19,12 +21,18 @@ function Game() {
   let timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const p1Ref = useRef(
-    new Player([20, heightRef.current / 2 - boardHeightRef.current / 2], 1)
+    new Player(
+      [
+        widthRef.current / 50,
+        heightRef.current / 2 - boardHeightRef.current / 2,
+      ],
+      1
+    )
   );
   const p2Ref = useRef(
     new Player(
       [
-        widthRef.current - boardWidthRef.current - 20,
+        widthRef.current - boardWidthRef.current - widthRef.current / 50,
         heightRef.current / 2 - boardHeightRef.current / 2,
       ],
       2
@@ -120,6 +128,24 @@ function Game() {
       ball.setY(param.posY * heightRef.current);
     };
 
+    const updateScore = (param: { playerNumber: number; score: number }) => {
+      if (param.playerNumber === 1) {
+        p1.setScore(param.score);
+      } else {
+        p2.setScore(param.score);
+      }
+    };
+
+    const updateReadyListener = (value: boolean) => {
+      if (value === true && ready === false) {
+        setReady(true);
+      }
+    };
+
+    const updateCancel = () => {
+      if (ready) resetGame(p1, p2);
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
     window.addEventListener("blur", handleBlur);
@@ -127,6 +153,9 @@ function Game() {
     socket.on("updateBallDirClient", updateBallDir);
     socket.on("updatePlayerPosClient", updatePlayerPos);
     socket.on("updateBallPosClient", updateBallPos);
+    socket.on("updateScoreClient", updateScore);
+    socket.on("updateReadyClient", updateReadyListener);
+    socket.on("updateCancelClient", updateCancel);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
@@ -136,6 +165,10 @@ function Game() {
       socket.off("updateBallDirClient", updateBallDir);
       socket.off("updatePlayerPosClient", updatePlayerPos);
       socket.off("updateBallPosClient", updateBallPos);
+      socket.off("updateScoreClient", updateScore);
+      socket.off("updateReadyClient", updateReadyListener);
+      socket.off("updateCancelClient", updateCancel);
+      socket.disconnect();
     };
   });
 
@@ -159,9 +192,10 @@ function Game() {
       boardHeightRef.current = heightRef.current / 6;
       boardWidthRef.current = heightRef.current / 50;
       ballSizeRef.current = heightRef.current / 50;
+      p1.setX(widthRef.current / 50);
       p1.setY(heightRef.current * p1.getRelativePosition());
+      p2.setX(widthRef.current - boardWidthRef.current - widthRef.current / 50);
       p2.setY(heightRef.current * p2.getRelativePosition());
-      p2.setX(widthRef.current - boardWidthRef.current - 20);
       ball.setX(widthRef.current * ball.getRelativePosition()[0]);
       ball.setY(heightRef.current * ball.getRelativePosition()[1]);
       ball.setStartingPosition([
@@ -200,6 +234,8 @@ function Game() {
     p1.setRelativePosition(p1.getY() / heightRef.current);
     p2.setRelativePosition(p2.getY() / heightRef.current);
     p1.setY(heightRef.current * p1.getRelativePosition());
+    p1.setX(widthRef.current / 50);
+    p2.setX(widthRef.current - boardWidthRef.current - widthRef.current / 50);
     p2.setY(heightRef.current * p2.getRelativePosition());
     ball.setX(widthRef.current / 2 - ballSizeRef.current / 2);
     ball.setY(heightRef.current / 2 - ballSizeRef.current / 2);
@@ -209,6 +245,9 @@ function Game() {
     ]);
     ball.setX(widthRef.current * ball.getRelativePosition()[0]);
     ball.setY(heightRef.current * ball.getRelativePosition()[1]);
+    if (startButton) {
+      updateReady(true);
+    }
   }
 
   function drawMap(ctx: CanvasRenderingContext2D): void {
@@ -335,7 +374,10 @@ function Game() {
 
   function scorePoint(p1: Player, p2: Player): boolean {
     if (ball.getRightBorder() <= 0) {
-      p2.setScore(p2.getScore() + 1);
+      socket.emit("updateScoreServer", {
+        playerNumber: 2,
+        score: p2.getScore() + 1,
+      });
       ball.resetPosition();
       ball.setDirectionX(0);
       ball.setDirectionY(0);
@@ -343,7 +385,10 @@ function Game() {
       p2.setCanHit(true);
       return true;
     } else if (ball.getLeftBorder() >= widthRef.current) {
-      p1.setScore(p1.getScore() + 1);
+      socket.emit("updateScoreServer", {
+        playerNumber: 1,
+        score: p1.getScore() + 1,
+      });
       ball.resetPosition();
       ball.setDirectionX(0);
       ball.setDirectionY(0);
@@ -388,6 +433,8 @@ function Game() {
   }
 
   function resetGame(p1: Player, p2: Player): void {
+    updateReady(false);
+    setReady(false);
     setStartButton(false);
     if (p1.getScore() === 10) {
       setWin(1);
@@ -408,18 +455,25 @@ function Game() {
     p2: Player
   ): void => {
     if (startButton) {
-      if (scorePoint(p1, p2)) {
-        timerRef.current = setTimeout(() => {
-          socket.emit("updateBallDirServer", ball.initializeDirection());
-        }, 1000);
+      //   updateReady(true);
+      if (ready) {
+        if (scorePoint(p1, p2)) {
+          timerRef.current = setTimeout(() => {
+            socket.emit("updateBallDirServer", ball.initializeDirection());
+          }, 1000);
+        }
+        updatePlayerPosition(p1);
+        updatePlayerPosition(p2);
+        updateBallDirection(p1, p2);
+        updateBallPosition();
+        drawGame(ctx, p1, p2);
       }
-      updatePlayerPosition(p1);
-      updatePlayerPosition(p2);
-      updateBallDirection(p1, p2);
-      updateBallPosition();
-      drawGame(ctx, p1, p2);
     }
   };
+
+  function updateReady(ready: boolean): void {
+    socket.emit("updateReadyServer", ready);
+  }
 
   return (
     <div className={`game`}>
@@ -428,10 +482,14 @@ function Game() {
           setStartButton={setStartButton}
           setWin={setWin}
           win={win}
+          updateReady={updateReady}
+          ready={ready}
         />
+      ) : !ready ? (
+        <WaitingStart />
       ) : null}
       <canvas
-        className={`${!startButton ? "display-none" : ""}`}
+        className={`${!startButton && "display-none"}`}
         ref={canvasRef}
       ></canvas>
     </div>
