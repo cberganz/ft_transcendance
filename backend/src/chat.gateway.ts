@@ -7,7 +7,6 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
-import { Logger } from '@nestjs/common'
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -17,43 +16,37 @@ import { Logger } from '@nestjs/common'
 })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
+  private userSockets: Map<string, Socket>
   @WebSocketServer() public server: Server;
-  private logger: Logger = new Logger('ChatGateway')
 
   afterInit(server: Server) {
   }
 
-  handleConnection(client: Socket) {
-    client.join('connectedUserPool')
-    this.logger.log('New connection')
+  handleConnection(socket: Socket) {
+    socket.join('connectedUserPool')
   }
 
-  handleDisconnect(client: Socket) {
-    client.leave('connectedUserPool')
-    this.logger.log('New disconnection')
+  handleDisconnect(socket: Socket) {
+    socket.leave('connectedUserPool')
   }
 
   @SubscribeMessage('newChan')
-  handleNewChannel(client: Socket, payload: any) : void {
-    this.server.to('connectedUserPool').emit('newChan', payload)
+  handleNewChannel(client: Socket, chan: any) : void {
+    client.join("chat" + chan.id);
+    if (chan.type === "dm"){}
+    else
+      this.server.to('connectedUserPool').emit('newChan', chan)
   }
 
-  @SubscribeMessage('sendChatMessage')
-  handleSendMessage(client: Socket, message: {room: string, message: string}) : void {
+  @SubscribeMessage('newMessage')
+  handleNewMessage(client: Socket, message: {room: string, message: string}) : void {
     // check if user not MUTE
-    this.server.to(message.room).emit('chatToClient', message.message)
-    // add msg to bdd
-  }
-
-  @SubscribeMessage('joinChatRoom')
-  handleJoinRoom(client: Socket, room: string): void {
-    client.join(room);
-    // add member to chan members
+    this.server.to(message.room).emit('newMsg', message.message)
   }
 
   @SubscribeMessage('leaveChatRoom')
-  handleLeaveRoom(client: Socket, room: string): void {
-    client.leave(room);
+  handleLeaveRoom(client: Socket, chanID: string): void {
+    client.leave("chat" + chanID);
     // remove member from chan members (BAN)
   }
 }

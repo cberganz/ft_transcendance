@@ -8,7 +8,6 @@ import { ChannelModule } from './channel/channel.module';
 import { BlacklistModule } from './blacklist/blacklist.module';
 import { FriendshipModule } from './friendship/friendship.module';
 import { GameModule } from './game/game.module';
-import { ChatModule } from './chat/chat.module';
 import { MessageModule } from './message/message.module';
 import { GameGateway } from './game.gateway';
 import { AuthModule } from './auth/auth.module';
@@ -23,7 +22,6 @@ import { ChatGateway } from './chat.gateway';
 		FriendshipModule,
 		GameModule,
 		MessageModule,
-		ChatModule,
 		AuthModule
 	],
   controllers: [AppController],

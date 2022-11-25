@@ -6,8 +6,8 @@ import useToken from '../Hooks/hook_access_token'
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import PrimarySearchAppBar from "../Components/TopBar"
-import Game from "../Game/Game";
-import Chat from "../chat/chat"
+import Game from "../Pages/Game/Game";
+import Chat from "../Pages/chat/chat"
 
 function	OutletRoute() {
 	return (
