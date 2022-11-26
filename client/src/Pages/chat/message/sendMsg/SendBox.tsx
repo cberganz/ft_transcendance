@@ -28,7 +28,7 @@ function newMessage(value: string, props: any) {
     authorId:  props.state.actualUser.user.id,
     content:   value,
   }
-  props.socket.emit("newMsg", {room: "chat" + chan.id, message: newMsg})
+  props.socket.emit("newMsgFromClient", {room: "chat" + chan.id, message: newMsg})
   postMsg(newMsg)
 }
 

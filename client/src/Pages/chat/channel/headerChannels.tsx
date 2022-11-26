@@ -67,7 +67,7 @@ function CreateChannelButton(props: any) {
       newChan.members[0] = props.props.state.actualUser.user
       newChan.admin[0] = props.props.state.actualUser.user
 
-      props.props.socket.emit("newChan", newChan)
+      props.props.socket.emit("newChanFromClient", newChan)
       postChan(newChan)
     }
     return (
@@ -147,7 +147,7 @@ function SendMessageButton(props: any) {
       newChan.members[0] = props.props.state.actualUser.user
       // newChan.members[1] = get user 
 
-      props.props.socket.emit("newChan", newChan)
+      props.props.socket.emit("newChanFromClient", newChan)
       postChan(newChan)
     }
   
@@ -175,7 +175,7 @@ function SendMessageButton(props: any) {
                     label="login"
                     onChange={handleChange}
                     >
-                    {userList.map((user) => (<MenuItem value={user.id}>{user.login}</MenuItem>))}
+                    {userList.map((user) => (<MenuItem value={user.id} key={user.id}>{user.login}</MenuItem>))}
                     </Select>
                 </FormControl>
             </Box>

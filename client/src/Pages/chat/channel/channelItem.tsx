@@ -16,7 +16,7 @@ import { Channel } from '../stateInterface'
 
 function getLastMessage(id: number, props: any) {
   for (let i = props.state.messages.length - 1; i >= 0; i--) {
-    if (props.state.messages[i].channel.id === id)
+    if (props.state.messages[i].channelId === id)
       return props.state.messages[i]
   }
 }
