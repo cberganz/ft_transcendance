@@ -1,4 +1,5 @@
-import { Controller, Get, Request, Res, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, Res, Post, UseGuards } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService } from './auth/auth.service';
 import { LocalAuthGuard } from './auth/local-auth.guard'
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -7,22 +8,23 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 export class AppController {
 	constructor(private authService: AuthService) {}
 
-	@UseGuards(LocalAuthGuard)// avoid magic strings crearte class for AuthGuard('local') cf. nest Authentication doc
+	@UseGuards(LocalAuthGuard)
 	@Post('auth/login')
-	async login(@Request() req) {
-		let access_token = await this.authService.login(req.user)
-		return access_token;
+	async login(@Res({ passthrough: true }) response: Response, @Req() req) {
+		let jwt_token = await this.authService.login(req.user)
+		response.cookie('jwt', jwt_token.access_token, { maxAge: 60000/* , httpOnly: true  */})
+		return jwt_token;
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Get('auth/validate')
-	validAuth(@Request() req) {
+	validAuth() {
 		return {message: 'success'};
 	}
 	
 	@UseGuards(JwtAuthGuard)
 	@Get('profile')
-	getProfile(@Request() req) {
-		return req.user;
+	getProfile(@Req() req) {
+		return {"message": "success"}/* req.user */;
 	}
 }

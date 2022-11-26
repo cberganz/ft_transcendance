@@ -20,7 +20,6 @@ function	OutletRoute() {
 
 function	PrivateRoutes() {
 	const isTokenValidated = useToken();
-
 	if (isTokenValidated === 'loading'){
 		return (
 			<Box sx={{ display: 'flex' }}>
@@ -38,7 +37,7 @@ export default function Router() {
 		<BrowserRouter>
 			<Routes>
 				<Route path="/login" element={<Login />} />
-				<Route path='/' element={<OutletRoute/>}/* {<PrivateRoutes />} */>
+				<Route path='/' element=/* {<OutletRoute/>} */{<PrivateRoutes />}>
 					<Route path="/" element={<Dashboard />} />
 					<Route path="/connected-users" element={<ConnectedUsers />} />
 					<Route path="/game" element={<Game />} />

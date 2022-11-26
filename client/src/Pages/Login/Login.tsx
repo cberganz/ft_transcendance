@@ -19,13 +19,16 @@ type Credentials = {
 async function loginUser(credentials: Credentials) {
 	const resp = await fetch('http://localhost:3000/auth/login', {
 	  method: 'POST',
+	  mode: 'cors',
+	  redirect: 'follow',
+	  credentials: 'include',
 	  headers: {
-		'Content-Type': 'application/json'
+		'Content-Type': 'application/json',
+		'Accept': 'application/json',
 	  },
 	  body: JSON.stringify(credentials)
 	})
 	  .then(data => data)
-
 	if (resp.status !== 401) {
 		window.location.replace('/')
 	}

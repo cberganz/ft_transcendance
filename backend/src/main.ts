@@ -1,11 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();// a verifier
-
+  app.use(cookieParser())
+  app.enableCors({
+	credentials: true,
+	origin: 'http://localhost:3001'
+  });// a verifier
   const config = new DocumentBuilder()
     .setTitle('Median')
     .setDescription('The Median API description')
