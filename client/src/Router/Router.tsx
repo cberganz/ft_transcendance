@@ -8,6 +8,7 @@ import Box from '@mui/material/Box';
 import PrimarySearchAppBar from "../Components/TopBar"
 import Game from "../Pages/Game/Game";
 import Chat from "../Pages/chat/chat"
+import Ranking from "../Pages/Ranking/Ranking"
 
 function	OutletRoute() {
 	return (
@@ -43,6 +44,7 @@ export default function Router() {
 					<Route path="/connected-users" element={<ConnectedUsers />} />
 					<Route path="/game" element={<Game />} />
 					<Route path="/chat" element={<Chat />} />
+					<Route path="/ranking" element={<Ranking />} />
 
 				</Route>
 				<Route path="*" element={<Login />} />{/* Handle 404 */}
