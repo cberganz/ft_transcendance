@@ -17,6 +17,7 @@ model User {
   messages    Message[]
   channels    Channel[]    @relation("channel::members")
   admin_of    Channel[]    @relation("channel::admins")
+  owner_of    Channel[]
   p1_games    Game[]       @relation("player1")
   p2_games    Game[]       @relation("player2")
   friendship  Friendship[]
@@ -27,11 +28,13 @@ model Channel {
   id        Int         @id @default(autoincrement())
   members   User[]      @relation("channel::members")
   type      String
+  title     String
   password  String?
   admin     User[]      @relation("channel::admins")
   Message   Message[]
   blacklist Blacklist[]
-  title     String
+  owner     User        @relation(fields: [ownerId], references: [id])
+  ownerId   Int
 }
 
 model Game {

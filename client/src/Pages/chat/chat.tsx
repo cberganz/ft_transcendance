@@ -8,6 +8,7 @@ import React from "react";
 import { actualUser, ChatState, Channel, Message } from "./stateInterface";
 import io from "socket.io-client";
 import { InfoDialog } from "./channel/infoDialog"
+import axios from "axios"
 
 interface Props {
 }
@@ -24,13 +25,14 @@ export class Chat extends React.Component<Props, ChatState> {
     
     // FILL WITH API REQUESTS
     this.ChatData = {
-      messages: this.getMessages(),
+      messages: [],
       actualUser: this.getActualUser(),
-      joinedChans: this.getJoinedChans(),
-      notJoinedChans: this.getNotJoinedChans(),
+      joinedChans: [],
+      notJoinedChans: [],
       openedConversation: [],
     };
-
+  
+    this.getJoinedChans()
     this.socket = io("http://localhost:3000/chat") 
     this.state = this.ChatData
 
@@ -45,30 +47,23 @@ export class Chat extends React.Component<Props, ChatState> {
       return []
   }
   getActualUser() : actualUser {
-    let tmp = prompt("Enter your login", "")
-    if (tmp === null)
-      tmp = "cdine"
     let cdine = {
-      id:          0,
-      login:       tmp,
-      username:    tmp,
+      id:          1,
+      login:       "cdine",
+      username:    "cdine",
       avatar:      "https://i.guim.co.uk/img/media/08312799ce07993294b1cd2e135a0f00e3455c42/0_0_6720_4480/master/6720.jpg?width=620&quality=85&dpr=1&s=none",
-      friends:     [],
-      blacklisted: [],
-      messages:    [],
-      channels:    [],
-      admin_of:    [],
-      p1_games:    [],
-      p2_games:    [],
-      friendship:  [],
-      blacklist:   []
     }
     return ({user: cdine, openedConvID: -1})
   }
-  getJoinedChans() : Channel[] {
-    return []
+
+  async getJoinedChans() {
+    this.ChatData.joinedChans = await axios.get("http://localhost:3000/channel")
+      .then(response => response.data)
+      .catch(error => alert(error.status + ": " + error.message))
+    return [this.ChatData.joinedChans]
   }
-  getNotJoinedChans() : Channel[] {
+
+  getNotJoinedChans() {
     return []
   }
 
@@ -138,14 +133,14 @@ export class Chat extends React.Component<Props, ChatState> {
     this.setState({joinedChans: this.ChatData.joinedChans, notJoinedChans: this.ChatData.notJoinedChans})
   }
   
-  newMsg(msg: any) {
+  socketNewMsg(msg: any) {
     this.ChatData.messages.push(msg)
     if (msg.channelId === this.ChatData.actualUser.openedConvID)
       this.ChatData.openedConversation.push(msg)
     this.setState(this.ChatData)
   }
   
-  newChan(chan: any) {
+  socketNewChan(chan: any) {
     if (this.userIsInChan(chan))
       this.ChatData.joinedChans.push(chan)
     else
@@ -154,8 +149,8 @@ export class Chat extends React.Component<Props, ChatState> {
   }
   
   render() {
-    this.socket.off('newChanFromServer').on('newChanFromServer', (chan) => this.newChan(chan))
-    this.socket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.newMsg(msg))
+    this.socket.off('newChanFromServer').on('newChanFromServer', (chan) => this.socketNewChan(chan))
+    this.socket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.socketNewMsg(msg))
 
     return (
     <div className="chatContainer">

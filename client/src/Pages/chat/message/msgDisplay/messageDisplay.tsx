@@ -6,10 +6,10 @@ import { Player } from '@lottiefiles/react-lottie-player';
 import '../../chat.css'
 import { Message } from '../../stateInterface'
 
-function MessageItemReceiver(avatar: string, name: string, text: string) {
+function MessageItemReceiver(avatar: String, name: String, text: String) {
   return (
     <div className="leftChat">
-      <div className="leftChatAvatar"><Avatar src={avatar}></Avatar></div>
+      <div className="leftChatAvatar"><Avatar src={avatar.valueOf()}></Avatar></div>
       <div className="leftChatContent">
         <Alert severity="success" icon={false}>
           <AlertTitle><b>{name}</b></AlertTitle>
@@ -20,7 +20,7 @@ function MessageItemReceiver(avatar: string, name: string, text: string) {
   )
 }
 
-function MessageItemSender(avatar: string, name: string, text: string) {
+function MessageItemSender(avatar: String, name: String, text: String) {
   return (
     <div className="rightChat">
       <div className="rightChatContent">
@@ -29,7 +29,7 @@ function MessageItemSender(avatar: string, name: string, text: string) {
           {text}
         </Alert>
       </div>
-      <div className="rightChatAvatar"><Avatar src={avatar}></Avatar></div>
+      <div className="rightChatAvatar"><Avatar src={avatar.valueOf()}></Avatar></div>
     </div>
   )
 }

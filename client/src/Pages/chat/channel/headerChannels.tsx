@@ -15,15 +15,13 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import CreateSharpIcon from '@mui/icons-material/CreateSharp';
 import AddCircleOutlineSharpIcon from '@mui/icons-material/AddCircleOutlineSharp';
 import Tooltip from '@mui/material/Tooltip';
-import { Channel } from '../stateInterface'
-
+import axios from 'axios';
 
 // API REQUESTS ////////////////////////////////////
-function postChan(chan: Channel) {
-}
-
-function getChanID() : number {
-  return (1)
+async function postChan(chan: any, socket: any) {
+  axios.post('http://localhost:3000/channel', chan)
+    .then(response => socket.emit("newChanFromClient", response))
+    .catch(error => alert(error.status + ": " + error.message)) 
 }
 
 function getUserList() {
@@ -53,23 +51,15 @@ function CreateChannelButton(props: any) {
         chanType = "public"
       else
         chanType = "private"
-      const newChan: Channel = {
-        id:        getChanID(),
-        ownerId:   props.props.state.actualUser.user.id,
-        title:     e.target.name.value,
-        members:   [],
+      const newChan = {
         type:      chanType,
         password:  e.target.password.value,
-        admin:     [],
-        Message:   [],
-        blacklist: [],
+        title:     e.target.name.value,
+        ownerId:   props.props.state.actualUser.user.id,
       }
-      newChan.members[0] = props.props.state.actualUser.user
-      newChan.admin[0] = props.props.state.actualUser.user
-
-      props.props.socket.emit("newChanFromClient", newChan)
-      postChan(newChan)
+      postChan(newChan, props.props.socket);
     }
+
     return (
       <div>
         <Tooltip title="Create channel">
@@ -132,23 +122,13 @@ function SendMessageButton(props: any) {
     
     const newDM = (e: any) => {
       e.preventDefault()
-
-      const newChan: Channel = {
-        id:        getChanID(),
-        ownerId:     props.props.state.actualUser.user.id,
-        title:     "",
-        members:   [],
+      const newChan = {
         type:      "dm",
-        password:  "",
-        admin:     [],
-        Message:   [],
-        blacklist: [],
+        password:  e.target.password.value,
+        title:     e.target.name.value,
+        ownerId:   props.props.state.actualUser.user.id,
       }
-      newChan.members[0] = props.props.state.actualUser.user
-      // newChan.members[1] = get user 
-
-      props.props.socket.emit("newChanFromClient", newChan)
-      postChan(newChan)
+      postChan(newChan, props.props.socket);
     }
   
     return (

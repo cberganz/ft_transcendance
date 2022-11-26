@@ -12,7 +12,6 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
-import { Channel } from '../stateInterface'
 
 function getLastMessage(id: number, props: any) {
   for (let i = props.state.messages.length - 1; i >= 0; i--) {
@@ -59,7 +58,7 @@ export function DialogChannelItem(props: any) {
                     {lastMsg?.author.login}
                   </Typography>
                   <span> </span>
-                    {lastMsg?.content.substring(0, 15)}
+                    {lastMsg?.content.subString(0, 15)}
                     {lastMsg?.content.length && lastMsg?.content.length > 15 ? <span>...</span> : null}
                   
                 </React.Fragment>
@@ -99,7 +98,7 @@ export function DialogChannelItem(props: any) {
 )
 }
 
-export function ChannelItem(chan: Channel, chanName: string, avatar: string, props: any) {
+export function ChannelItem(chan: any, chanName: String, avatar: String, props: any) {
     const lastMsg = getLastMessage(chan.id, props);
     let bckgColor
   
@@ -112,7 +111,7 @@ export function ChannelItem(chan: Channel, chanName: string, avatar: string, pro
         <ListItem onClick={event => props.openConvHandler(chan.id)} alignItems="flex-start" className="ChannelItem" sx={{backgroundColor: bckgColor, cursor: 'pointer'}}>
 
             <ListItemAvatar>
-              {chan.type === 'dm' ? <Avatar alt={chanName} src={avatar} /> : <Avatar alt={chanName} src="-" />}
+              {chan.type === 'dm' ? <Avatar alt={chanName.valueOf()} src={avatar.valueOf()} /> : <Avatar alt={chanName.valueOf()} src="-" />}
             </ListItemAvatar>
 
             <ListItemText
@@ -128,7 +127,7 @@ export function ChannelItem(chan: Channel, chanName: string, avatar: string, pro
                     {lastMsg?.author.login}
                   </Typography>
                   <span> </span>
-                    {lastMsg?.content.substring(0, 15)}
+                    {lastMsg?.content.subString(0, 15)}
                     {lastMsg?.content.length && lastMsg?.content.length > 15 ? <span>...</span> : null}
                   
                 </React.Fragment>

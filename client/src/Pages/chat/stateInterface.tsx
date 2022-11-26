@@ -1,24 +1,24 @@
 export interface ChatState {
     messages: Message[],
     actualUser: actualUser,
-    joinedChans: Channel[],
+    joinedChans: any,
     notJoinedChans: Channel[],
     openedConversation: Message[],
 }
 
 export interface actualUser {
-    user: User,
+    user: any,
     openedConvID: number
 }    
 
 export interface Channel {
   id:        number,
-  owner?:    User,
+  owner:     User,
   ownerId:   number,
-  title:     string,
+  title:     String,
   members:   User[],
-  type:      string,
-  password:  string,
+  type:      String,
+  password:  String,
   admin:     User[],
   Message:   Message[],
   blacklist: Blacklist[],
@@ -31,7 +31,7 @@ export interface Message {
     author:    User,
     authorId:  number,
     date?:      Date,
-    content:   string,
+    content:   String,
 }
 
 
@@ -40,9 +40,9 @@ export interface Message {
 
 export interface User {
     id:          number,
-    login:       string,
-    username:    string,
-    avatar:      string,
+    login:       String,
+    username:    String,
+    avatar:      String,
     friends:     Friendship[],
     blacklisted: Blacklist[],
     messages:    Message[],
@@ -80,7 +80,7 @@ export interface Blacklist {
     id:        number,
     target:    User,
     target_id: number,
-    type:      string,
+    type:      String,
     date:      Date,
     delay:     number,
     channel:   Channel,

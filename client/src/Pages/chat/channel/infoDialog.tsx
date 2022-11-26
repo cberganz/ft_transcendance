@@ -17,10 +17,10 @@ import TableRow from '@mui/material/TableRow';
 
 interface Column {
     id: 'command' | 'description';
-    label: string;
+    label: String;
     minWidth?: number;
     align?: 'right';
-    format?: (value: number) => string;
+    format?: (value: number) => String;
   }
 
 const columns: readonly Column[] = [
@@ -29,13 +29,13 @@ const columns: readonly Column[] = [
 ];
 
 interface Data {
-    command: string;
-    description: string;
+    command: String;
+    description: String;
   }
 
 function createData(
-command: string,
-description: string,
+command: String,
+description: String,
 ): Data {
 return { command, description };
 }
@@ -96,7 +96,7 @@ export function InfoDialog() {
                         {rows
                         .map((row) => {
                             return (
-                            <TableRow hover role="checkbox" tabIndex={-1} key={row.command}>
+                            <TableRow hover role="checkbox" tabIndex={-1} key={row.command.valueOf()}>
                                 {columns.map((column) => {
                                 const value = row[column.id];
                                 return (

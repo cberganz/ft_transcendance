@@ -14,6 +14,10 @@ export class ChannelService {
 		});
 	}
 
+	async allChannels(): Promise<Channel[] | null> {
+		return this.prisma.channel.findMany();
+	}
+
 	async channels(params: {
 		skip?: number;
 		take?: number;

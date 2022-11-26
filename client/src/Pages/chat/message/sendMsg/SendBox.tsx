@@ -19,7 +19,7 @@ function getCurrentChan(props: any) {
   }
 }
 
-function newMessage(value: string, props: any) {
+function newMessage(value: String, props: any) {
   const chan = getCurrentChan(props)
   const newMsg = {
     id:        getMsgID(),
