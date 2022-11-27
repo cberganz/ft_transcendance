@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes, Outlet } from 'react-router-dom';
-import Login from '../Pages/Login/Login'
+import Login from '../Pages/Auth/Login'
 import ConnectedUsers from '../Pages/ConnectedUsers/ConnectedUsers'
 import {Dashboard} from './test'
 import useToken from '../Hooks/hook_access_token'
@@ -8,6 +8,7 @@ import Box from '@mui/material/Box';
 import PrimarySearchAppBar from "../Components/TopBar"
 import Game from "../Pages/Game/Game";
 import Chat from "../Pages/chat/chat"
+import Signup from "../Pages/Auth/SignUp"
 
 function	OutletRoute() {
 	return (
@@ -37,6 +38,7 @@ export default function Router() {
 		<BrowserRouter>
 			<Routes>
 				<Route path="/login" element={<Login />} />
+				<Route path="/signup" element={<Signup />} />
 				<Route path='/' element=/* {<OutletRoute/>} */{<PrivateRoutes />}>
 					<Route path="/" element={<Dashboard />} />
 					<Route path="/connected-users" element={<ConnectedUsers />} />

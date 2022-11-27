@@ -4,29 +4,38 @@ import {
 	Param,
 	Post,
 	Body,
-	Put,
+	UseFilters,
 	Delete
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User as UserMode1 } from '@prisma/client';
+import BackendException from '../utils/BackendException.filter'
+
+class CreateUser {
+	username:	string;
+	login:		string;
+}
 
 @Controller('user')
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
 	@Get(':id')
+	@UseFilters(BackendException)
 	async getUserById(@Param('id') id: string): Promise<UserMode1> {
 		return this.userService.user({ id: Number(id) });
 	}
 
-	@Post()
+	@Post('signup')
+	@UseFilters(BackendException)
 	async signupUser (
-		@Body() userData: { login: string; username: string }
+		@Body() userData: CreateUser
 	): Promise<UserMode1> {
 		return this.userService.createUser(userData);
 	}
 
 	@Delete(':id')
+	@UseFilters(BackendException)
 	async deleteUser(@Param('id') id: string): Promise<UserMode1> {
 		return this.userService.deleteUser({ id: Number(id) });
 	}
