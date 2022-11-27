@@ -34,8 +34,16 @@ export class MessageService {
 			orderBy,
 		});
 	}
-
-	async createMessage(data: Prisma.MessageCreateInput): Promise<Message> {
+	
+	async createMessage(data: Prisma.MessageCreateInput, channelId: number): Promise<Message> {
+		this.prisma.channel.update({
+			where: {
+				id: channelId,
+			},
+			data: {
+				updatedAt: new Date(),
+			}
+		});
 		return this.prisma.message.create({
 			data,
 		});

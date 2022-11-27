@@ -13,12 +13,6 @@ import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
 
-function getLastMessage(id: number, props: any) {
-  for (let i = props.state.messages.length - 1; i >= 0; i--) {
-    if (props.state.messages[i].channelId === id)
-      return props.state.messages[i]
-  }
-}
 
 export function DialogChannelItem(props: any) {
   const [open, setOpen] = React.useState(false);
@@ -35,7 +29,7 @@ export function DialogChannelItem(props: any) {
     else if (props.chan.type === "private" && props.chan.password !== e.target.password.value)
       alert("Wrong password.")
   }
-  const lastMsg = getLastMessage(props.chan.id, props.props);
+  const lastMsg = props.chan.Message.slice(-1);
 
   return (
   <div>
@@ -55,11 +49,11 @@ export function DialogChannelItem(props: any) {
                     color="text.primary"
                     component={'span'} 
                   >
-                    {lastMsg?.author.login}
+                    {lastMsg?.author?.login}
                   </Typography>
                   <span> </span>
-                    {lastMsg?.content.subString(0, 15)}
-                    {lastMsg?.content.length && lastMsg?.content.length > 15 ? <span>...</span> : null}
+                    {lastMsg?.content?.subString(0, 15)}
+                    {lastMsg?.content?.length && lastMsg?.content?.length > 15 ? <span>...</span> : null}
                   
                 </React.Fragment>
               }
@@ -99,42 +93,43 @@ export function DialogChannelItem(props: any) {
 }
 
 export function ChannelItem(chan: any, chanName: String, avatar: String, props: any) {
-    const lastMsg = getLastMessage(chan.id, props);
-    let bckgColor
-  
-    if (props.state.actualUser.openedConvID === chan.id)
-      bckgColor = '#f5f5f5'
-    else
-      bckgColor = 'white'
-    return (
-      <div>
-        <ListItem onClick={event => props.openConvHandler(chan.id)} alignItems="flex-start" className="ChannelItem" sx={{backgroundColor: bckgColor, cursor: 'pointer'}}>
+  let lastMsg = chan?.Message[chan.Message.length - 1];
+  let lastMsgContent: string = lastMsg?.content
+  let bckgColor
+ 
+  if (props.state.actualUser.openedConvID === chan.id)
+    bckgColor = '#f5f5f5'
+  else
+    bckgColor = 'white'
+  return (
+    <div>
+      <ListItem onClick={event => {props.openConvHandler(chan.id)}} alignItems="flex-start" className="ChannelItem" sx={{backgroundColor: bckgColor, cursor: 'pointer'}}>
 
-            <ListItemAvatar>
-              {chan.type === 'dm' ? <Avatar alt={chanName.valueOf()} src={avatar.valueOf()} /> : <Avatar alt={chanName.valueOf()} src="-" />}
-            </ListItemAvatar>
+          <ListItemAvatar>
+            {chan.type === 'dm' ? <Avatar alt={chanName?.valueOf()} src={avatar.valueOf()} /> : <Avatar alt={chanName?.valueOf()} src="-" />}
+          </ListItemAvatar>
 
-            <ListItemText
-              primary={chanName}
-              secondary={
-                <React.Fragment>
-                  <Typography
-                    sx={{ display: 'inline' }}
-                    component="span"
-                    variant="body2"
-                    color="text.primary"
-                  >
-                    {lastMsg?.author.login}
-                  </Typography>
-                  <span> </span>
-                    {lastMsg?.content.subString(0, 15)}
-                    {lastMsg?.content.length && lastMsg?.content.length > 15 ? <span>...</span> : null}
-                  
-                </React.Fragment>
-              }
-              />
-            {chan.type === 'private' ? <span> <LockIcon sx={{ padding: '5%', marginTop:'10px'}} /></span> : null}
-        </ListItem>
-      </div>
-    )
+          <ListItemText
+            primary={chanName}
+            secondary={
+              <React.Fragment>
+                <Typography
+                  sx={{ display: 'inline' }}
+                  component="span"
+                  variant="body2"
+                  color="text.primary"
+                >
+                  {lastMsg?.author.login}
+                </Typography>
+                <span> </span>
+                  {lastMsgContent?.substring(0, 15)}
+                  {lastMsgContent?.length && lastMsgContent?.length > 15 ? <span>...</span> : null}
+                
+              </React.Fragment>
+            }
+            />
+          {chan.type === 'private' ? <span> <LockIcon sx={{ padding: '5%', marginTop:'10px'}} /></span> : null}
+      </ListItem>
+    </div>
+  )
 }

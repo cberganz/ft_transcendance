@@ -20,7 +20,7 @@ import axios from 'axios';
 // API REQUESTS ////////////////////////////////////
 async function postChan(chan: any, socket: any) {
   axios.post('http://localhost:3000/channel', chan)
-    .then(response => socket.emit("newChanFromClient", response))
+    .then(response => socket.emit("newChanFromClient", response.data))
     .catch(error => alert(error.status + ": " + error.message)) 
 }
 

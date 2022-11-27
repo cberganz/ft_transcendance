@@ -19,6 +19,16 @@ export class ChannelController {
 		return this.channelService.channel({ id: Number(id) });
 	}
 
+	@Get('/joinedChannels/:userId')
+	async getJoinedChannels(@Param('userId') userId: string): Promise<ChannelMode1[]> {
+		return this.channelService.joinedChannels(Number(userId));
+	}
+
+	@Get('/notJoinedChannels/:userId')
+	async getNotJoinedChannels(@Param('userId') userId: string): Promise<ChannelMode1[]> {
+		return this.channelService.notJoinedChannels(Number(userId));
+	}
+
 	@Get()
 	async getAllChannels(): Promise<ChannelMode1[]> {
 		return this.channelService.allChannels();
@@ -28,7 +38,7 @@ export class ChannelController {
 	async newChannel (
 		@Body() channelData: { type: string; password?: string; title: string; ownerId: string }
 	): Promise<ChannelMode1> {
-		return this.channelService.createChannel({
+		let newChan = await this.channelService.createChannel({
 			type: channelData.type,
 			password: channelData.password,
 			title: channelData.title,
@@ -36,6 +46,7 @@ export class ChannelController {
 			members: { connect: { id: Number(channelData.ownerId) } },
 			admin: { connect: { id: Number(channelData.ownerId) } },
 		});
+		return this.channelService.channel({ id: Number(newChan.id) });
 	}
 
 	@Delete(':id')

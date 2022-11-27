@@ -5,7 +5,7 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 
 function getChan(id: number, props: any) {
-  for (let i = 0; i < props.state.joinedChans.length; i++) {
+  for (let i = 0; i < props.state.joinedChans?.length; i++) {
     if (props.state.joinedChans[i].id === id)
       return (props.state.joinedChans[i])
   }
@@ -32,9 +32,9 @@ export default function ChatHeader(props:any) {
         }}>
       <div style={{textAlign: 'left', marginLeft: '25px'}}>{chan?.title} {isBlocked(props) ? <i style={{fontSize: '10px'}}>[blocked]</i> : null} </div>
       <div>
-        {chan.type === 'dm' && !isBlocked(props) ? <div><Tooltip title="Invite for a pong"><SportsEsportsIcon sx={{cursor: 'pointer', color: 'grey', marginRight: '20px'}} /></Tooltip><Tooltip title="Block user"><BlockIcon sx={{cursor: 'pointer', color: 'grey'}} /></Tooltip></div> : null}
-        {chan.type === 'dm' && isBlocked(props) ? <Tooltip title="Unblock user"><LockOpenIcon sx={{cursor: 'pointer', color: 'grey', marginLeft: '45px'}} /></Tooltip> : null}
-        {chan.type === 'public' || chan.type === 'private' ? <Tooltip title="Leave channel" sx={{cursor: 'pointer', color: 'grey', marginLeft: '45px'}}><ExitToAppIcon /></Tooltip> : null}
+        {chan?.type === 'dm' && !isBlocked(props) ? <div><Tooltip title="Invite for a pong"><SportsEsportsIcon sx={{cursor: 'pointer', color: 'grey', marginRight: '20px'}} /></Tooltip><Tooltip title="Block user"><BlockIcon sx={{cursor: 'pointer', color: 'grey'}} /></Tooltip></div> : null}
+        {chan?.type === 'dm' && isBlocked(props) ? <Tooltip title="Unblock user"><LockOpenIcon sx={{cursor: 'pointer', color: 'grey', marginLeft: '45px'}} /></Tooltip> : null}
+        {chan?.type === 'public' || chan?.type === 'private' ? <Tooltip title="Leave channel" sx={{cursor: 'pointer', color: 'grey', marginLeft: '45px'}}><ExitToAppIcon /></Tooltip> : null}
       </div>
     </div>
   )

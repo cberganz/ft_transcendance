@@ -1,12 +1,16 @@
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
+import axios from 'axios';
 
 // API REQUESTS /////////////////////////
 function getMsgID() {
   return (0)
 }
 
-function postMsg(msg: any) {
+function postMsg(msg: any, socket: any, chanId: number) {
+  axios.post("http://localhost:3000/message", msg)
+    .then(response => socket.emit("newMsgFromClient", {room: "chat" + chanId, message: response.data}))
+    .catch(error => alert(error.status + ": " + error.message)) 
 }
 /////////////////////////////////////////
 
@@ -22,14 +26,11 @@ function getCurrentChan(props: any) {
 function newMessage(value: String, props: any) {
   const chan = getCurrentChan(props)
   const newMsg = {
-    id:        getMsgID(),
     channelId: chan.id,
-    author:    props.state.actualUser.user,
     authorId:  props.state.actualUser.user.id,
     content:   value,
   }
-  props.socket.emit("newMsgFromClient", {room: "chat" + chan.id, message: newMsg})
-  postMsg(newMsg)
+  postMsg(newMsg, props.socket, chan.id)
 }
 
 function onKeyPress(e: any, props: any) {

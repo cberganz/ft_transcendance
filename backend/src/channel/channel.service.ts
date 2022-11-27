@@ -11,11 +11,83 @@ export class ChannelService {
 	): Promise<Channel | null> {
 		return this.prisma.channel.findUnique({
 			where: channelWhereUniqueInput,
+			include: {
+				Message:  {
+					include: {
+						author: true,
+					}
+				},
+				blacklist: true,
+				admin: true,
+				members: true,
+				owner: true
+			}
 		});
 	}
 
 	async allChannels(): Promise<Channel[] | null> {
-		return this.prisma.channel.findMany();
+		return this.prisma.channel.findMany({
+			include: {
+				blacklist: true,
+				admin: true,
+				members: true,
+				owner: true
+			}
+		});
+	}
+
+	async joinedChannels(userId: number): Promise<Channel[] | null> {
+		return this.prisma.channel.findMany({
+			where: {
+				members: {
+					some: {
+						id: userId
+					}
+				}
+			},
+			include: {
+				Message:  {
+					include: {
+						author: true,
+					}
+				},
+				blacklist: true,
+				admin: true,
+				members: true,
+				owner: true
+			},
+			orderBy: {
+				updatedAt: 'desc'
+			}
+		});
+	}
+
+	async notJoinedChannels(userId: number): Promise<Channel[] | null> {
+		return this.prisma.channel.findMany({
+			where: {
+				members: {
+					some: {
+						NOT: {
+							id: userId
+						}
+					}
+				}
+			},
+			include: {
+				Message:  {
+					include: {
+						author: true,
+					}
+				},
+				blacklist: true,
+				admin: true,
+				members: true,
+				owner: true
+			},
+			orderBy: {
+				updatedAt: 'desc'
+			}
+		});
 	}
 
 	async channels(params: {

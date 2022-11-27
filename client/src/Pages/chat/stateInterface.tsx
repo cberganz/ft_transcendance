@@ -1,9 +1,8 @@
 export interface ChatState {
-    messages: Message[],
     actualUser: actualUser,
     joinedChans: any,
-    notJoinedChans: Channel[],
-    openedConversation: Message[],
+    notJoinedChans: any,
+    openedConversation: any
 }
 
 export interface actualUser {

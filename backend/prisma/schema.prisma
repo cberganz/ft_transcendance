@@ -35,6 +35,7 @@ model Channel {
   blacklist Blacklist[]
   owner     User        @relation(fields: [ownerId], references: [id])
   ownerId   Int
+  updatedAt DateTime    @default(now())
 }
 
 model Game {
