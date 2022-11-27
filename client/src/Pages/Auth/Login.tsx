@@ -41,9 +41,9 @@ export default function Login() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-	const access_token = await loginUser({
+	loginUser({
 		"username": data.get('username'),
-		"password": data.get('password')
+		"password": data.get('login')
 	})
   };
 
@@ -80,11 +80,10 @@ export default function Login() {
 				margin="normal"
 				required
 				fullWidth
-				name="password"
+				name="login"
 				label="Password"
-				type="password"
-				id="password"
-				autoComplete="current-password"
+				id="login"
+				autoComplete="current-login"
 				/>
 				<Button
 				type="submit"
@@ -96,7 +95,7 @@ export default function Login() {
 				</Button>
 				<Grid container>
 					<Grid item>
-						<Link href="#" variant="body2">
+						<Link href="/signup" variant="body2">
 						{"Don't have an account? Sign Up"}
 						</Link>
 					</Grid>

@@ -8,7 +8,7 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 export class AppController {
 	constructor(private authService: AuthService) {}
 
-	@UseGuards(LocalAuthGuard)
+	@UseGuards(LocalAuthGuard)// je pense que doit recevoir {username, password} obligatoirement ex: {username, login} => error
 	@Post('auth/login')
 	async login(@Res({ passthrough: true }) response: Response, @Req() req) {
 		let jwt_token = await this.authService.login(req.user)
@@ -20,11 +20,5 @@ export class AppController {
 	@Get('auth/validate')
 	validAuth() {
 		return {message: 'success'};
-	}
-	
-	@UseGuards(JwtAuthGuard)
-	@Get('profile')
-	getProfile(@Req() req) {
-		return {"message": "success"}/* req.user */;
 	}
 }
