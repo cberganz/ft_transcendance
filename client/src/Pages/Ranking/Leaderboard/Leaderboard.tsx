@@ -8,7 +8,7 @@ export default function Leaderboard() {
 		<React.Fragment>
     	  <CssBaseline />
     	  <Container maxWidth="lg">
-    	    <Box sx={{ bgcolor: '#cfe8fc', height: '51vh' }} />
+    	    <Box sx={{ bgcolor: '#cfe8fc', height: '51vh', minHeight: '150px' }} />
     	  </Container>
     	</React.Fragment>
 	);

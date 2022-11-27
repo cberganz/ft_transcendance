@@ -43,7 +43,7 @@ export default function BadgeAvatar() {
         <Avatar
 			alt="Charles Berganza"
 			src="/app/src/Pages/Ranking/PlayerInfos/avatar.jpg"
-			sx={{ mt: 2, ml: 2, width: 175, height: 175 }}
+			sx={{ mt: 2, ml: 2, width: '100%', height: '100%' }}
 		/>
       </StyledBadge>
   );
