@@ -44,7 +44,7 @@ export class ChannelController {
 
 	@Post()
 	async newChannel (
-		@Body() channelData: { type: string; password?: string; title: string; ownerId: string }
+		@Body() channelData: { type: string; password?: string; title?: string; ownerId?: string }
 	): Promise<ChannelMode1> {
 		let newChan = await this.channelService.createChannel({
 			type: channelData.type,

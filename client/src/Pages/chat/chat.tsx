@@ -5,11 +5,11 @@ import SendBox from "./message/sendMsg/SendBox";
 import HeaderChannels from "./channel/headerChannels";
 import './chat.css'
 import React from "react";
-import { actualUser, ChatState, Channel, Message } from "./stateInterface";
+import { actualUser, ChatState, Channel, Message, User } from "./stateInterface";
 import io from "socket.io-client";
-import { InfoDialog } from "./channel/infoDialog"
 import axios from "axios"
 import { getChan, userIsInChan, sortChannels } from './utils'
+import { InfoDialog } from "./channel/infoDialog"
 
 interface Props {
 }
@@ -35,10 +35,11 @@ export class Chat extends React.Component<Props, ChatState> {
       joinedChans: [],
       notJoinedChans: [],
       openedConversation: [],
+      userList: [],
     };
     
-    this.socket = io("http://localhost:3000/chat") 
     this.getData()
+    this.socket = io("http://localhost:3000/chat") 
     this.state = this.ChatData
     this.socket.emit('initTable', this.ChatData.actualUser.user.login)
   }
@@ -52,11 +53,12 @@ export class Chat extends React.Component<Props, ChatState> {
       actualUser: await this.getActualUser(),
       joinedChans: await this.getJoinedChans(),
       notJoinedChans: await this.getNotJoinedChans(),
-      openedConversation: []
+      userList: await this.getUserList(),
+      openedConversation: [],
     }
     for (const chan of this.state.joinedChans)
       this.socket.emit('joinChatRoom', chan.id)
-  }
+    }
   async getActualUser(): Promise<any> {
     this.ChatData.actualUser = {
       openedConvID: -1,
@@ -71,13 +73,21 @@ export class Chat extends React.Component<Props, ChatState> {
       .then(response => response.data)
       .catch(error => alert(error.status + ": " + error.message))
     sortChannels(this.ChatData.joinedChans)
+    return (this.ChatData.joinedChans)
     }
   async getNotJoinedChans(): Promise<any> {
     this.ChatData.notJoinedChans = await axios.get("http://localhost:3000/channel/notJoinedChannels/" + this.ChatData.actualUser.user.id)
       .then(response => response.data)
       .catch(error => alert(error.status + ": " + error.message))
     sortChannels(this.ChatData.notJoinedChans)
-    }
+    return (this.ChatData.notJoinedChans)
+  }
+  async getUserList(): Promise<any> {
+    this.ChatData.userList = await axios.get('http://localhost:3000/user/list/1')
+      .then(response => response.data)
+      .catch(error => alert(error.status + ": " + error.message))
+    return (this.ChatData.userList)
+  }
 
     
     /** RENDERING FUNCTIONS */
@@ -156,7 +166,6 @@ export class Chat extends React.Component<Props, ChatState> {
     this.socket.off('updateChanFromServer').on('updateChanFromServer', (chan) => this.socketUpdateChan(chan))
     this.socket.off('newChanFromServer').on('newChanFromServer', (chan) => this.socketNewChan(chan))
     this.socket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.socketNewMsg(msg))
-
     return (
     <div className="chatContainer">
       

@@ -19,6 +19,11 @@ export class UserController {
 		return this.userService.user({ id: Number(id) });
 	}
 
+	@Get('/list/:id')
+	async getAllUsers(@Param('id') id: string): Promise<UserMode1[]> {
+		return this.userService.users({where: {NOT: {id: Number(id)}}, orderBy: {username: 'asc'}});
+	}
+
 	@Post()
 	async signupUser (
 		@Body() userData: { login: string; username: string; avatar: string }

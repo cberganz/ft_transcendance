@@ -16,7 +16,7 @@ import CreateSharpIcon from '@mui/icons-material/CreateSharp';
 import AddCircleOutlineSharpIcon from '@mui/icons-material/AddCircleOutlineSharp';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
-import { ChatProps } from '../stateInterface'
+import { ChatProps, User } from '../stateInterface'
 
 // API REQUESTS ////////////////////////////////////
 async function postChan(chan: any, socket: any) {
@@ -25,9 +25,6 @@ async function postChan(chan: any, socket: any) {
     .catch(error => alert(error.status + ": " + error.message)) 
 }
 
-function getUserList() {
-  return ([{login: "cdine", id: 0}, {login: "rbicanic", id: 1}])
-}
 
 ////////////////////////////////////////////////////
 
@@ -118,20 +115,16 @@ function SendMessageButton(props: any) {
     const handleChange = (event: SelectChangeEvent) => {
         setLogin(event.target.value as string);
     };
-
-    const userList = getUserList()
     
     const newDM = (e: any) => {
       e.preventDefault()
       const newChan = {
         type:      "dm",
-        password:  e.target.password.value,
-        title:     e.target.name.value,
-        ownerId:   props.props.state.actualUser.user.id,
+        password:  "",
       }
       postChan(newChan, props.props.socket);
     }
-  
+
     return (
       <div>
         <Tooltip title="Send message">
@@ -156,7 +149,7 @@ function SendMessageButton(props: any) {
                     label="login"
                     onChange={handleChange}
                     >
-                    {userList.map((user) => (<MenuItem value={user.id} key={user.id}>{user.login}</MenuItem>))}
+                    {props.props.state.userList.map((user: User) => <MenuItem value={user.id} key={user.id}>{user.login}</MenuItem>)}
                     </Select>
                 </FormControl>
             </Box>
@@ -174,9 +167,9 @@ function SendMessageButton(props: any) {
 
 export default function HeaderChannels(props: ChatProps) {
     return (
-        <div className='ChannelHeader'>
-            <SendMessageButton props={props} />
-            <CreateChannelButton props={props} />
-        </div>
-    )
+    <div className='ChannelHeader'>
+        <SendMessageButton props={props} />
+        <CreateChannelButton props={props} />
+    </div>
+  )
 }
