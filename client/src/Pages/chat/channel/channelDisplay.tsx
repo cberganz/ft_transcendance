@@ -5,7 +5,25 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import showChannelItems from './channelCategory';
-import { channelCategories } from "../bdd"
+import { ChatProps } from '../stateInterface'
+
+let channelCategories = [
+  {
+    type: 'dm', 
+    name: 'Private messages',
+    panel: 'panel1'
+  }, 
+  {
+    type: 'joined', 
+    name: 'Joined Channels',
+    panel: 'panel2'
+  }, 
+  {
+    type: 'all', 
+    name: 'All Channels',
+    panel: 'panel3'
+  }, 
+]
 
 
 function Channel(name: String, panel: String, type: String, props: any) {

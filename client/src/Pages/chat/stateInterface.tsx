@@ -1,58 +1,53 @@
+import Socket from "socket.io-client"
+
 export interface ChatState {
     actualUser: actualUser,
-    joinedChans: any,
-    notJoinedChans: any,
-    openedConversation: any
+    joinedChans: Channel[],
+    notJoinedChans: Channel[],
+    openedConversation: Message[] | undefined,
 }
 
 export interface actualUser {
-    user: any,
+    user: User,
     openedConvID: number
-}    
-
-export interface Channel {
-  id:        number,
-  owner:     User,
-  ownerId:   number,
-  title:     String,
-  members:   User[],
-  type:      String,
-  password:  String,
-  admin:     User[],
-  Message:   Message[],
-  blacklist: Blacklist[],
 }
 
-export interface Message {
-    id:        number,
-    channel?:  Channel,
-    channelId: number,
-    author:    User,
-    authorId:  number,
-    date?:      Date,
-    content:   String,
+export interface ChatProps {
+    state: ChatState,
+    socket: any,
 }
-
-
-
 
 
 export interface User {
     id:          number,
+    avatar:      String,
     login:       String,
     username:    String,
-    avatar:      String,
-    friends:     Friendship[],
-    blacklisted: Blacklist[],
-    messages:    Message[],
-    channels:    Channel[],
-    admin_of:    Channel[],
-    p1_games:    Game[],
-    p2_games:    Game[],
-    friendship:  Friendship[],
-    blacklist:   Blacklist[]
-  }
-  
+    friends?:     Friendship[],
+    blacklisted?: Blacklist[],
+    messages?:    Message[],
+    channels?:    Channel[],
+    admin_of?:    Channel[],
+    owner_of?:    Channel[],
+    p1_games?:    Game[],
+    p2_games?:    Game[],
+    friendship?:  Friendship[],
+    blacklist?:   Blacklist[],
+}
+
+export interface Channel {
+    id:        number,
+    members:   User[],
+    type:      String,
+    title:     String,
+    password:  String,
+    admin:     User[],
+    Message?:   Message[],
+    blacklist?: Blacklist[],
+    owner?:     User,
+    ownerId?:   number,
+}
+
 export interface Game {
     id:            number,
     player1:       User,
@@ -64,7 +59,17 @@ export interface Game {
     winner:        number,
     date:          Date,
 }
-  
+
+export interface Message {
+    id:        number,
+    channel?:   Channel,
+    channelId: number,
+    author:    User,
+    authorId:  number,
+    date:      Date,
+    content:   String,
+}
+
 export interface Friendship {
     id:       number,
     user1:    User,
@@ -74,7 +79,7 @@ export interface Friendship {
     date:     Date,
     approved: Boolean,
 }
-  
+
 export interface Blacklist {
     id:        number,
     target:    User,
@@ -86,5 +91,4 @@ export interface Blacklist {
     channelId: number,
     creator:   User,
     creatorId: number,
-  }
-  
+}

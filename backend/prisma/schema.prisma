@@ -33,7 +33,7 @@ model Channel {
   admin     User[]      @relation("channel::admins")
   Message   Message[]
   blacklist Blacklist[]
-  owner     User        @relation(fields: [ownerId], references: [id])
+  owner     User?        @relation(fields: [ownerId], references: [id])
   ownerId   Int
 }
 

@@ -9,7 +9,7 @@ import { actualUser, ChatState, Channel, Message } from "./stateInterface";
 import io from "socket.io-client";
 import { InfoDialog } from "./channel/infoDialog"
 import axios from "axios"
-import { channel } from "diagnostics_channel";
+import { getChan, userIsInChan, sortChannels } from './utils'
 
 interface Props {
 }
@@ -19,7 +19,6 @@ export class Chat extends React.Component<Props, ChatState> {
     super(props)
 
     this.openConvHandler = this.openConvHandler.bind(this)
-    this.updateChannelMenu = this.updateChannelMenu.bind(this)
     this.joinChan = this.joinChan.bind(this)
     
     // FILL WITH API REQUESTS
@@ -41,14 +40,13 @@ export class Chat extends React.Component<Props, ChatState> {
     this.socket = io("http://localhost:3000/chat") 
     this.getData()
     this.state = this.ChatData
-    
     this.socket.emit('initTable', this.ChatData.actualUser.user.login)
   }
 
   private socket
   private ChatData: ChatState
 
-  /** INIT REQUESTS **/
+  /** INIT DATA **/
   async getData(): Promise<void> {
     this.ChatData = {
       actualUser: await this.getActualUser(),
@@ -72,110 +70,108 @@ export class Chat extends React.Component<Props, ChatState> {
     this.ChatData.joinedChans = await axios.get("http://localhost:3000/channel/joinedChannels/" + this.ChatData.actualUser.user.id)
       .then(response => response.data)
       .catch(error => alert(error.status + ": " + error.message))
-    this.sortChannels(this.ChatData.joinedChans)
+    sortChannels(this.ChatData.joinedChans)
     }
   async getNotJoinedChans(): Promise<any> {
     this.ChatData.notJoinedChans = await axios.get("http://localhost:3000/channel/notJoinedChannels/" + this.ChatData.actualUser.user.id)
       .then(response => response.data)
       .catch(error => alert(error.status + ": " + error.message))
-    this.sortChannels(this.ChatData.notJoinedChans)
+    sortChannels(this.ChatData.notJoinedChans)
     }
-  sortChannels(chan: any) {
-    chan.sort(function(a: any, b: any) {
-      var c = new Date(b.Message[b.Message.length - 1].date).getTime()
-      var d = new Date(a.Message[a.Message.length - 1].date).getTime()
-      return c - d;
-    });
-  }
+
     
     /** RENDERING FUNCTIONS */
   openConvHandler(chanID: number) {
-    this.ChatData = this.state
-    this.ChatData.openedConversation = this.getChan(chanID).Message
-    this.ChatData.actualUser.openedConvID = chanID
-    this.setState(this.ChatData)
+    let ChatData = structuredClone(this.state)
+  
+    ChatData.openedConversation = getChan(chanID, this.state)?.Message
+    ChatData.actualUser.openedConvID = chanID
+    this.setState(ChatData)
   }
 
-  updateChannelMenu(chan: any) : void {
-    let whichTable;
-    this.ChatData = this.state
-    const userIsInChan = this.userIsInChan(chan)
+  /** SOCKETS **/
+  socketNewMsg(msg: Message) {
+    let ChatData = structuredClone(this.state)
+    const chan = getChan(msg.channelId, ChatData)
 
-    if (userIsInChan)
-      whichTable = this.ChatData.joinedChans;
-    else 
-      whichTable = this.ChatData.notJoinedChans;
-    for (let i = 0; i < whichTable.length; i++) {
-      if (whichTable[i].id === chan.id) {
-        whichTable.splice(0, 0, whichTable[i]);
-        whichTable.splice(i + 1, 1);
+    chan?.Message?.push(msg)
+    sortChannels(ChatData.joinedChans)
+    if (ChatData.actualUser.openedConvID === msg.channelId)
+      ChatData.openedConversation.push(msg)
+    this.setState(ChatData)
+  }
+  
+  socketNewChan(chan: Channel) {
+    let ChatData = structuredClone(this.state)
+
+    if (userIsInChan(chan, this.state))
+      ChatData.joinedChans.splice(0, 0, chan)
+    else
+      ChatData.notJoinedChans.splice(0, 0, chan)
+    this.setState(ChatData)
+  }
+
+  socketUpdateChan(newChan: Channel) {
+    let ChatData = structuredClone(this.state)
+    let which
+
+    for (let chan of ChatData.joinedChans) {
+      if (chan.id === newChan.id) {
+        ChatData.joinedChans.splice(ChatData.joinedChans.findIndex((chan_: Channel) => chan_.id === newChan.id), 1)
+        break ;
       }
     }
-  }
-
-  /** UTILS **/
-  userIsInChan(chan: any) {
-    if (chan.members === undefined)
-      return (false)
-    for (let user of chan.members) {
-      if (user.login === this.state.actualUser.user.login)
-        return (true)
+    for (let chan of ChatData.notJoinedChans) {
+      if (chan.id === newChan.id) {
+        ChatData.notJoinedChans.splice(ChatData.notJoinedChans.findIndex((chan_: Channel) => chan_.id === newChan.id), 1)
+        break ;
+      }
     }
-    return (false)
+    if (userIsInChan(newChan, this.state))
+      which = ChatData.joinedChans
+    else
+      which = ChatData.notJoinedChans
+    which.push(newChan)
+    sortChannels(ChatData)
+    this.setState(ChatData)
   }
-  getChan(id: number) {
-    for (const chan of this.state.joinedChans) {
-      if (chan.id === id)
-        return chan
-    }
-  }
-
-  /** CREATE **/
+  
+  /** CHAT COMMANDS **/
   joinChan(chan: Channel) {
-    this.ChatData = this.state
-    for (let i = 0; i < this.ChatData.notJoinedChans.length; i++) {
-      if (chan.id === this.ChatData.notJoinedChans[i].id) {
-        this.ChatData.notJoinedChans.splice(i, 1)
+    let ChatData = structuredClone(this.state)
+
+    for (let i = 0; i < ChatData.notJoinedChans.length; i++) {
+      if (chan.id === ChatData.notJoinedChans[i].id) {
+        ChatData.notJoinedChans.splice(i, 1)
         break 
       }
     }
-    this.ChatData.joinedChans.push(chan)
+    ChatData.joinedChans.push(chan)
     this.openConvHandler(chan.id)
-    this.setState(this.ChatData)
+    this.setState(ChatData)
   }
-  
-  socketNewMsg(msg: any) {
-    this.ChatData = this.state
-    const chan = this.getChan(msg.channelId)
-    chan.Message.push(msg)
-    this.updateChannelMenu(this.getChan(msg.channelId))
-    this.setState(this.ChatData)
-  }
-  
-  socketNewChan(chan: any) {
-    this.ChatData = this.state
-    if (this.userIsInChan(chan))
-      this.ChatData.joinedChans.splice(0, 0, chan)
-    else
-      this.ChatData.notJoinedChans.splice(0, 0, chan)
-    this.setState(this.ChatData)
-  }
+    
   
   render() {
+    this.socket.off('updateChanFromServer').on('updateChanFromServer', (chan) => this.socketUpdateChan(chan))
     this.socket.off('newChanFromServer').on('newChanFromServer', (chan) => this.socketNewChan(chan))
     this.socket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.socketNewMsg(msg))
 
     return (
     <div className="chatContainer">
+      
         <div className="ChannelMenu">
             <HeaderChannels state={this.state} socket={this.socket} />
-            <ChannelDisplay state={this.state} openConvHandler={this.openConvHandler}
-                  joinChan={this.joinChan} />
+            <ChannelDisplay state={this.state} socket={this.socket} 
+                  openConvHandler={this.openConvHandler} joinChan={this.joinChan} />
             <InfoDialog />
         </div>
-        {this.state.actualUser.openedConvID === -1 ? null : <div className="ChatHeader"><ChatHeader state={this.state} /></div> }
-        <div className="MessageDisplay"><MessageDisplay state={this.state} /></div>
-        {this.state.actualUser.openedConvID === -1 ? null : <div className="SendMessage"><SendBox state={this.state} socket={this.socket} /></div>}
+        <div className="ChatDisplay">
+            {this.state.actualUser.openedConvID === -1 ? null : <div className="ChatHeader"><ChatHeader state={this.state} socket={this.socket} /></div> }
+            <div className="MessageDisplay"><MessageDisplay state={this.state} socket={this.socket} /></div>
+            {this.state.actualUser.openedConvID === -1 ? null : <div className="SendMessage"><SendBox state={this.state} socket={this.socket} /></div>}
+        </div>
+
     </div>
     )
   }

@@ -39,15 +39,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
   @SubscribeMessage('newChanFromClient')
   handleNewChannel(socket: Socket, chan: any) : void {
     socket.join("chat" + chan.id);
-    if (chan.type === "dm"){}
+    // add other user socket to room
+    if (chan.type === "dm")
+      this.server.to("chat" + chan.id).emit('newChanFromServer', chan)
     else
       this.server.emit('newChanFromServer', chan)
+  }
+
+  @SubscribeMessage('updateChanFromClient')
+  handleUpdateChannel(socket: Socket, chan: any) : void {
+    this.server.emit('updateChanFromServer', chan)
   }
 
   @SubscribeMessage('newMsgFromClient')
   handleNewMessage(socket: Socket, message: {room: string, message: any}) : void {
     // check if user not MUTE
-    console.log(socket.rooms)
     this.server.to(message.room).emit('newMsgFromServer', message.message)
   }
 

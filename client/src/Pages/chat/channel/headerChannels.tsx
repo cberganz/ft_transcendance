@@ -16,6 +16,7 @@ import CreateSharpIcon from '@mui/icons-material/CreateSharp';
 import AddCircleOutlineSharpIcon from '@mui/icons-material/AddCircleOutlineSharp';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
+import { ChatProps } from '../stateInterface'
 
 // API REQUESTS ////////////////////////////////////
 async function postChan(chan: any, socket: any) {
@@ -171,7 +172,7 @@ function SendMessageButton(props: any) {
     );
 }
 
-export default function HeaderChannels(props: any) {
+export default function HeaderChannels(props: ChatProps) {
     return (
         <div className='ChannelHeader'>
             <SendMessageButton props={props} />
