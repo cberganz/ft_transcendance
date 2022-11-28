@@ -39,11 +39,12 @@ export default function BadgeAvatar() {
         overlap="circular"
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         variant="dot"
+		sx={{ width: '100%', height: '100%' }}
       >
         <Avatar
 			alt="Charles Berganza"
-			src="/app/src/Pages/Ranking/PlayerInfos/avatar.jpg"
-			sx={{ mt: 2, ml: 2, width: '100%', height: '100%' }}
+			src="https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=400"
+			sx={{ width: '100%', height: '100%' }}
 		/>
       </StyledBadge>
   );
