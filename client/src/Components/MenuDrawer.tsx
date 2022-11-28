@@ -12,6 +12,7 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Groups2Icon from '@mui/icons-material/Groups2';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import { useNavigate } from "react-router-dom"
 
 type Anchor = 'top' | 'left' | 'bottom' | 'right';
 
@@ -19,12 +20,14 @@ interface DrawerItemProp {
 	text: string,
 	icon: JSX.Element
 	href: string,
-}
+} 
 
 function DrawerItem(props: DrawerItemProp) {
+	const navigate = useNavigate()
+
 	return (
 		<ListItem key={props.text} disablePadding>
-			<ListItemButton href={props.href}>
+			<ListItemButton onClick={() => navigate(props.href)}>
 				<ListItemIcon>
 					{props.icon}
 				</ListItemIcon>
