@@ -36,7 +36,7 @@ export class ChannelController {
 
 	@Post('/update/:id')
 	async updateChannel(
-		@Body() channelData: ChannelMode1,
+		@Body() channelData: { type: string; password?: string; ownerId: string },
 		@Param('id') id: string
 	) : Promise<ChannelMode1> {
 		return this.channelService.updateChannel({where: {id: Number(id)}, data: channelData})

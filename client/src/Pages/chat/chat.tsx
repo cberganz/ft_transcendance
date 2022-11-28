@@ -105,9 +105,9 @@ export class Chat extends React.Component<Props, ChatState> {
     let ChatData = structuredClone(this.state)
 
     if (userIsInChan(chan, this.state))
-      ChatData.joinedChans.splice(0, 0, chan)
+      ChatData.joinedChans.push(chan)
     else
-      ChatData.notJoinedChans.splice(0, 0, chan)
+      ChatData.notJoinedChans.push(chan)
     this.setState(ChatData)
   }
 

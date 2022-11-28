@@ -19,8 +19,15 @@ export function userIsInChan(chan: Channel, state: ChatState) {
 
 export function sortChannels(chans: Channel[]) {
     chans.sort(function(a: any, b: any) {
-      var c = new Date(b.Message[b.Message.length - 1].date).getTime()
-      var d = new Date(a.Message[a.Message.length - 1].date).getTime()
-      return c - d;
+        var c, d;
+        if (b.Message.length === 0)
+            c = b.id
+        else
+            c = new Date(b.Message[b.Message.length - 1].date).getTime()
+        if (a.Message.length === 0)
+            d = a.id;
+        else
+            d = new Date(a.Message[a.Message.length - 1].date).getTime()
+        return c - d;
     });
   }

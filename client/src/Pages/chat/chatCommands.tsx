@@ -18,7 +18,7 @@ export let COMMANDS = {
 /** UPDATE REQUESTS */
 async function postUpdateChan(chan: Channel, socket: any) {
     console.log(chan)
-    axios.post("http://localhost:3000/channel/update/" + chan.id)
+    axios.post("http://localhost:3000/channel/update/" + chan.id, chan)
         .then(response => socket.emit('updateChanFromClient', response.data))
         .catch(error => alert(error.status + ": " + error.message)) 
 }
@@ -44,6 +44,9 @@ function LeaveChan(socket: any, state: ChatState, chanId: number) {
             chan?.admin.splice(i, 1);
             break ;
         }
+    }
+    let newChan = {
+        
     }
     postUpdateChan(chan, socket);
     socket.emit('leaveChatRoom', chan.id)
