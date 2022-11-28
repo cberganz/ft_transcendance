@@ -56,9 +56,6 @@ export class ChannelService {
 				members: true,
 				owner: true
 			},
-			orderBy: {
-				updatedAt: 'desc'
-			}
 		});
 	}
 
@@ -74,19 +71,11 @@ export class ChannelService {
 				}
 			},
 			include: {
-				Message:  {
-					include: {
-						author: true,
-					}
-				},
 				blacklist: true,
 				admin: true,
 				members: true,
 				owner: true
 			},
-			orderBy: {
-				updatedAt: 'desc'
-			}
 		});
 	}
 

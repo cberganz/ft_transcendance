@@ -72,11 +72,20 @@ export class Chat extends React.Component<Props, ChatState> {
     this.ChatData.joinedChans = await axios.get("http://localhost:3000/channel/joinedChannels/" + this.ChatData.actualUser.user.id)
       .then(response => response.data)
       .catch(error => alert(error.status + ": " + error.message))
-  }
+    this.sortChannels(this.ChatData.joinedChans)
+    }
   async getNotJoinedChans(): Promise<any> {
     this.ChatData.notJoinedChans = await axios.get("http://localhost:3000/channel/notJoinedChannels/" + this.ChatData.actualUser.user.id)
       .then(response => response.data)
       .catch(error => alert(error.status + ": " + error.message))
+    this.sortChannels(this.ChatData.notJoinedChans)
+    }
+  sortChannels(chan: any) {
+    chan.sort(function(a: any, b: any) {
+      var c = new Date(b.Message[b.Message.length - 1].date).getTime()
+      var d = new Date(a.Message[a.Message.length - 1].date).getTime()
+      return c - d;
+    });
   }
     
     /** RENDERING FUNCTIONS */
