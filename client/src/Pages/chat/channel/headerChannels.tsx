@@ -29,8 +29,6 @@ async function postDMChan(chan: any, socket: any) {
     .then(response => socket.emit("newChanFromClient", response.data))
     .catch(error => alert("postDMChan: " + error.status + ": " + error.message)) 
 }
-
-
 ////////////////////////////////////////////////////
 
 function CreateChannelButton(props: any) {

@@ -16,40 +16,30 @@ export let COMMANDS = {
 }
 
 /** UPDATE REQUESTS */
-async function postUpdateChan(chan: Channel, socket: any) {
-    console.log(chan)
-    axios.post("http://localhost:3000/channel/update/" + chan.id, chan)
+async function deleteMemberChan(chanId: number, memberId: number, socket: any) {
+    axios.post("http://localhost:3000/channel/deleteMember/", {channelId: chanId, memberId: memberId})
+        .then(response => socket.emit('updateChanFromClient', response.data))
+        .catch(error => alert(error.status + ": " + error.message)) 
+}
+async function addMemberChan(chanId: number, memberId: number, socket: any) {
+    axios.post("http://localhost:3000/channel/addMember/", {channelId: chanId, memberId: memberId})
         .then(response => socket.emit('updateChanFromClient', response.data))
         .catch(error => alert(error.status + ": " + error.message)) 
 }
 /****************** */
 
-/** SOCKET UPDATE */
 
+/** SOCKET UPDATE */
 /**************** */
 
 function JoinChan(socket: any, state: ChatState, chanId: number) {
-
+    addMemberChan(chanId, state.actualUser.user.id, socket);
+    socket.emit('joinChatRoom', chanId);
 }
 
 function LeaveChan(socket: any, state: ChatState, chanId: number) {
-    let chan = structuredClone(getChan(chanId, state));
-
-    chan?.members.splice(chan.members.findIndex((member: any) => member.id === state.actualUser.user.id), 1)
-    if (chan?.owner?.id === state.actualUser.user.id) {
-        chan.owner = undefined
-    }
-    for (let i = 0; chan?.admin?.length && i < chan?.admin?.length; i++) {
-        if (chan?.admin[i].id === state.actualUser.user.id) {
-            chan?.admin.splice(i, 1);
-            break ;
-        }
-    }
-    let newChan = {
-        
-    }
-    postUpdateChan(chan, socket);
-    socket.emit('leaveChatRoom', chan.id)
+    deleteMemberChan(chanId, state.actualUser.user.id, socket);
+    socket.emit('leaveChatRoom', chanId)
 }
 
 export function ChatCommands(which: number, socket: any, state: ChatState, params: any) {

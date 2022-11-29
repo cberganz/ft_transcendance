@@ -66,12 +66,12 @@ export class ChannelService {
 					some: {
 						NOT: {
 							id: userId
-						}
-					}
+						},
+					},
 				},
 				NOT: {
 					type: "dm",
-				}
+				},
 			},
 			include: {
 				blacklist: true,
@@ -113,6 +113,36 @@ export class ChannelService {
 		return this.prisma.channel.update({
 			data,
 			where,
+		});
+	}
+
+	async deleteMember(data: {channelId: number, memberId: number}): Promise<Channel> {
+		return this.prisma.channel.update({
+			where: {
+				id: data.channelId,
+			},
+			data: {
+				members: {
+					disconnect: {
+						id: data.memberId,
+					}
+				}
+			}
+		});
+	}
+
+	async addMember(data: {channelId: number, memberId: number}): Promise<Channel> {
+		return this.prisma.channel.update({
+			where: {
+				id: data.channelId,
+			},
+			data: {
+				members: {
+					connect: {
+						id: data.memberId,
+					}
+				}
+			}
 		});
 	}
 

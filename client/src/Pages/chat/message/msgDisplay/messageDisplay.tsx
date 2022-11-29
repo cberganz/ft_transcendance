@@ -52,8 +52,8 @@ export default function MessageDisplay(props: any) {
       <Stack sx={{ width: '100%' }} spacing={2}>
           {props.state.openedConversation.map((msg: Message) => (
             <div key={msg.id}>
-              {msg.author.login === props.state.actualUser.user.login ? MessageItemSender(msg.author.avatar, msg.author.login, msg.content) : 
-                MessageItemReceiver(msg.author.avatar, msg.author.login, msg.content)}
+              {msg.author.id === props.state.actualUser.user.id ? MessageItemSender(msg.author.avatar, msg.author.username, msg.content) : 
+                MessageItemReceiver(msg.author.avatar, msg.author.username, msg.content)}
             </div>
           ))}
       </Stack>

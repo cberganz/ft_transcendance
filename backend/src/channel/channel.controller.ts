@@ -34,12 +34,18 @@ export class ChannelController {
 		return this.channelService.allChannels();
 	}
 
-	@Post('/update/:id')
-	async updateChannel(
-		@Body() channelData: { type: string; password?: string; ownerId: string },
-		@Param('id') id: string
+	@Post('/deleteMember/')
+	async PostDeleteMember(
+		@Body() data: { channelId: string; memberId: string; }
 	) : Promise<ChannelMode1> {
-		return this.channelService.updateChannel({where: {id: Number(id)}, data: channelData})
+		return this.channelService.deleteMember({channelId: Number(data.channelId), memberId: Number(data.memberId)})
+	}
+
+	@Post('/addMember/')
+	async PostAddMember(
+		@Body() data: { channelId: string; memberId: string; }
+	) : Promise<ChannelMode1> {
+		return this.channelService.addMember({channelId: Number(data.channelId), memberId: Number(data.memberId)})
 	}
 
 	@Post('/new/chan/')

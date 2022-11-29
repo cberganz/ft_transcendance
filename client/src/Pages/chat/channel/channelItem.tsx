@@ -12,6 +12,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
+import { ChatCommands, COMMANDS } from '../chatCommands';
 
 
 export function DialogChannelItem(props: any) {
@@ -25,12 +26,11 @@ export function DialogChannelItem(props: any) {
   const joinChan = (e: any) => {
     e.preventDefault()
     if (props.chan.type === "public" || (props.chan.type === "private" && props.chan.password === e.target.password.value))
-      props.props.joinChan(props.chan)
+      ChatCommands(COMMANDS.JOINCHAN, props.props.socket, props.props.state, props.chan.id);
     else if (props.chan.type === "private" && props.chan.password !== e.target.password.value)
       alert("Wrong password.")
   }
   const lastMsg = props.chan?.Message?.slice(-1);
-
   return (
   <div>
         <ListItem onClick={handleClickOpen} alignItems="flex-start" className="ChannelItem" sx={{cursor: 'pointer'}}>
