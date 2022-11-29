@@ -19,7 +19,7 @@ import { Stack } from '@mui/system';
 import Grid from '@mui/material/Grid';
 import SettingsDialog from './SettingsDialog';
 
-import { selectCurrentUser } from '../Features/Auth/authSlice'
+import { selectCurrentUser } from '../Hooks/authSlice'
 import { useSelector } from "react-redux"
 
 const Search = styled('div')(({ theme }) => ({

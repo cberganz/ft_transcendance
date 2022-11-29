@@ -2,7 +2,7 @@ import { HttpStatus, Catch, ExceptionFilter, ArgumentsHost } from '@nestjs/commo
 import { Prisma } from '@prisma/client'
 import HttpMessages from './HttpMessages'
 
-import { Request, Response } from 'express';
+import { Response } from 'express';
 
 @Catch(Error)
 export default class BackendException implements ExceptionFilter {

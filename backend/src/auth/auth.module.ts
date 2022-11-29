@@ -4,6 +4,7 @@ import { UserService } from '../user/user.service';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
+import { JwtRefreshStrategy } from './jwt-refresh.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
 import { PrismaService } from '../prisma/prisma.service';
@@ -23,6 +24,7 @@ import { AuthController } from './auth.controller';
 		UserService,
 		LocalStrategy,
 		JwtStrategy,
+		JwtRefreshStrategy,
 		PrismaService
 	],
 	exports: [AuthService],

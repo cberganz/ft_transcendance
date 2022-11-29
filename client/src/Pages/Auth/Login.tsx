@@ -11,10 +11,10 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-import { setCredentials } from '../../Features/Auth/authSlice'
+import { setCredentials } from '../../Hooks/authSlice'
 import { useNavigate } from "react-router-dom"
 import { useDispatch } from "react-redux"
-import { useLoginMutation } from "../../Features/Auth/authApiSlice"
+import { useLoginMutation } from "../../Api/Auth/authApiSlice"
 
 
 type Credentials = {
@@ -30,8 +30,8 @@ function Login() {
 	const navigate = useNavigate()
 
 	async function loginUser(credentials: Credentials) {
-
 		const userData = await login(credentials).unwrap()
+
 		dispatch(setCredentials({ user: userData.user, accessToken: userData.jwt_token }))
 		return (userData)
 	}

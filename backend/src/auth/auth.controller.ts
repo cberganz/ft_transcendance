@@ -18,21 +18,22 @@ export class AuthController {
 	async login(@Res({ passthrough: true }) response: Response, @Req() req) {
 		let jwt_tokens = await this.authService.login(req.user)
 
-		response.cookie('jwt', jwt_tokens.refresh_token, { maxAge: 3600000/* , httpOnly: true  */})
+		response.cookie(
+			'jwt', 
+			jwt_tokens.refresh_token,
+			{ 
+				maxAge: 3600000, 
+				httpOnly: true 
+			}
+		)
 		return { user: req.user, jwt_token: jwt_tokens.access_token };
-	}
-
-	@UseGuards(JwtAuthGuard)
-	@Get('validate')
-	validAuth() {
-		return {message: 'success'};
 	}
 
 	@UseGuards(JwtRefreshAuthGuard)
 	@Get('refresh')
 	async refresh(@Req() req) {
-		const user: UserMode1 =
-			jwt_decode(ExtractJwt.fromExtractors([(request: Request) => request?.cookies["jwt"]]))
+		const user: UserMode1 = 
+			jwt_decode(req?.cookies["jwt"])
 		const jwt_tokens = await this.authService.refreshTokens(user)
 		return { user: req.user, jwt_token: jwt_tokens.access_token };
 	}
