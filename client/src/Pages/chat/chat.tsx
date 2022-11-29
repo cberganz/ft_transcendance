@@ -82,6 +82,7 @@ export class Chat extends React.Component<Props, ChatState> {
       .then(response => response.data)
       .catch(error => alert("getNotJoinedChans " + error.status + ": " + error.message))
     sortChannels(this.ChatData.notJoinedChans)
+    console.log(this.ChatData.notJoinedChans)
     return (this.ChatData.notJoinedChans)
   }
   async getUserList(): Promise<any> {

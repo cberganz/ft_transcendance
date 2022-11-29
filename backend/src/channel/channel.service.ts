@@ -68,6 +68,9 @@ export class ChannelService {
 							id: userId
 						}
 					}
+				},
+				NOT: {
+					type: "dm",
 				}
 			},
 			include: {
