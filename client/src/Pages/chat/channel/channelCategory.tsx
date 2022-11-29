@@ -7,8 +7,8 @@ export function DMChannels(props: any) {
     {
         props.state.joinedChans?.map((chan: any) => (
               <div key={chan.id}>
-              {chan.type === 'dm' && chan.members[0].login === props.state.actualUser.user.login ? ChannelItem(chan, chan.members[1].login, chan.members[1].avatar, props) : null}
-              {chan.type === 'dm' && chan.members[1].login === props.state.actualUser.user.login ? ChannelItem(chan, chan.members[0].login, chan.members[0].avatar, props) : null}
+              {chan.type === 'dm' && chan.members[0].id === props.state.actualUser.user.id ? ChannelItem(chan, chan.members[1].username, chan.members[1].avatar, props) : null}
+              {chan.type === 'dm' && chan.members[1].id === props.state.actualUser.user.id ? ChannelItem(chan, chan.members[0].username, chan.members[0].avatar, props) : null}
               </div>
       ))
     }

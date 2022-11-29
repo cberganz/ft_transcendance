@@ -42,9 +42,9 @@ export class ChannelController {
 		return this.channelService.updateChannel({where: {id: Number(id)}, data: channelData})
 	}
 
-	@Post()
+	@Post('/new/chan/')
 	async newChannel (
-		@Body() channelData: { type: string; password?: string; title?: string; ownerId?: string }
+		@Body() channelData: { type: string; password: string; title: string; ownerId: string }
 	): Promise<ChannelMode1> {
 		let newChan = await this.channelService.createChannel({
 			type: channelData.type,
@@ -53,6 +53,17 @@ export class ChannelController {
 			owner: { connect: { id: Number(channelData.ownerId) } },
 			members: { connect: { id: Number(channelData.ownerId) } },
 			admin: { connect: { id: Number(channelData.ownerId) } },
+		});
+		return this.channelService.channel({ id: Number(newChan.id) });
+	}
+
+	@Post('/new/dm/')
+	async newDMChannel (
+		@Body() channelData: { user1: string, user2: string }
+	): Promise<ChannelMode1> {
+		let newChan = await this.channelService.createChannel({
+			type: "dm",
+			members: { connect: [{ id: Number(channelData.user1) }, { id: Number(channelData.user2) }] },
 		});
 		return this.channelService.channel({ id: Number(newChan.id) });
 	}

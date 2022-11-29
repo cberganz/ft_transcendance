@@ -38,14 +38,15 @@ export class Chat extends React.Component<Props, ChatState> {
       userList: [],
     };
     
+    this.userID = prompt("User ID ?")
     this.getData()
     this.socket = io("http://localhost:3000/chat") 
     this.state = this.ChatData
-    this.socket.emit('initTable', this.ChatData.actualUser.user.login)
   }
 
   private socket
   private ChatData: ChatState
+  private userID
 
   /** INIT DATA **/
   async getData(): Promise<void> {
@@ -62,30 +63,31 @@ export class Chat extends React.Component<Props, ChatState> {
   async getActualUser(): Promise<any> {
     this.ChatData.actualUser = {
       openedConvID: -1,
-      user: await axios.get("http://localhost:3000/user/1")
+      user: await axios.get("http://localhost:3000/user/" + this.userID)
         .then(response => response.data)
-        .catch(error => alert(error.status + ": " + error.message))
+        .catch(error => alert("getActualUser " + error.status + ": " + error.message))
       }
+    this.socket.emit('initTable', this.ChatData.actualUser.user.login)
     return (this.ChatData.actualUser)
   }
   async getJoinedChans(): Promise<any> {
-    this.ChatData.joinedChans = await axios.get("http://localhost:3000/channel/joinedChannels/" + this.ChatData.actualUser.user.id)
+    this.ChatData.joinedChans = await axios.get("http://localhost:3000/channel/joinedChannels/" + this.userID)
       .then(response => response.data)
-      .catch(error => alert(error.status + ": " + error.message))
+      .catch(error => alert("getJoinedChan " + error.status + ": " + error.message))
     sortChannels(this.ChatData.joinedChans)
     return (this.ChatData.joinedChans)
     }
   async getNotJoinedChans(): Promise<any> {
-    this.ChatData.notJoinedChans = await axios.get("http://localhost:3000/channel/notJoinedChannels/" + this.ChatData.actualUser.user.id)
+    this.ChatData.notJoinedChans = await axios.get("http://localhost:3000/channel/notJoinedChannels/" + this.userID)
       .then(response => response.data)
-      .catch(error => alert(error.status + ": " + error.message))
+      .catch(error => alert("getNotJoinedChans " + error.status + ": " + error.message))
     sortChannels(this.ChatData.notJoinedChans)
     return (this.ChatData.notJoinedChans)
   }
   async getUserList(): Promise<any> {
-    this.ChatData.userList = await axios.get('http://localhost:3000/user/list/1')
+    this.ChatData.userList = await axios.get('http://localhost:3000/user/list/' + this.userID)
       .then(response => response.data)
-      .catch(error => alert(error.status + ": " + error.message))
+      .catch(error => alert("getUserList " + error.status + ": " + error.message))
     return (this.ChatData.userList)
   }
 

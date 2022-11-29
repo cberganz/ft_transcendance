@@ -27,6 +27,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
   @SubscribeMessage('initTable')
   handleInitTable(socket: Socket, login: string) {
     this.userSockets.set(socket, login)
+    console.log(login)
   }
 
   handleDisconnect(socket: Socket) {
@@ -39,9 +40,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
   @SubscribeMessage('newChanFromClient')
   handleNewChannel(socket: Socket, chan: any) : void {
     socket.join("chat" + chan.id);
-    // add other user socket to room
-    if (chan.type === "dm")
+
+    if (chan.type === "dm"){
+      let user2;
+        
+      if (chan.members[0].login === this.userSockets.get(socket))
+        user2 = chan.members[1].login;
+      else
+        user2 = chan.members[0].login;
+      this.userSockets.forEach((login, userSocket) => {
+        if (login === user2)
+          userSocket.join("chat" + chan.id)
+      })
       this.server.to("chat" + chan.id).emit('newChanFromServer', chan)
+    }
     else
       this.server.emit('newChanFromServer', chan)
   }

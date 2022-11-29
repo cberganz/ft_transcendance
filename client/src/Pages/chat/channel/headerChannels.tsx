@@ -20,9 +20,14 @@ import { ChatProps, User } from '../stateInterface'
 
 // API REQUESTS ////////////////////////////////////
 async function postChan(chan: any, socket: any) {
-  axios.post('http://localhost:3000/channel', chan)
+  axios.post('http://localhost:3000/channel/new/chan/', chan)
     .then(response => socket.emit("newChanFromClient", response.data))
-    .catch(error => alert(error.status + ": " + error.message)) 
+    .catch(error => alert("postChan: " + error.status + ": " + error.message)) 
+}
+async function postDMChan(chan: any, socket: any) {
+  axios.post('http://localhost:3000/channel/new/dm/', chan)
+    .then(response => socket.emit("newChanFromClient", response.data))
+    .catch(error => alert("postDMChan: " + error.status + ": " + error.message)) 
 }
 
 
@@ -116,15 +121,33 @@ function SendMessageButton(props: any) {
         setLogin(event.target.value as string);
     };
     
-    const newDM = (e: any) => {
+    const newDM = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()
+      const data = new FormData(e.currentTarget);
       const newChan = {
-        type:      "dm",
-        password:  "",
+        user1: props.props.state.actualUser.user.id,
+        user2: data.get('login'),
       }
-      postChan(newChan, props.props.socket);
+      postDMChan(newChan, props.props.socket);
     }
 
+    let userList = structuredClone(props.props.state.userList);
+    let dmList: User[] = []
+    for (let chan of props.props.state.joinedChans) {
+      if (chan.type === "dm") {
+        if (chan.members[0].id === props.props.state.actualUser.user.id)
+          dmList.push(structuredClone(chan.members[1]));
+        else
+          dmList.push(structuredClone(chan.members[0]));
+      }
+    }
+    for (let i = userList.length - 1; i >= 0; i--) {
+      for (let dmUser of dmList) {
+        if (dmUser.id === userList[i].id) {
+          userList.splice(i, 1);
+        }
+      }
+    }
     return (
       <div>
         <Tooltip title="Send message">
@@ -135,7 +158,7 @@ function SendMessageButton(props: any) {
         </Tooltip>
 
         <form  onSubmit={(e) => {newDM(e)}}>
-        <Dialog open={open} onClose={handleClose}>
+        <Dialog open={open} onClose={handleClose} disablePortal>
           <DialogTitle>New DM</DialogTitle>
           <DialogContent>
 
@@ -143,13 +166,14 @@ function SendMessageButton(props: any) {
                 <FormControl fullWidth>
                     <InputLabel id="login">Login</InputLabel>
                     <Select
+                    name="login"
                     labelId="login"
                     id="login"
                     value={login}
                     label="login"
                     onChange={handleChange}
                     >
-                    {props.props.state.userList.map((user: User) => <MenuItem value={user.id} key={user.id}>{user.login}</MenuItem>)}
+                    {userList.map((user: User) => <MenuItem value={user.id} key={user.id}>{user.login}</MenuItem>)}
                     </Select>
                 </FormControl>
             </Box>
@@ -157,7 +181,7 @@ function SendMessageButton(props: any) {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
-            <Button onClick={handleClose}>Open discussion</Button>
+            <Button type="submit" onClick={handleClose}>Open discussion</Button>
           </DialogActions>
         </Dialog>
         </form>

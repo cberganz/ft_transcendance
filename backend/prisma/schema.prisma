@@ -28,13 +28,13 @@ model Channel {
   id        Int         @id @default(autoincrement())
   members   User[]      @relation("channel::members")
   type      String
-  title     String
+  title     String?
   password  String?
   admin     User[]      @relation("channel::admins")
   Message   Message[]
   blacklist Blacklist[]
   owner     User?        @relation(fields: [ownerId], references: [id])
-  ownerId   Int
+  ownerId   Int?
 }
 
 model Game {

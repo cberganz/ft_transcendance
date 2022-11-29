@@ -29,7 +29,7 @@ export function DialogChannelItem(props: any) {
     else if (props.chan.type === "private" && props.chan.password !== e.target.password.value)
       alert("Wrong password.")
   }
-  const lastMsg = props.chan.Message.slice(-1);
+  const lastMsg = props.chan?.Message?.slice(-1);
 
   return (
   <div>
