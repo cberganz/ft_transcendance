@@ -1,10 +1,8 @@
 import * as React from 'react';
-import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
-import InputBase from '@mui/material/InputBase';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
@@ -18,55 +16,35 @@ import Divider from '@mui/material/Divider';
 import { Stack } from '@mui/system';
 import Grid from '@mui/material/Grid';
 import SettingsDialog from './SettingsDialog';
-
 import { selectCurrentUser } from '../Hooks/authSlice'
 import { useSelector } from "react-redux"
+import { SearchIconWrapper, Search, StyledInputBase } from './topBarStyle';
+// import { useNavigate } from 'react-router-dom';
+import { useLogoutMutation } from '../Api/Auth/authApiSlice'
+import { logOut } from '../Hooks/authSlice';
 
-const Search = styled('div')(({ theme }) => ({
-	position: 'relative',
-	borderRadius: theme.shape.borderRadius,
-	backgroundColor: alpha(theme.palette.grey[600], 0.15),
-	'&:hover': {
-		backgroundColor: alpha(theme.palette.primary.dark, 0.25),
-	},
-	marginRight: theme.spacing(2),
-	marginLeft: 0,
-	width: '100%',
-	[theme.breakpoints.up('sm')]: {
-		marginLeft: theme.spacing(3),
-		width: 'auto',
-	},
-}));
 
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-	padding: theme.spacing(0, 2),
-	height: '100%',
-	position: 'absolute',
-	pointerEvents: 'none',
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'center',
-}));
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-	color: 'inherit',
-	'& .MuiInputBase-input': {
-		padding: theme.spacing(1, 1, 1, 0),
-		// vertical padding + font size from searchIcon
-		paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-		transition: theme.transitions.create('width'),
-		width: '100%',
-		[theme.breakpoints.up('md')]: {
-		width: '20ch',
-		},
-	},
-}));
+function LogoutButton () {
+	const [logoutUser] = useLogoutMutation()
+	// const navigate = useNavigate()
+	
+	const handleLogout = (e: any) => {
+		logoutUser({})
+		logOut({})
+		window.location.replace('/login'); // pas utilise navigate car quand precedent revient sur l'app
+		// navigate('/login', { replace: true })
+	}
+
+	return (
+		<ListItemText onClick={handleLogout}>Logout</ListItemText>
+	)
+}
 
 function ProfileBox() {
 	const user = useSelector(selectCurrentUser)
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const isMenuOpen = Boolean(anchorEl);
-
 
 	const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
 		setAnchorEl(event.currentTarget);
@@ -75,6 +53,7 @@ function ProfileBox() {
 	const handleMenuClose = () => {
 		setAnchorEl(null);
 	};
+
 
 	const menuId = 'primary-search-account-menu';
 	const renderMenu = (
@@ -111,7 +90,7 @@ function ProfileBox() {
 			</MenuItem>
 			<Divider />
 			<MenuItem>
-				<ListItemText>Logout</ListItemText>
+				<LogoutButton />
 			</MenuItem>
 		</Menu>
 	);
