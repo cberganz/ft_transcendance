@@ -10,6 +10,7 @@ import io from "socket.io-client";
 import axios from "axios"
 import { getChan, userIsInChan, sortChannels } from './utils'
 import { InfoDialog } from "./channel/infoDialog"
+import { ChatCommands } from './chatCommands'
 
 interface Props {
 }
@@ -37,12 +38,13 @@ export class Chat extends React.Component<Props, ChatState> {
       userList: [],
     };
     
-    this.userID = prompt("User ID ?")
-    this.getData()
-    this.socket = io("http://localhost:3000/chat") 
-    this.state = this.ChatData
+    this.userID = prompt("User ID ?");
+    this.getData();
+    this.socket = io("http://localhost:3000/chat"); 
+    this.state = this.ChatData;
+    this.chatCommands = new ChatCommands(this.socket, this.state, this.openConvHandler);
   }
-
+  private chatCommands: ChatCommands
   private socket
   private ChatData: ChatState
   private userID
@@ -158,13 +160,13 @@ export class Chat extends React.Component<Props, ChatState> {
         <div className="ChannelMenu">
             <HeaderChannels state={this.state} socket={this.socket} />
             <ChannelDisplay state={this.state} socket={this.socket} 
-                  openConvHandler={this.openConvHandler} />
+                  openConvHandler={this.openConvHandler} chatCommands={this.chatCommands} />
             <InfoDialog />
         </div>
         <div className="ChatDisplay">
-            {this.state.actualUser.openedConvID === -1 ? null : <div className="ChatHeader"><ChatHeader state={this.state} socket={this.socket} /></div> }
+            {this.state.actualUser.openedConvID === -1 ? null : <div className="ChatHeader"><ChatHeader state={this.state} socket={this.socket} chatCommands={this.chatCommands} /></div> }
             <div className="MessageDisplay"><MessageDisplay state={this.state} socket={this.socket} /></div>
-            {this.state.actualUser.openedConvID === -1 ? null : <div className="SendMessage"><SendBox state={this.state} socket={this.socket} /></div>}
+            {this.state.actualUser.openedConvID === -1 ? null : <div className="SendMessage"><SendBox state={this.state} socket={this.socket} chatCommands={this.chatCommands} /></div>}
         </div>
 
     </div>

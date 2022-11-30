@@ -1,61 +1,45 @@
 import { ChatState, Channel } from './stateInterface'
-import { getChan } from './utils'
 import axios from 'axios'
 
-export let COMMANDS = {
-    JOINCHAN: 0,
-    LEAVECHAN: 1,
-    BLOCK: 2,
-    UNBLOCK: 3,
-    SETPWD: 4,
-    RMPWD: 5,
-    ADDADMIN: 6,
-    BAN: 7,
-    MUTE: 8,
-    GAME: 9,
-}
+export class ChatCommands {
+    private cmd_socket: any;
+    private cmd_state: ChatState;
+    private commands: Map<string, Function>;
+    private openConvHandler: Function;
+    
+    constructor(socket: any, state: ChatState, openConvHandler: Function) {
+        this.JoinChan = this.JoinChan.bind(this);
+        this.LeaveChan = this.LeaveChan.bind(this);
+        this.handler = this.handler.bind(this);
 
-/** UPDATE REQUESTS */
-async function deleteMemberChan(chanId: number, memberId: number, socket: any) {
-    axios.post("http://localhost:3000/channel/deleteMember/", {channelId: chanId, memberId: memberId})
-        .then(response => socket.emit('updateChanFromClient', response.data))
-        .catch(error => alert(error.status + ": " + error.message)) 
-}
-async function addMemberChan(chanId: number, memberId: number, socket: any) {
-    axios.post("http://localhost:3000/channel/addMember/", {channelId: chanId, memberId: memberId})
-        .then(response => socket.emit('updateChanFromClient', response.data))
-        .catch(error => alert(error.status + ": " + error.message)) 
-}
-/****************** */
-
-
-/** SOCKET UPDATE */
-/**************** */
-
-function JoinChan(socket: any, state: ChatState, chanId: number) {
-    addMemberChan(chanId, state.actualUser.user.id, socket);
-    socket.emit('joinChatRoom', chanId);
-}
-
-function LeaveChan(socket: any, state: ChatState, chanId: number) {
-    deleteMemberChan(chanId, state.actualUser.user.id, socket);
-    socket.emit('leaveChatRoom', chanId)
-}
-
-export function ChatCommands(which: number, socket: any, state: ChatState, params: any) {
-    switch (which) {
-        case COMMANDS.JOINCHAN:
-            return JoinChan(socket, state, params);
-        case COMMANDS.LEAVECHAN:
-            return LeaveChan(socket, state, params);
-        case COMMANDS.BLOCK :
-        case COMMANDS.UNBLOCK:
-        case COMMANDS.SETPWD:
-        case COMMANDS.RMPWD:
-        case COMMANDS.ADDADMIN:
-        case COMMANDS.BAN:
-        case COMMANDS.MUTE:
-        case COMMANDS.GAME:
-        default:
+        this.openConvHandler = openConvHandler;
+        this.cmd_socket = socket;
+        this.cmd_state = state;
+        this.commands = new Map([
+            ["/join", this.JoinChan],  
+            ["/leave", this.LeaveChan],
+        ]);
+        }
+    
+    handler(input: string, params: any) {
+        let inputs = input.split(' ', 3);
+        let func = this.commands.get(inputs[0])
+        if (func !== undefined)
+            func(params, this)
+    }
+    
+    JoinChan(chanId: number) {
+        axios.post("http://localhost:3000/channel/addMember/", {channelId: chanId, memberId: this.cmd_state.actualUser.user.id})
+            .then(response => this.cmd_socket.emit('updateChanFromClient', response.data))
+            .catch(error => alert(error.status + ": " + error.message)) 
+        this.cmd_socket.emit('joinChatRoom', chanId);
+    }
+    
+    LeaveChan(chanId: any, self: ChatCommands) {
+        axios.post("http://localhost:3000/channel/deleteMember/", {channelId: chanId, memberId: this.cmd_state.actualUser.user.id})
+            .then(response => this.cmd_socket.emit('updateChanFromClient', response.data))
+            .catch(error => alert(error.status + ": " + error.message)) 
+        this.cmd_socket.emit('leaveChatRoom', chanId)
+        this.openConvHandler(-1);
     }
 }

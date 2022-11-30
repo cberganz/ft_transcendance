@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
-import { ChatCommands, COMMANDS } from '../../chatCommands'
 
 // API REQUESTS /////////////////////////
 function postMsg(msg: any, socket: any, chanId: number) {
@@ -38,27 +37,10 @@ function onKeyPress(e: any, props: any) {
     target.value = ""
     if (value.length) {
       if (value[0] === '/') {
-        if (value.substring(0, 6) === "/leave")
-          ChatCommands(COMMANDS.LEAVECHAN, props.socket, props.state, props.state.actualUser.openedConvID)
-        else if (value.substring(0, 6) === "/block")
-          alert("Blocked " + value.substring(7))
-        else if (value.substring(0, 6) === "/unblock")
-          alert("Blocked " + value.substring(9))
-        else if (value.substring(0, 7) === "/setpwd")
-          alert("Password changed.")
-        else if (value.substring(0, 6) === "/rmpwd")
-          alert("Password removed.")
-        else if (value.substring(0, 10) === "/addadmin")
-          alert("Admin added.")
-        else if (value.substring(0, 4) === "/ban")
-          alert(value.split(" ", 3)[1] + " banned for " + value.split(" ", 3)[2] + " minutes.")
-        else if (value.substring(0, 4) === "/mute")
-          alert(value.split(" ", 3)[1] + " muted for " + value.split(" ", 3)[2] + " minutes.")
-        else if (value.substring(0, 5) === "/game")
-          alert(value.split(" ", 3)[1] + " invited to play a game.")
+        props.chatCommands.handler(value, props.state.actualUser.openedConvID);
       }
       else 
-        newMessage(value, props)
+        newMessage(value, props);
     }
   }
 }
