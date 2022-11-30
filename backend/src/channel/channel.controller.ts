@@ -48,6 +48,13 @@ export class ChannelController {
 		return this.channelService.addMember({channelId: Number(data.channelId), memberId: Number(data.memberId)})
 	}
 
+	@Post('/setPwd/')
+	async PostSetPwd(
+		@Body() data: { pwd: string; channelId: string; userId: string;}
+	) : Promise<ChannelMode1> {
+		return this.channelService.setPwd({pwd: data.pwd, channelId: Number(data.channelId), userId: Number(data.userId)})
+	}
+
 	@Post('/new/chan/')
 	async newChannel (
 		@Body() channelData: { type: string; password: string; title: string; ownerId: string }

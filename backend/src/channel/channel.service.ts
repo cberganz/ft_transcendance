@@ -119,6 +119,54 @@ export class ChannelService {
 		});
 	}
 
+	async setPwd(data: {pwd: string, channelId: number, userId: number}): Promise<Channel> {
+		const chan = await this.prisma.channel.findUnique( {
+			where: {
+				id: data.channelId,
+			},
+			include: {
+				Message:  {
+					include: {
+						author: true,
+					}
+				},
+				blacklist: true,
+				admin: true,
+				members: true,
+				owner: true
+			}
+		})
+		let type;
+		if (data.pwd === "")
+			type = "public";
+		else
+			type = "private";
+		if (!chan.ownerId || chan.ownerId === data.userId) {
+			return this.prisma.channel.update({
+				where: {
+					id : data.channelId,
+				},
+				data: {
+					password: data.pwd,
+					type: type,
+				},
+				include: {
+					Message:  {
+						include: {
+							author: true,
+						}
+					},
+					blacklist: true,
+					admin: true,
+					members: true,
+					owner: true
+				}
+			})
+		}
+		else
+			return chan;
+	}
+
 	async deleteMember(data: {channelId: number, memberId: number}): Promise<Channel> {
 		const chan = await this.prisma.channel.findUnique( {
 			where: {

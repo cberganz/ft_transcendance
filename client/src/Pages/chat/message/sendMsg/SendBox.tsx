@@ -37,7 +37,7 @@ function onKeyPress(e: any, props: any) {
     target.value = ""
     if (value.length) {
       if (value[0] === '/') {
-        props.chatCommands.handler(value, props.state.actualUser.openedConvID);
+        props.chatCommands.handler(value, props.state, props.state.actualUser.openedConvID);
       }
       else 
         newMessage(value, props);
@@ -51,6 +51,7 @@ export default function SendBox(props: any) {
       <TextField
         onKeyPress={(e) => onKeyPress(e, props)} 
         fullWidth id="fullWidth" 
+        autoFocus
         sx={{background: 'white'}} />
     </Box>
   );

@@ -50,7 +50,7 @@ class Chat extends React.Component<Props, ChatState> {
     this.userID = this.props.user.userId;
     this.getData();
     this.state = this.ChatData;
-    this.chatCommands = new ChatCommands(this.socket, this.state, this.openConvHandler);
+    this.chatCommands = new ChatCommands(this.socket, this.openConvHandler);
   }
   private chatCommands: ChatCommands
   private socket
