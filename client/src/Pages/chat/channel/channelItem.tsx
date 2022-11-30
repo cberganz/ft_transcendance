@@ -95,7 +95,10 @@ export function ChannelItem(chan: any, chanName: String, avatar: String, props: 
   let lastMsg = chan?.Message[chan.Message.length - 1];
   let lastMsgContent: string = lastMsg?.content
   let bckgColor
- 
+
+  if (avatar === undefined || avatar === null)
+    avatar = "";
+    
   if (props.state.actualUser.openedConvID === chan.id)
     bckgColor = '#f5f5f5'
   else

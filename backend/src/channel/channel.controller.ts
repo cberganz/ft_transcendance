@@ -5,10 +5,12 @@ import {
 	Post,
 	Body,
 	Put,
+	UseFilters,
 	Delete
 } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { Channel as ChannelMode1 } from '@prisma/client';
+import BackendException from '../utils/BackendException.filter'
 
 @Controller('channel')
 export class ChannelController {
@@ -53,6 +55,14 @@ export class ChannelController {
 		@Body() data: { pwd: string; channelId: string; userId: string;}
 	) : Promise<ChannelMode1> {
 		return this.channelService.setPwd({pwd: data.pwd, channelId: Number(data.channelId), userId: Number(data.userId)})
+	}
+
+	@Post('/addAdmin/')
+	@UseFilters(BackendException)
+	async PostAddAdmin(
+		@Body() data: { adminId: string; chanId: string; userId: string;}
+	) : Promise<ChannelMode1> {
+		return this.channelService.addAdmin({adminId: Number(data.adminId), chanId: Number(data.chanId), userId: Number(data.userId)})
 	}
 
 	@Post('/new/chan/')

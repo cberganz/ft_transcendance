@@ -141,7 +141,7 @@ export class ChannelService {
 			type = "public";
 		else
 			type = "private";
-		if (!chan.ownerId || chan.ownerId === data.userId) {
+		if (chan.ownerId && chan.ownerId === data.userId) {
 			return this.prisma.channel.update({
 				where: {
 					id : data.channelId,
@@ -161,12 +161,68 @@ export class ChannelService {
 					members: true,
 					owner: true
 				}
-			})
+			}) ;
 		}
 		else
 			return chan;
 	}
 
+	async addAdmin(data: {adminId: number, chanId: number, userId: number}): Promise<Channel> {
+		const chan = await this.prisma.channel.findUnique( {
+			where: {
+				id: data.chanId,
+			},
+			include: {
+				Message:  {
+					include: {
+						author: true,
+					}
+				},
+				blacklist: true,
+				admin: true,
+				members: true,
+				owner: true
+			},
+		}) ;
+		let userIsAdmin = false ;
+		for (let admin of chan.admin) {
+			if (admin.id === data.adminId)
+				return chan ;
+			if (admin.id === data.userId) {
+				userIsAdmin = true ;
+				break ;
+			}
+		}
+		if (userIsAdmin) {
+			return this.prisma.channel.update({
+				where: {
+					id : data.chanId,
+				},
+				data: {
+					admin: {
+						connect: {
+							id : data.adminId,
+						}
+					}
+				},
+				include: {
+					Message:  {
+						include: {
+							author: true,
+						}
+					},
+					blacklist: true,
+					admin: true,
+					members: true,
+					owner: true
+				}
+			}) ;
+		}
+		else
+			return chan ;
+
+
+	}
 	async deleteMember(data: {channelId: number, memberId: number}): Promise<Channel> {
 		const chan = await this.prisma.channel.findUnique( {
 			where: {
@@ -215,35 +271,58 @@ export class ChannelService {
 			}
 		})
 		if (chan.admin.length === 0)
-		
-		return this.prisma.channel.update({
-			where: {
-				id: data.channelId,
-			},
-			data: {
-				members: {
-					connect: {
-						id: data.memberId,
+			return this.prisma.channel.update({
+				where: {
+					id: data.channelId,
+				},
+				data: {
+					members: {
+						connect: {
+							id: data.memberId,
+						}
+					},
+					admin: {
+						connect: {
+							id: data.memberId, 
+						}
 					}
 				},
-				admin: {
-					connect: {
-						id: chan.admin.length === 0 ? data.memberId : null, 
-					}
-				}
-			},
-			include: {
-				Message:  {
-					include: {
-						author: true,
-					}
+				include: {
+					Message:  {
+						include: {
+							author: true,
+						}
+					},
+					blacklist: true,
+					admin: true,
+					members: true,
+					owner: true
 				},
-				blacklist: true,
-				admin: true,
-				members: true,
-				owner: true
-			},
-		});
+			});
+		else
+			return this.prisma.channel.update({
+				where: {
+					id: data.channelId,
+				},
+				data: {
+					members: {
+						connect: {
+							id: data.memberId,
+						}
+					},
+				},
+				include: {
+					Message:  {
+						include: {
+							author: true,
+						}
+					},
+					blacklist: true,
+					admin: true,
+					members: true,
+					owner: true
+				},
+			});
 	}
 
 	async deleteChannel(where: Prisma.ChannelWhereUniqueInput): Promise<Channel> {

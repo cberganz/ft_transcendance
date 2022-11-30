@@ -13,6 +13,7 @@ export class ChatCommands {
         this.SetPwd = this.SetPwd.bind(this);
         this.RmPwd = this.RmPwd.bind(this);
         this.handler = this.handler.bind(this);
+        this.AddAdmin = this.AddAdmin.bind(this);
 
         this.openConvHandler = openConvHandler;
         this.socket = socket;
@@ -21,6 +22,7 @@ export class ChatCommands {
             ["/leave", this.LeaveChan],
             ["/setpwd", this.SetPwd],
             ["/rmpwd", this.RmPwd],
+            ["/addadmin", this.AddAdmin],
         ]);
         }
     
@@ -31,16 +33,11 @@ export class ChatCommands {
             func(inputs, state, params)
     }
     
-    isDMChan(chanId: number, state: ChatState) : boolean {
+    JoinChan(inputs: string[], state: ChatState, chanId: any) {
         const chan = getChan(chanId, state);
         if (chan?.type === 'dm')
-            return true ;
-        return false ;
-    }
-
-    JoinChan(inputs: string[], state: ChatState, chanId: any) {
-        if (this.isDMChan(chanId, state))
             return ;
+        console.log(state.actualUser.user.id)
         axios.post("http://localhost:3000/channel/addMember/", {channelId: chanId, memberId: state.actualUser.user.id})
             .then(response => this.socket.emit('updateChanFromClient', response.data))
             .catch(error => alert(error.status + ": " + error.message)) 
@@ -48,8 +45,10 @@ export class ChatCommands {
     }
     
     LeaveChan(inputs: string[], state: ChatState, chanId: any) {
-        if (this.isDMChan(chanId, state))
+        const chan = getChan(chanId, state);
+        if (chan?.type === 'dm')
             return ;
+
         axios.post("http://localhost:3000/channel/deleteMember/", {channelId: chanId, memberId: state.actualUser.user.id})
             .then(response => this.socket.emit('updateChanFromClient', response.data))
             .catch(error => alert(error.status + ": " + error.message)) 
@@ -58,18 +57,40 @@ export class ChatCommands {
     }
 
     SetPwd(inputs: string[], state: ChatState, chanId: any) {
-        if (this.isDMChan(chanId, state))
+        const chan = getChan(chanId, state);
+        if (chan?.type === 'dm' || inputs.length === 1)
             return ;
-        if (inputs.length === 1)
-            return ;
+
         axios.post("http://localhost:3000/channel/setPwd/", {pwd: inputs[1], channelId: chanId, userId: state.actualUser.user.id})
             .then(response => this.socket.emit('updateChanFromClient', response.data))
             .catch(error => alert(error.status + ": " + error.message)) 
     }
+
     RmPwd(inputs: string[], state: ChatState, chanId: any) {
-        if (this.isDMChan(chanId, state))
+        const chan = getChan(chanId, state);
+        if (chan?.type === 'dm')
             return ;
+
         axios.post("http://localhost:3000/channel/setPwd/", {pwd: "", channelId: chanId, userId: state.actualUser.user.id})
+            .then(response => this.socket.emit('updateChanFromClient', response.data))
+            .catch(error => alert(error.status + ": " + error.message)) 
+    }
+
+    AddAdmin(inputs: string[], state: ChatState, chanId: any) {
+        const chan = getChan(chanId, state);
+        if (chan?.type === 'dm' || inputs.length === 1 || chan === undefined)
+            return ;
+
+        let adminId = -1;
+        for (let user of chan?.members) {
+            if (user.login === inputs[1] || user.username === inputs[1]) {
+                adminId = user.id;
+                break ;
+            }
+        }
+        if (adminId === -1)
+            return ;
+        axios.post("http://localhost:3000/channel/addAdmin/", {adminId: adminId, chanId: chanId, userId: state.actualUser.user.id})
             .then(response => this.socket.emit('updateChanFromClient', response.data))
             .catch(error => alert(error.status + ": " + error.message)) 
     }
