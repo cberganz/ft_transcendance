@@ -6,7 +6,9 @@ import { Player } from '@lottiefiles/react-lottie-player';
 import '../../chat.css'
 import { Message } from '../../stateInterface'
 
-function MessageItemReceiver(avatar: String, name: String, text: String) {
+function MessageItemReceiver(avatar: String | undefined, name: String, text: String) {
+  if (avatar === undefined || avatar === null)
+    avatar = "";
   return (
     <div className="leftChat">
       <div className="leftChatAvatar"><Avatar src={avatar.valueOf()}></Avatar></div>
@@ -20,7 +22,9 @@ function MessageItemReceiver(avatar: String, name: String, text: String) {
   )
 }
 
-function MessageItemSender(avatar: String, name: String, text: String) {
+function MessageItemSender(avatar: String | undefined, name: String, text: String) {
+  if (avatar === undefined || avatar === null)
+    avatar = "";
   return (
     <div className="rightChat">
       <div className="rightChatContent">

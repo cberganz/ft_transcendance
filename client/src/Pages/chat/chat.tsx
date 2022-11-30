@@ -11,11 +11,20 @@ import axios from "axios"
 import { getChan, userIsInChan, sortChannels } from './utils'
 import { InfoDialog } from "./channel/infoDialog"
 import { ChatCommands } from './chatCommands'
+import { selectCurrentUser } from '../../Hooks/authSlice'
+import { useSelector } from "react-redux"
 
-interface Props {
+function ChatWithHook(component: any) {
+  return function WrappedChat(props: any) {
+    const user = useSelector(selectCurrentUser);
+    return (<Chat user={user} />)
+  }
 }
 
-export class Chat extends React.Component<Props, ChatState> {
+interface Props {
+  user: any;
+}
+class Chat extends React.Component<Props, ChatState> {
   constructor(props: any) {
     super(props)
 
@@ -37,10 +46,9 @@ export class Chat extends React.Component<Props, ChatState> {
       openedConversation: [],
       userList: [],
     };
-    
-    this.userID = prompt("User ID ?");
-    this.getData();
     this.socket = io("http://localhost:3000/chat"); 
+    this.userID = this.props.user.userId;
+    this.getData();
     this.state = this.ChatData;
     this.chatCommands = new ChatCommands(this.socket, this.state, this.openConvHandler);
   }
@@ -64,10 +72,11 @@ export class Chat extends React.Component<Props, ChatState> {
   async getActualUser(): Promise<any> {
     this.ChatData.actualUser = {
       openedConvID: -1,
-      user: await axios.get("http://localhost:3000/user/" + this.userID)
-        .then(response => response.data)
-        .catch(error => alert("getActualUser " + error.status + ": " + error.message))
+      user: {
+        id: this.props.user.userId,
+        username: this.props.user.username,
       }
+    }
     this.socket.emit('initTable', this.ChatData.actualUser.user.login)
     return (this.ChatData.actualUser)
   }
@@ -90,7 +99,6 @@ export class Chat extends React.Component<Props, ChatState> {
       .catch(error => alert("getUserList " + error.status + ": " + error.message))
     return (this.ChatData.userList)
   }
-
     
     /** RENDERING FUNCTIONS */
   openConvHandler(chanID: number) {
@@ -116,7 +124,7 @@ export class Chat extends React.Component<Props, ChatState> {
   socketNewChan(chan: Channel) {
     let ChatData = structuredClone(this.state)
 
-    if (userIsInChan(chan, this.state))
+    if (userIsInChan(chan, this.state.actualUser.user.id))
       ChatData.joinedChans.push(chan)
     else
       ChatData.notJoinedChans.push(chan)
@@ -139,7 +147,7 @@ export class Chat extends React.Component<Props, ChatState> {
         break ;
       }
     }
-    if (userIsInChan(newChan, this.state))
+    if (userIsInChan(newChan, this.state.actualUser.user.id))
       which = ChatData.joinedChans
     else
       which = ChatData.notJoinedChans
@@ -173,4 +181,4 @@ export class Chat extends React.Component<Props, ChatState> {
     )
   }
 }
-export default Chat;
+export default ChatWithHook(Chat);

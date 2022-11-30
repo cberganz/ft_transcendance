@@ -21,8 +21,8 @@ export interface ChatProps {
 
 export interface User {
     id:          number,
-    avatar:      String,
-    login:       String,
+    avatar?:      String,
+    login?:       String,
     username:    String,
     friends?:     Friendship[],
     blacklisted?: Blacklist[],

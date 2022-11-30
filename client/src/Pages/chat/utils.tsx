@@ -7,11 +7,11 @@ export function getChan(id: number, state: ChatState) {
     }
   }
 
-export function userIsInChan(chan: Channel, state: ChatState) {
+export function userIsInChan(chan: Channel, userId: number) {
     if (chan.members === undefined)
       return (false)
     for (let user of chan.members) {
-      if (user.login === state.actualUser.user.login)
+      if (user.id === userId)
         return (true)
     }
     return (false)
