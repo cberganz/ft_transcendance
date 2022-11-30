@@ -20,7 +20,7 @@ export function userIsInChan(chan: Channel, state: ChatState) {
 export function sortChannels(chans: Channel[]) {
     chans.sort(function(a: any, b: any) {
         var c, d;
-        if (b.Message.length === 0)
+        if (b.Message?.length === 0)
             c = b.id
         else
             c = new Date(b.Message[b.Message.length - 1].date).getTime()

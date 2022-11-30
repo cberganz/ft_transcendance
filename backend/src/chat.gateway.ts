@@ -27,7 +27,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
   @SubscribeMessage('initTable')
   handleInitTable(socket: Socket, login: string) {
     this.userSockets.set(socket, login)
-    console.log(login)
   }
 
   handleDisconnect(socket: Socket) {

@@ -1,12 +1,9 @@
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
+import { ChatCommands, COMMANDS } from '../../chatCommands'
 
 // API REQUESTS /////////////////////////
-function getMsgID() {
-  return (0)
-}
-
 function postMsg(msg: any, socket: any, chanId: number) {
   axios.post("http://localhost:3000/message", msg)
     .then(response => socket.emit("newMsgFromClient", {room: "chat" + chanId, message: response.data}))
@@ -42,7 +39,7 @@ function onKeyPress(e: any, props: any) {
     if (value.length) {
       if (value[0] === '/') {
         if (value.substring(0, 6) === "/leave")
-          alert("Left channel.")
+          ChatCommands(COMMANDS.LEAVECHAN, props.socket, props.state, props.state.actualUser.user.id)
         else if (value.substring(0, 6) === "/block")
           alert("Blocked " + value.substring(7))
         else if (value.substring(0, 6) === "/unblock")

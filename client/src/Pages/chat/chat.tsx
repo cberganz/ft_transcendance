@@ -19,7 +19,6 @@ export class Chat extends React.Component<Props, ChatState> {
     super(props)
 
     this.openConvHandler = this.openConvHandler.bind(this)
-    this.joinChan = this.joinChan.bind(this)
     
     // FILL WITH API REQUESTS
     this.ChatData = {
@@ -81,8 +80,6 @@ export class Chat extends React.Component<Props, ChatState> {
     this.ChatData.notJoinedChans = await axios.get("http://localhost:3000/channel/notJoinedChannels/" + this.userID)
       .then(response => response.data)
       .catch(error => alert("getNotJoinedChans " + error.status + ": " + error.message))
-    sortChannels(this.ChatData.notJoinedChans)
-    console.log(this.ChatData.notJoinedChans)
     return (this.ChatData.notJoinedChans)
   }
   async getUserList(): Promise<any> {
@@ -145,25 +142,11 @@ export class Chat extends React.Component<Props, ChatState> {
     else
       which = ChatData.notJoinedChans
     which.push(newChan)
-    sortChannels(ChatData)
+    sortChannels(which)
     this.setState(ChatData)
   }
   
   /** CHAT COMMANDS **/
-  joinChan(chan: Channel) {
-    let ChatData = structuredClone(this.state)
-
-    for (let i = 0; i < ChatData.notJoinedChans.length; i++) {
-      if (chan.id === ChatData.notJoinedChans[i].id) {
-        ChatData.notJoinedChans.splice(i, 1)
-        break 
-      }
-    }
-    ChatData.joinedChans.push(chan)
-    this.openConvHandler(chan.id)
-    this.setState(ChatData)
-  }
-    
   
   render() {
     this.socket.off('updateChanFromServer').on('updateChanFromServer', (chan) => this.socketUpdateChan(chan))
@@ -175,7 +158,7 @@ export class Chat extends React.Component<Props, ChatState> {
         <div className="ChannelMenu">
             <HeaderChannels state={this.state} socket={this.socket} />
             <ChannelDisplay state={this.state} socket={this.socket} 
-                  openConvHandler={this.openConvHandler} joinChan={this.joinChan} />
+                  openConvHandler={this.openConvHandler} />
             <InfoDialog />
         </div>
         <div className="ChatDisplay">

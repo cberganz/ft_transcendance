@@ -63,10 +63,8 @@ export class ChannelService {
 		return this.prisma.channel.findMany({
 			where: {
 				members: {
-					some: {
-						NOT: {
-							id: userId
-						},
+					none: {
+						id: userId
 					},
 				},
 				NOT: {
@@ -74,6 +72,11 @@ export class ChannelService {
 				},
 			},
 			include: {
+				Message:  {
+					include: {
+						author: true,
+					}
+				},
 				blacklist: true,
 				admin: true,
 				members: true,
@@ -127,7 +130,18 @@ export class ChannelService {
 						id: data.memberId,
 					}
 				}
-			}
+			},
+			include: {
+				Message:  {
+					include: {
+						author: true,
+					}
+				},
+				blacklist: true,
+				admin: true,
+				members: true,
+				owner: true
+			},
 		});
 	}
 
@@ -142,7 +156,18 @@ export class ChannelService {
 						id: data.memberId,
 					}
 				}
-			}
+			},
+			include: {
+				Message:  {
+					include: {
+						author: true,
+					}
+				},
+				blacklist: true,
+				admin: true,
+				members: true,
+				owner: true
+			},
 		});
 	}
 
