@@ -172,7 +172,7 @@ class Chat extends React.Component<Props, ChatState> {
             <InfoDialog />
         </div>
         <div className="ChatDisplay">
-            {this.state.actualUser.openedConvID === -1 ? null : <div className="ChatHeader"><ChatHeader state={this.state} socket={this.socket} chatCommands={this.chatCommands} /></div> }
+            {this.state.actualUser.openedConvID === -1 ? null : <ChatHeader state={this.state} socket={this.socket} chatCommands={this.chatCommands} /> }
             <div className="MessageDisplay"><MessageDisplay state={this.state} socket={this.socket} /></div>
             {this.state.actualUser.openedConvID === -1 ? null : <div className="SendMessage"><SendBox state={this.state} socket={this.socket} chatCommands={this.chatCommands} /></div>}
         </div>

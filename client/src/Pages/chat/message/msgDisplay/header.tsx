@@ -23,8 +23,7 @@ export default function ChatHeader(props:any) {
   else
     title = chan?.title;
   return (
-    <div style={{
-        marginTop: '15px', 
+    <div className='ChatHeader' style={{
         color: 'black',
         display: 'grid',
         gridTemplateColumns: 'auto 80px',

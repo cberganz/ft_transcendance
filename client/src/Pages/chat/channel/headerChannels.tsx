@@ -67,7 +67,7 @@ function CreateChannelButton(props: any) {
           <AddCircleOutlineSharpIcon
             onClick={handleClickOpen}
             fontSize='medium'
-            sx={{color: 'black', cursor: 'pointer', marginTop: '10px', marginLeft: '70%'}} />
+            sx={{color: 'black', cursor: 'pointer', marginTop: '10px', marginLeft: '65%'}} />
           </Tooltip>
         <form  onSubmit={(e) => {createChannel(e)}}>
           <Dialog open={open} onClose={handleClose} disablePortal>
