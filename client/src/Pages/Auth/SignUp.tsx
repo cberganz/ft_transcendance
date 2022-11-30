@@ -3,50 +3,48 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import axios, { AxiosResponse } from 'axios';
 
 type Credentials = {
 	username: FormDataEntryValue | null,
-	password: FormDataEntryValue | null,
+	login: FormDataEntryValue | null,
 }
 
-async function loginUser(credentials: Credentials) {
-	const resp = await fetch('http://localhost:3000/auth/login', {
-	  method: 'POST',
-	  headers: {
-		'Content-Type': 'application/json'
-	  },
-	  body: JSON.stringify(credentials)
-	})
-	  .then(data => data)
-
-	if (resp.status !== 401) {
-		window.location.replace('/')
-	}
+async function signUp(credentials: Credentials) {
+	axios.post('http://localhost:3000/user/signup', {
+			username: credentials.username,
+			login: credentials.login
+		})
+		.then((response: AxiosResponse) => {
+			if (response.status === 201) {
+				window.location.replace('/login');
+				return ;
+			}
+		})
+		.catch(() => console.log("User already exist"))
 }
 
 const theme = createTheme();
 
-export default function Login() {
+export default function signup() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-	const access_token = await loginUser({
+	await signUp({
 		"username": data.get('username'),
-		"password": data.get('password')
+		"login": data.get('login')
 	})
   };
 
   return (
 	<ThemeProvider theme={theme}>
-		<Container component="main" maxWidth="xs">
+		<Container id="signup-container"  component="main" maxWidth="xs">
 			<CssBaseline />
 			<Box
 			sx={{
@@ -60,7 +58,7 @@ export default function Login() {
 				<LockOutlinedIcon />
 			</Avatar>
 			<Typography component="h1" variant="h5">
-				Sign in
+				Sign up
 			</Typography>
 			<Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
 				<TextField
@@ -77,11 +75,10 @@ export default function Login() {
 				margin="normal"
 				required
 				fullWidth
-				name="password"
+				name="login"
 				label="Password"
-				type="password"
-				id="password"
-				autoComplete="current-password"
+				id="login"
+				autoComplete="current-login"
 				/>
 				<Button
 				type="submit"
@@ -89,18 +86,12 @@ export default function Login() {
 				variant="contained"
 				sx={{ mt: 3, mb: 2 }}
 				>
-				Sign In
+				Sign Up
 				</Button>
-				<Grid container>
-					<Grid item>
-						<Link href="#" variant="body2">
-						{"Don't have an account? Sign Up"}
-						</Link>
-					</Grid>
-				</Grid>
 			</Box>
 			</Box>
 		</Container>
 	</ThemeProvider>
   );
 }
+
