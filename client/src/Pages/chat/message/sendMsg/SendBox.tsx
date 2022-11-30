@@ -39,7 +39,7 @@ function onKeyPress(e: any, props: any) {
     if (value.length) {
       if (value[0] === '/') {
         if (value.substring(0, 6) === "/leave")
-          ChatCommands(COMMANDS.LEAVECHAN, props.socket, props.state, props.state.actualUser.user.id)
+          ChatCommands(COMMANDS.LEAVECHAN, props.socket, props.state, props.state.actualUser.openedConvID)
         else if (value.substring(0, 6) === "/block")
           alert("Blocked " + value.substring(7))
         else if (value.substring(0, 6) === "/unblock")

@@ -120,6 +120,12 @@ export class ChannelService {
 	}
 
 	async deleteMember(data: {channelId: number, memberId: number}): Promise<Channel> {
+		const chan = await this.prisma.channel.findUnique( {
+			where: {
+				id: data.channelId,
+			}
+		})
+		
 		return this.prisma.channel.update({
 			where: {
 				id: data.channelId,
@@ -129,7 +135,13 @@ export class ChannelService {
 					disconnect: {
 						id: data.memberId,
 					}
-				}
+				},
+				admin: {
+					disconnect: {
+						id: data.memberId,
+					}
+				},
+				ownerId: chan.ownerId === data.memberId ? null : chan.ownerId,
 			},
 			include: {
 				Message:  {
@@ -146,6 +158,16 @@ export class ChannelService {
 	}
 
 	async addMember(data: {channelId: number, memberId: number}): Promise<Channel> {
+		const chan = await this.prisma.channel.findUnique( {
+			where: {
+				id: data.channelId,
+			},
+			include: {
+				admin: true,
+			}
+		})
+		if (chan.admin.length === 0)
+		
 		return this.prisma.channel.update({
 			where: {
 				id: data.channelId,
@@ -154,6 +176,11 @@ export class ChannelService {
 				members: {
 					connect: {
 						id: data.memberId,
+					}
+				},
+				admin: {
+					connect: {
+						id: chan.admin.length === 0 ? data.memberId : null, 
 					}
 				}
 			},
