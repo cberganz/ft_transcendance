@@ -1,6 +1,6 @@
 import * as React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Grid, Container, Box, Stack } from '@mui/material';
+import { Grid, Container } from '@mui/material';
 import PlayerInfos from './components/PlayerInfos'
 import StatCard from './components/StatCard';
 import PlayedGames from './components/PlayedGames'

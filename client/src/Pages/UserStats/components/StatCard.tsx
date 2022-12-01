@@ -1,8 +1,5 @@
 import * as React from 'react';
-import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import CardContent from '@mui/material/CardContent';
 import Card from '@mui/material/Card';
 
 export default class StatCard extends React.Component<{
@@ -13,10 +10,6 @@ export default class StatCard extends React.Component<{
 		sx?: object,
 		other?: any,
 	}, {}> {
-
-	constructor(props: any) {
-		super(props);
-	}
 
 	render () {
 		return (
