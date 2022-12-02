@@ -16,7 +16,7 @@ import CreateSharpIcon from '@mui/icons-material/CreateSharp';
 import AddCircleOutlineSharpIcon from '@mui/icons-material/AddCircleOutlineSharp';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
-import { ChatProps, User } from '../stateInterface'
+import { ChatProps, User, Channel } from '../stateInterface'
 
 // API REQUESTS ////////////////////////////////////
 async function postChan(chan: any, socket: any) {
@@ -30,6 +30,18 @@ async function postDMChan(chan: any, socket: any) {
     .catch(error => alert("postDMChan: " + error.status + ": " + error.message)) 
 }
 ////////////////////////////////////////////////////
+
+function titleAlreadyExists(title: string, notJoinedChans: Channel[], joinedChans: Channel[]) : boolean {
+  for (let chan of joinedChans) {
+    if (title === chan.title && chan.type !== 'dm')
+      return (true);
+  }
+  for (let chan of notJoinedChans) {
+    if (title === chan.title && chan.type !== 'dm')
+      return (true);
+  }
+  return (false);
+}
 
 function CreateChannelButton(props: any) {
     const [open, setOpen] = React.useState(false);
@@ -46,7 +58,8 @@ function CreateChannelButton(props: any) {
       e.preventDefault()
       if (e.target.name.value === "")
         return (alert("Please a channel title."))
-        
+      if (titleAlreadyExists(e.target.name.value, props.props.state.notJoinedChans, props.props.state.joinedChans))
+        return (setOpen(true), alert("Title already exists."))
       let chanType
       if (e.target.password.value === "")
         chanType = "public"

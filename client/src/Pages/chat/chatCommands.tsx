@@ -40,7 +40,6 @@ export class ChatCommands {
         const chan = getChan(chanId, state);
         if (chan?.type === 'dm')
             return ;
-        console.log(state.actualUser.user.id)
         axios.post("http://localhost:3000/channel/Member/", {channelId: chanId, memberId: state.actualUser.user.id})
             .then(response => this.socket.emit('updateChanFromClient', response.data))
             .catch(error => alert(error.status + ": " + error.message)) 

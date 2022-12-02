@@ -98,9 +98,16 @@ export class ChannelService {
 	}
 
 	async createChannel(data: Prisma.ChannelCreateInput): Promise<Channel> {
-		return this.prisma.channel.create({
-			data,
+		let chan = await this.prisma.channel.findMany({
+			where: {
+				title: data.title,
+			}
 		});
+		if (chan.length === 0)
+			return this.prisma.channel.create({
+				data,
+			});
+		////////////// handle error
 	}
 
 	async updateChannel(params: {
