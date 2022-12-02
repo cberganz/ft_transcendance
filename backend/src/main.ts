@@ -8,7 +8,7 @@ async function bootstrap() {
   app.use(cookieParser())
   app.enableCors({
 	credentials: true,
-	origin: 'http://localhost:3001'
+	origin: ['http://localhost:3001', 'http://127.0.0.1:3001']
   });// a verifier
   const config = new DocumentBuilder()
     .setTitle('Median')
