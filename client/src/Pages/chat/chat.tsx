@@ -43,7 +43,6 @@ class Chat extends React.Component<Props, ChatState> {
       },
       joinedChans: [],
       notJoinedChans: [],
-      openedConversation: [],
       userList: [],
     };
     this.socket = io("http://localhost:3000/chat"); 
@@ -64,7 +63,6 @@ class Chat extends React.Component<Props, ChatState> {
       joinedChans: await this.getJoinedChans(),
       notJoinedChans: await this.getNotJoinedChans(),
       userList: await this.getUserList(),
-      openedConversation: [],
     }
     for (const chan of this.state.joinedChans)
       this.socket.emit('joinChatRoom', chan.id)
@@ -72,12 +70,11 @@ class Chat extends React.Component<Props, ChatState> {
   async getActualUser(): Promise<any> {
     this.ChatData.actualUser = {
       openedConvID: -1,
-      user: {
-        id: this.props.user.userId,
-        username: this.props.user.username,
-      }
+      user: await axios.get("http://localhost:3000/user/" + this.props.user.userId)
+        .then(response => response.data)
+        .catch(error => alert("getActualUser " + error.status + ": " + error.message))
     }
-    this.socket.emit('initTable', this.ChatData.actualUser.user.login)
+    this.socket.emit('initTable', this.ChatData.actualUser.user.username)
     return (this.ChatData.actualUser)
   }
   async getJoinedChans(): Promise<any> {
@@ -104,7 +101,6 @@ class Chat extends React.Component<Props, ChatState> {
   openConvHandler(chanID: number) {
     let ChatData = structuredClone(this.state)
   
-    ChatData.openedConversation = getChan(chanID, this.state)?.Message
     ChatData.actualUser.openedConvID = chanID
     this.setState(ChatData)
   }
@@ -116,8 +112,6 @@ class Chat extends React.Component<Props, ChatState> {
 
     chan?.Message?.push(msg)
     sortChannels(ChatData.joinedChans)
-    if (ChatData.actualUser.openedConvID === msg.channelId)
-      ChatData.openedConversation.push(msg)
     this.setState(ChatData)
   }
   
@@ -154,16 +148,22 @@ class Chat extends React.Component<Props, ChatState> {
     which.push(newChan)
     if (which === ChatData.joinedChans)
       sortChannels(which)
-    console.log(which)
     this.setState(ChatData)
+  }
+
+  socketUpdateUser(user: User) {
+    let ChatData: ChatState = structuredClone(this.state);
+    ChatData.actualUser.user = user;
+    this.setState(ChatData);
   }
   
   /** CHAT COMMANDS **/
   
   render() {
-    this.socket.off('updateChanFromServer').on('updateChanFromServer', (chan) => this.socketUpdateChan(chan))
-    this.socket.off('newChanFromServer').on('newChanFromServer', (chan) => this.socketNewChan(chan))
-    this.socket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.socketNewMsg(msg))
+    this.socket.off('updateChanFromServer').on('updateChanFromServer', (chan) => this.socketUpdateChan(chan));
+    this.socket.off('newChanFromServer').on('newChanFromServer', (chan) => this.socketNewChan(chan));
+    this.socket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.socketNewMsg(msg));
+    this.socket.off('updateUserFromServer').on('updateUserFromServer', (user) => this.socketUpdateUser(user));
     return (
     <div className="chatContainer">
       

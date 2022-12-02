@@ -21,16 +21,24 @@ export class BlacklistController {
 
 	@Post()
 	async newBlacklist (
-		@Body() blacklistData: { target_id: string; type: string; delay: string; channelId?: string; creatorId: string }
+		@Body() blacklistData: { target_id: string; type: string; delay?: string; channelId?: string; creatorId: string }
 	): Promise<BlacklistMode1> {
 		if (blacklistData.channelId) {
-			return this.blacklistService.createBlacklist({
-				type: blacklistData.type,
-				delay: Number(blacklistData.delay),
-				channel: { connect: { id: Number(blacklistData.channelId) } },
-				target: { connect: { id: Number(blacklistData.target_id) } },
-				creator: { connect: { id: Number(blacklistData.creatorId) } },
-			});
+			if (blacklistData.delay === undefined)
+				return this.blacklistService.createBlacklist({
+					type: blacklistData.type,
+					channel: { connect: { id: Number(blacklistData.channelId) } },
+					target: { connect: { id: Number(blacklistData.target_id) } },
+					creator: { connect: { id: Number(blacklistData.creatorId) } },
+				});
+			else
+				return this.blacklistService.createBlacklist({
+					type: blacklistData.type,
+					delay: Number(blacklistData.delay),
+					channel: { connect: { id: Number(blacklistData.channelId) } },
+					target: { connect: { id: Number(blacklistData.target_id) } },
+					creator: { connect: { id: Number(blacklistData.creatorId) } },
+				});
 		} else {
 			return this.blacklistService.createBlacklist({
 				type: blacklistData.type,

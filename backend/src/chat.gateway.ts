@@ -44,14 +44,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
       let user2;
         
       if (chan.members[0].login === this.userSockets.get(socket))
-        user2 = chan.members[1].login;
+      user2 = chan.members[1].login;
       else
-        user2 = chan.members[0].login;
-      this.userSockets.forEach((login, userSocket) => {
+      user2 = chan.members[0].login;
+      for (let [userSocket, login] of this.userSockets) {
         if (login === user2)
           userSocket.join("chat" + chan.id)
-      })
-      this.server.to("chat" + chan.id).emit('newChanFromServer', chan)
+      }
+    this.server.to("chat" + chan.id).emit('newChanFromServer', chan)
     }
     else {
       let isInChan: boolean;
@@ -108,5 +108,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
   handleLeaveRoom(socket: Socket, chanID: number): void {
     socket.leave("chat" + chanID);
     // remove member from chan members (BAN)
+  }
+
+  @SubscribeMessage('updateUserFromClient')
+  updateUser(socket: Socket, user: any): void {
+    socket.emit('updateUserFromServer', user);
   }
 }

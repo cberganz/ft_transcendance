@@ -1,4 +1,4 @@
-import { ChatState, Channel } from "./stateInterface"
+import { ChatState, Channel, User } from "./stateInterface"
 
 export function getChan(id: number, state: ChatState) {
     for (const chan of state.joinedChans) {
@@ -30,4 +30,14 @@ export function sortChannels(chans: Channel[]) {
             d = new Date(a.Message[a.Message.length - 1].date).getTime()
         return c - d;
     });
+  }
+
+  export function isBlocked(actualUser: User, otherDMUser: User) : boolean {
+    if (otherDMUser === undefined || actualUser.blacklist === undefined)
+      return (false);
+    for (let blacklist of actualUser.blacklist) {
+      if (blacklist.target_id === otherDMUser.id)
+        return (true);
+    }
+    return (false)
   }

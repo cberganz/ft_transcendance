@@ -1,6 +1,7 @@
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
+import { isBlocked } from '../../utils'
 
 // API REQUESTS /////////////////////////
 function postMsg(msg: any, socket: any, chanId: number) {

@@ -84,7 +84,7 @@ export class ChatCommands {
 
         let adminId = -1;
         for (let user of chan?.members) {
-            if (user.login === inputs[1] || user.username === inputs[1]) {
+            if (user.username === inputs[1]) {
                 adminId = user.id;
                 break ;
             }
@@ -96,7 +96,23 @@ export class ChatCommands {
             .catch(error => alert(error.status + ": " + error.message)) 
     }
 
-    Block(inputs: string[], state: ChatState, userId: any) {
-        // axios.post("http://localhost:3000/blacklist", )
+    Block(inputs: string[], state: ChatState, chanId: any) {
+        const chan = getChan(chanId, state);
+        if (inputs.length === 1 || chan === undefined)
+            return ;
+
+        let blockedId = -1;
+        for (let user of chan?.members) {
+            if (user.username === inputs[1]) {
+                blockedId = user.id;
+                break ;
+            }
+        }
+        if (blockedId === -1)
+            return ;
+
+        axios.post("http://localhost:3000/blacklist", {target_id: blockedId, type: "block", channelId: chanId, creatorId: state.actualUser.user.id})
+            .then(response => this.socket.emit('updateUserFromClient', response))
+            .catch(error => alert(error.status + ": " + error.message)) 
     }
 }

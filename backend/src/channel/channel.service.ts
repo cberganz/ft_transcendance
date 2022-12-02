@@ -103,7 +103,7 @@ export class ChannelService {
 				title: data.title,
 			}
 		});
-		if (chan.length === 0)
+		if (chan.length === 0 || data.type === 'dm')
 			return this.prisma.channel.create({
 				data,
 			});

@@ -27,7 +27,9 @@ export class MessageController {
 			content: messageData.content,
 			channel: { connect: { id: Number(messageData.channelId) } },
 			author: { connect: { id: Number(messageData.authorId) } },
-		}, Number(messageData.channelId));
+		}, Number(messageData.channelId), Number(messageData.authorId));
+		if (newMsg === null)
+			return (null);
 		return this.messageService.message({ id: newMsg.id })
 	}
 

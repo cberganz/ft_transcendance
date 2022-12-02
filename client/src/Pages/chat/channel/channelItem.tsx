@@ -12,6 +12,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
+import { isBlocked } from '../utils';
 
 
 export function DialogChannelItem(props: any) {
@@ -92,7 +93,13 @@ export function DialogChannelItem(props: any) {
 }
 
 export function ChannelItem(chan: any, chanName: String, avatar: String, props: any) {
-  let lastMsg = chan?.Message[chan.Message.length - 1];
+  let lastMsg = null;
+  for (let i = chan.Message.length - 1; i >= 0; i--) {
+    if (!isBlocked(props.state.actualUser.user, chan?.Message[i].author)) {
+      lastMsg = chan?.Message[i];
+      break ;
+    }
+  }
   let lastMsgContent: string = lastMsg?.content
   let bckgColor
 
