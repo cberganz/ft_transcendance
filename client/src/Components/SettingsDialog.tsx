@@ -13,22 +13,53 @@ import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Button from '@mui/material/Button';
 import SettingsIcon from '@mui/icons-material/Settings';
-
-
-const emails = ['username@gmail.com', 'user02@gmail.com'];
+import { selectCurrentUser } from '../Hooks/authSlice'
+import { useSelector } from "react-redux"
+import { useUpdateUserMutation } from "../Api/User/userApiSlice"
+import useAlert from "../Hooks/useAlert";
 
 export interface SimpleDialogProps {
 	open: boolean;
-	selectedValue: string;
+	// selectedValue: string;
 	onClose: (value: string) => void;
 }
 
 function SimpleDialog(props: SimpleDialogProps) {
-	const { onClose, selectedValue, open } = props;
+	const currentUser = useSelector(selectCurrentUser)
+	const { onClose, /* selectedValue, */ open } = props;
+	const [username, setMessage] = React.useState(currentUser.username);
+	const { setAlert } = useAlert();
+
+	const handleChange = (event: any) => {
+	  setMessage(event.target.value);
+	};
+
+	const [updateUser, {
+		data: data,
+		isLoading,
+		isError,
+		isSuccess,
+		error
+	}] = useUpdateUserMutation()
 
 	const handleClose = () => {
-		onClose(selectedValue);
+		onClose(username);
 	};
+
+	const handleSubmit = (e: any) => {
+		e.preventDefault()
+		if (!username.length) {
+			setAlert("Username must be provided", "error")
+			return ;
+		}
+		const input = {
+			id: currentUser.id,
+			newUserData: {
+				username: username,
+			}
+		}
+		updateUser(input)// verifier que le username n'existe pas deja
+	}	
 
 	return (
 		<Dialog onClose={handleClose} open={open}>
@@ -47,10 +78,17 @@ function SimpleDialog(props: SimpleDialogProps) {
 				</ListItemAvatar>
 			</ListItem>
 			<ListItem>
-				<TextField id="update-username-settings" label="Update Username" variant="standard" />
+				<TextField
+				type="text"
+				id="username"
+				name="username"
+				label="update username"
+				onChange={handleChange}
+				value={username}
+				/>
 			</ListItem>
 			<ListItem>
-				<Button variant="contained" disableElevation>
+				<Button onClick={handleSubmit} variant="contained" disableElevation>
 					update changes
 				</Button>
 			</ListItem>
@@ -61,7 +99,6 @@ function SimpleDialog(props: SimpleDialogProps) {
 
 export default function SettingsDialog() {
 	const [open, setOpen] = React.useState(false);
-	const [selectedValue, setSelectedValue] = React.useState(emails[1]);
 
 	const handleClickOpen = () => {
 		setOpen(true);
@@ -69,7 +106,6 @@ export default function SettingsDialog() {
 
 	const handleClose = (value: string) => {
 		setOpen(false);
-		setSelectedValue(value);
 	};
 
 	return (
@@ -81,7 +117,7 @@ export default function SettingsDialog() {
 				<ListItemText>Settings</ListItemText>
 			</MenuItem>
 			<SimpleDialog
-				selectedValue={selectedValue}
+				// selectedValue={selectedValue}
 				open={open}
 				onClose={handleClose}
 			/>

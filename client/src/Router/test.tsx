@@ -1,8 +1,10 @@
+import * as React from "react"
 import { useUpdateUserMutation, useGetUserMutation } from "../Api/User/userApiSlice"
 import { selectCurrentUser } from '../Hooks/authSlice'
 import { useSelector } from "react-redux"
 import { Button } from '@mui/material';
 import useSimpleRequest from '../Api/useSimpleRequest';
+import useAlert from "../Hooks/useAlert";
 
 export function Dashboard() {
 	const currentUser = useSelector(selectCurrentUser)
@@ -28,12 +30,10 @@ export function Dashboard() {
 		}
 		updateUser(input)
 	}
-
 	return (
 		<div>
 			<h1>Dashboard</h1>
 			 <Content></Content>
-			{/*<Button onClick={handleSubmit}>update data</Button> */}
 		</div>
 	);
 }
