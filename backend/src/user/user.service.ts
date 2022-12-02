@@ -13,8 +13,18 @@ export class UserService {
 		return this.prisma.user.findUnique({
 			where: userWhereUniqueInput,
 			include: {
-				blacklist: true,
-				blacklisted: true, 
+				blacklist: {
+					include: {
+						target: true,
+						creator: true,
+					},
+				},
+				blacklisted: {
+					include: {
+						target: true,
+						creator: true,
+					},
+				},
 			}
 		});
 	}

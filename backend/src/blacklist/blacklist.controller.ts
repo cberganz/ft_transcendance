@@ -53,4 +53,9 @@ export class BlacklistController {
 	async deleteBlacklist(@Param('id') id: string): Promise<BlacklistMode1> {
 		return this.blacklistService.deleteBlacklist({ id: Number(id) });
 	}
+
+	@Delete()
+	async deleteBlockBlacklist(data: {target_id: string, creatorId: string}): Promise<BlacklistMode1> {
+		return this.blacklistService.deleteBlockBlacklist({target_id: Number(data.target_id), creatorId: Number(data.creatorId)});
+	}
 }

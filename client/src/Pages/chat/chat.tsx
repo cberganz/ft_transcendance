@@ -152,6 +152,7 @@ class Chat extends React.Component<Props, ChatState> {
   }
 
   socketUpdateUser(user: User) {
+    console.log(user)
     let ChatData: ChatState = structuredClone(this.state);
     ChatData.actualUser.user = user;
     this.setState(ChatData);

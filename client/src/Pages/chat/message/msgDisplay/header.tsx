@@ -23,7 +23,9 @@ function isAdmin(userId: number, chan?: Channel) : boolean {
 // invite for a game, leave chan ou block/unblock
 export default function ChatHeader(props:any) {
   const chan = getChan(props.state.actualUser.openedConvID, props.state);
-  let title;
+  if (chan === undefined)
+    return (<div></div>)
+  let title: String;
   let dmUser = undefined;
   if (chan?.type === 'dm') {
     if (props.state.actualUser.user.id === chan.members[0].id)
@@ -51,8 +53,8 @@ export default function ChatHeader(props:any) {
         {isAdmin(props.state.actualUser.user.id, chan) ? <Tooltip title="Group administrator"><Icon icon="dashicons:admin-users" color="gray" inline={true} /></Tooltip> : null}
       </div>
       <div>
-        {chan?.type === 'dm' && dmUser !== undefined && !isBlocked(props.state.actualUser.user, dmUser) ? <div><Tooltip title="Invite for a pong"><SportsEsportsIcon sx={{cursor: 'pointer', color: 'grey', marginRight: '20px'}} /></Tooltip><Tooltip title="Block user"><BlockIcon sx={{cursor: 'pointer', color: 'grey'}} /></Tooltip></div> : null}
-        {chan?.type === 'dm' && dmUser !== undefined && isBlocked(props.state.actualUser.user, dmUser) ? <Tooltip title="Unblock user"><LockOpenIcon sx={{cursor: 'pointer', color: 'grey', marginLeft: '45px'}} /></Tooltip> : null}
+        {chan?.type === 'dm' && dmUser !== undefined && !isBlocked(props.state.actualUser.user, dmUser) ? <div><Tooltip title="Invite for a pong"><SportsEsportsIcon sx={{cursor: 'pointer', color: 'grey', marginRight: '20px'}} /></Tooltip><Tooltip title="Block user"><BlockIcon onClick={(event) => props.chatCommands.Block({0: "/block", 1: title}, props.state, chan.id)} sx={{cursor: 'pointer', color: 'grey'}} /></Tooltip></div> : null}
+        {chan?.type === 'dm' && dmUser !== undefined && isBlocked(props.state.actualUser.user, dmUser) ? <Tooltip title="Unblock user"><LockOpenIcon onClick={(event) => props.chatCommands.Unblock({0: "/block", 1: title}, props.state, chan.id)} sx={{cursor: 'pointer', color: 'grey', marginLeft: '45px'}} /></Tooltip> : null}
         {chan?.type === 'public' || chan?.type === 'private' ? <Tooltip title="Leave channel" sx={{cursor: 'pointer', color: 'grey', marginLeft: '45px'}}><ExitToAppIcon onClick={(event) => props.chatCommands.handler("/leave", props.state, chan.id)} /></Tooltip> : null}
       </div>
     </div>

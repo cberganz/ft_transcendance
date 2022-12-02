@@ -15,6 +15,7 @@ export class ChatCommands {
         this.handler = this.handler.bind(this);
         this.AddAdmin = this.AddAdmin.bind(this);
         this.Block = this.Block.bind(this);
+        this.Unblock = this.Unblock.bind(this);
 
         this.openConvHandler = openConvHandler;
         this.socket = socket;
@@ -25,6 +26,7 @@ export class ChatCommands {
             ["/rmpwd", this.RmPwd],
             ["/addadmin", this.AddAdmin],
             ["/block", this.Block],
+            ["/unblock", this.Unblock],
         ]);
         }
     
@@ -96,7 +98,7 @@ export class ChatCommands {
             .catch(error => alert(error.status + ": " + error.message)) 
     }
 
-    Block(inputs: string[], state: ChatState, chanId: any) {
+    async Block(inputs: string[], state: ChatState, chanId: any) {
         const chan = getChan(chanId, state);
         if (inputs.length === 1 || chan === undefined)
             return ;
@@ -111,8 +113,34 @@ export class ChatCommands {
         if (blockedId === -1)
             return ;
 
-        axios.post("http://localhost:3000/blacklist", {target_id: blockedId, type: "block", channelId: chanId, creatorId: state.actualUser.user.id})
-            .then(response => this.socket.emit('updateUserFromClient', response))
-            .catch(error => alert(error.status + ": " + error.message)) 
+        await axios.post("http://localhost:3000/blacklist", {target_id: blockedId, type: "block", channelId: chanId, creatorId: state.actualUser.user.id})
+            .then()
+            .catch(error => alert(error.status + ": " + error.message));
+        axios.get("http://localhost:3000/user/" + state.actualUser.user.id)
+            .then(response => this.socket.emit('updateUserFromClient', response.data))
+            .catch(error => alert("getActualUser " + error.status + ": " + error.message))
+    }
+
+    async Unblock(inputs: string[], state: ChatState, chanId: any) {
+        const chan = getChan(chanId, state);
+        if (inputs.length === 1 || chan === undefined)
+            return ;
+
+        let blockedId = -1;
+        for (let user of chan?.members) {
+            if (user.username === inputs[1]) {
+                blockedId = user.id;
+                break ;
+            }
+        }
+        if (blockedId === -1)
+            return ;
+
+        await axios.post("http://localhost:3000/blacklist", {target_id: blockedId, type: "block", channelId: chanId, creatorId: state.actualUser.user.id})
+            .then()
+            .catch(error => alert(error.status + ": " + error.message));
+        axios.get("http://localhost:3000/user/" + state.actualUser.user.id)
+            .then(response => this.socket.emit('updateUserFromClient', response.data))
+            .catch(error => alert("getActualUser " + error.status + ": " + error.message))
     }
 }
