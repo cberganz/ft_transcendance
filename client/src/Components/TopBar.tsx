@@ -19,6 +19,9 @@ import { Stack } from '@mui/system';
 import Grid from '@mui/material/Grid';
 import SettingsDialog from './SettingsDialog';
 
+import { selectCurrentUser } from '../Hooks/authSlice'
+import { useSelector } from "react-redux"
+
 const Search = styled('div')(({ theme }) => ({
 	position: 'relative',
 	borderRadius: theme.shape.borderRadius,
@@ -43,7 +46,7 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
 	display: 'flex',
 	alignItems: 'center',
 	justifyContent: 'center',
-	}));
+}));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
 	color: 'inherit',
@@ -60,9 +63,10 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 function ProfileBox() {
+	const user = useSelector(selectCurrentUser)
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-
 	const isMenuOpen = Boolean(anchorEl);
+
 
 	const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
 		setAnchorEl(event.currentTarget);
@@ -92,9 +96,9 @@ function ProfileBox() {
 			<MenuItem>
 				<Stack >
 					<Typography fontWeight='bold'>
-						Username
+						{user.username}
 					</Typography>
-					<ListItemText>Rbicanic</ListItemText>
+					<ListItemText>{user.login}</ListItemText>
 				</Stack>
 			</MenuItem>
 			<Divider />
@@ -129,7 +133,7 @@ function ProfileBox() {
 							<AccountCircle/>
 					</Grid>
 					<Grid item xs={8}>
-						<Typography sx={{ fontWeight:'bold'}}>Rbicanic</Typography>
+						<Typography sx={{ fontWeight:'bold'}}>{user.username}</Typography>
 					</Grid>
 				</Grid>
 			</Box>
