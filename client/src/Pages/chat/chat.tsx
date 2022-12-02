@@ -152,7 +152,9 @@ class Chat extends React.Component<Props, ChatState> {
     else
       which = ChatData.notJoinedChans
     which.push(newChan)
-    sortChannels(which)
+    if (which === ChatData.joinedChans)
+      sortChannels(which)
+    console.log(which)
     this.setState(ChatData)
   }
   

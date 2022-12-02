@@ -36,14 +36,14 @@ export class ChannelController {
 		return this.channelService.allChannels();
 	}
 
-	@Post('/deleteMember/')
-	async PostDeleteMember(
+	@Delete('/Member/')
+	async DeleteMember(
 		@Body() data: { channelId: string; memberId: string; }
 	) : Promise<ChannelMode1> {
 		return this.channelService.deleteMember({channelId: Number(data.channelId), memberId: Number(data.memberId)})
 	}
 
-	@Post('/addMember/')
+	@Post('/Member/')
 	async PostAddMember(
 		@Body() data: { channelId: string; memberId: string; }
 	) : Promise<ChannelMode1> {
@@ -65,7 +65,7 @@ export class ChannelController {
 		return this.channelService.addAdmin({adminId: Number(data.adminId), chanId: Number(data.chanId), userId: Number(data.userId)})
 	}
 
-	@Post('/new/chan/')
+	@Post('/newChan/')
 	async newChannel (
 		@Body() channelData: { type: string; password: string; title: string; ownerId: string }
 	): Promise<ChannelMode1> {
@@ -80,7 +80,7 @@ export class ChannelController {
 		return this.channelService.channel({ id: Number(newChan.id) });
 	}
 
-	@Post('/new/dm/')
+	@Post('/newDM/')
 	async newDMChannel (
 		@Body() channelData: { user1: string, user2: string }
 	): Promise<ChannelMode1> {

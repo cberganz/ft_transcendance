@@ -20,12 +20,12 @@ import { ChatProps, User } from '../stateInterface'
 
 // API REQUESTS ////////////////////////////////////
 async function postChan(chan: any, socket: any) {
-  axios.post('http://localhost:3000/channel/new/chan/', chan)
+  axios.post('http://localhost:3000/channel/newChan/', chan)
     .then(response => socket.emit("newChanFromClient", response.data))
     .catch(error => alert("postChan: " + error.status + ": " + error.message)) 
 }
 async function postDMChan(chan: any, socket: any) {
-  axios.post('http://localhost:3000/channel/new/dm/', chan)
+  axios.post('http://localhost:3000/channel/newDM/', chan)
     .then(response => socket.emit("newChanFromClient", response.data))
     .catch(error => alert("postDMChan: " + error.status + ": " + error.message)) 
 }

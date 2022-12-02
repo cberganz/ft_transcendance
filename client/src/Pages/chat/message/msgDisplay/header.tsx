@@ -4,10 +4,22 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import { getChan } from '../../utils'
+import { Icon } from '@iconify/react';
+import { Channel } from '../../stateInterface'
 
 // check dans blacklist de l'user si blocked
 function isBlocked(props: any) : boolean {
   return (false)
+}
+
+function isAdmin(userId: number, chan?: Channel) : boolean {
+  if (chan === undefined) 
+    return (false);
+  for (let admin of chan.admin) {
+    if (admin.id === userId)
+      return true;
+  }
+  return (false);
 }
 
 // invite for a game, leave chan ou block/unblock
@@ -32,7 +44,12 @@ export default function ChatHeader(props:any) {
         gap: '0px 0px',
         gridAutoFlow: 'row',
         }}>
-      <div style={{textAlign: 'left', marginLeft: '25px'}}>{title} {isBlocked(props) ? <i style={{fontSize: '10px'}}>[blocked]</i> : null} </div>
+      <div style={{textAlign: 'left', marginLeft: '25px'}}>
+        {<span style={{marginRight: "10px"}}>{title}</span>} 
+        {isBlocked(props) ? <i style={{fontSize: '10px'}}>[blocked]</i> : null}
+        {chan?.ownerId === props.state.actualUser.user.id ? <Tooltip title="Owner"><Icon icon="mdi:shield-crown" color="gray" inline={true} /></Tooltip> : null}
+        {isAdmin(props.state.actualUser.user.id, chan) ? <Tooltip title="Group administrator"><Icon icon="dashicons:admin-users" color="gray" inline={true} /></Tooltip> : null}
+      </div>
       <div>
         {chan?.type === 'dm' && !isBlocked(props) ? <div><Tooltip title="Invite for a pong"><SportsEsportsIcon sx={{cursor: 'pointer', color: 'grey', marginRight: '20px'}} /></Tooltip><Tooltip title="Block user"><BlockIcon sx={{cursor: 'pointer', color: 'grey'}} /></Tooltip></div> : null}
         {chan?.type === 'dm' && isBlocked(props) ? <Tooltip title="Unblock user"><LockOpenIcon sx={{cursor: 'pointer', color: 'grey', marginLeft: '45px'}} /></Tooltip> : null}

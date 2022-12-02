@@ -37,7 +37,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   @SubscribeMessage('newChanFromClient')
-  handleNewChannel(socket: Socket, chan: any) : void {
+  async handleNewChannel(socket: Socket, chan: any) {
     socket.join("chat" + chan.id);
 
     if (chan.type === "dm"){
@@ -53,13 +53,44 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
       })
       this.server.to("chat" + chan.id).emit('newChanFromServer', chan)
     }
-    else
-      this.server.emit('newChanFromServer', chan)
+    else {
+      let isInChan: boolean;
+      let withoutMessageChan = {... chan};
+      delete withoutMessageChan.Message;
+      
+      this.server.to("chat" + chan.id).emit('newChanFromServer', chan)
+      for (let [userSocket, login] of this.userSockets) {
+        isInChan = false;
+        for (let room of userSocket.rooms) {
+          if (room === "chat" + chan.id) {
+            isInChan = true;
+            break ;
+          }
+        }
+        if (!isInChan)
+          userSocket.emit('newChanFromServer', withoutMessageChan);
+      }
+    }
   }
 
   @SubscribeMessage('updateChanFromClient')
   handleUpdateChannel(socket: Socket, chan: any) : void {
-    this.server.emit('updateChanFromServer', chan)
+    let isInChan: boolean;
+    let withoutMessageChan = {... chan};
+    delete withoutMessageChan.Message;
+    
+    this.server.to("chat" + chan.id).emit('updateChanFromServer', chan)
+    for (let [userSocket, login] of this.userSockets) {
+      isInChan = false;
+      for (let room of userSocket.rooms) {
+        if (room === "chat" + chan.id) {
+          isInChan = true;
+          break ;
+        }
+      }
+      if (!isInChan)
+        userSocket.emit('updateChanFromServer', withoutMessageChan);
+    }
   }
 
   @SubscribeMessage('newMsgFromClient')

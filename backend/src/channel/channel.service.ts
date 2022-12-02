@@ -72,11 +72,6 @@ export class ChannelService {
 				},
 			},
 			include: {
-				Message:  {
-					include: {
-						author: true,
-					}
-				},
 				blacklist: true,
 				admin: true,
 				members: true,

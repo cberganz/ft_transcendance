@@ -14,6 +14,7 @@ export class ChatCommands {
         this.RmPwd = this.RmPwd.bind(this);
         this.handler = this.handler.bind(this);
         this.AddAdmin = this.AddAdmin.bind(this);
+        this.Block = this.Block.bind(this);
 
         this.openConvHandler = openConvHandler;
         this.socket = socket;
@@ -23,6 +24,7 @@ export class ChatCommands {
             ["/setpwd", this.SetPwd],
             ["/rmpwd", this.RmPwd],
             ["/addadmin", this.AddAdmin],
+            ["/block", this.Block],
         ]);
         }
     
@@ -34,25 +36,25 @@ export class ChatCommands {
     }
     
     JoinChan(inputs: string[], state: ChatState, chanId: any) {
+        this.socket.emit('joinChatRoom', chanId);
         const chan = getChan(chanId, state);
         if (chan?.type === 'dm')
             return ;
         console.log(state.actualUser.user.id)
-        axios.post("http://localhost:3000/channel/addMember/", {channelId: chanId, memberId: state.actualUser.user.id})
+        axios.post("http://localhost:3000/channel/Member/", {channelId: chanId, memberId: state.actualUser.user.id})
             .then(response => this.socket.emit('updateChanFromClient', response.data))
             .catch(error => alert(error.status + ": " + error.message)) 
-        this.socket.emit('joinChatRoom', chanId);
     }
     
     LeaveChan(inputs: string[], state: ChatState, chanId: any) {
+        this.socket.emit('leaveChatRoom', chanId)
         const chan = getChan(chanId, state);
         if (chan?.type === 'dm')
             return ;
 
-        axios.post("http://localhost:3000/channel/deleteMember/", {channelId: chanId, memberId: state.actualUser.user.id})
+        axios.delete("http://localhost:3000/channel/Member/", {data: {channelId: chanId, memberId: state.actualUser.user.id}})
             .then(response => this.socket.emit('updateChanFromClient', response.data))
             .catch(error => alert(error.status + ": " + error.message)) 
-        this.socket.emit('leaveChatRoom', chanId)
         this.openConvHandler(-1);
     }
 
@@ -93,5 +95,9 @@ export class ChatCommands {
         axios.post("http://localhost:3000/channel/addAdmin/", {adminId: adminId, chanId: chanId, userId: state.actualUser.user.id})
             .then(response => this.socket.emit('updateChanFromClient', response.data))
             .catch(error => alert(error.status + ": " + error.message)) 
+    }
+
+    Block(inputs: string[], state: ChatState, userId: any) {
+        // axios.post("http://localhost:3000/blacklist", )
     }
 }
