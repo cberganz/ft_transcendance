@@ -5,6 +5,46 @@ import { useSelector } from "react-redux"
 import { Button } from '@mui/material';
 import useSimpleRequest from '../Api/useSimpleRequest';
 import useAlert from "../Hooks/useAlert";
+import axios from "axios";
+
+
+const UploadFile = () => {
+    const [file, setFile] = React.useState<any>();
+
+    const onChange = (file: React.ChangeEvent) => {
+        const { files } = file.target as HTMLInputElement;
+        if (files && files.length !== 0) {
+          setFile(files[0]);
+        }
+    }
+
+    const handleUpload = async () => {
+        const formData = new FormData();
+        formData.append('file', file)
+        const upload = await axios({
+            url:"http://localhost:3000/upload",
+            method:"post",
+            // headers:{
+            //     Authorization: `Bearer your token`
+            // },
+            data:formData
+        }).then((r: any) => r);
+
+        console.log(upload);
+        
+    }
+
+    return (
+        <div>
+            <form onSubmit={e => e.preventDefault()}>
+                <input type="file" onChange={onChange} />
+                <button onClick={handleUpload}>upload</button>
+            </form>
+        </div>
+    )
+}
+
+
 
 export function Dashboard() {
 	const currentUser = useSelector(selectCurrentUser)
@@ -34,6 +74,8 @@ export function Dashboard() {
 		<div>
 			<h1>Dashboard</h1>
 			 <Content></Content>
+			 <UploadFile/>
+			 <img src="http://localhost:3000/file/avatar/test.png"></img>
 		</div>
 	);
 }

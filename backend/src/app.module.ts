@@ -12,6 +12,8 @@ import { MessageModule } from './message/message.module';
 import { GameGateway } from './game.gateway';
 import { AuthModule } from './auth/auth.module';
 import { ChatGateway } from './chat.gateway';
+import { MulterModule } from '@nestjs/platform-express';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -22,7 +24,11 @@ import { ChatGateway } from './chat.gateway';
 		FriendshipModule,
 		GameModule,
 		MessageModule,
-		AuthModule
+		AuthModule,
+		MulterModule.register({
+			dest: '/app/src/uploaded_files',
+		}),
+		FileModule,
 	],
   controllers: [AppController],
   providers: [AppService, PrismaService, GameGateway, ChatGateway],
