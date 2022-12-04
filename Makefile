@@ -4,7 +4,7 @@ COMPOSE=docker-compose -p transcendance
 
 # GENERAL RULES
 
-all: data build up
+all: build up
 
 re: fclean all
 
@@ -18,9 +18,6 @@ up:
 
 stop:
 	${COMPOSE} stop
-
-ps:
-	docker ps
 
 # CLEAN RULES
 
@@ -40,4 +37,4 @@ prune:
 test:
 	@bash ./unit-test/unit-test.sh
 
-.PHONY: all re data build up stop ps clean fclean volume_rm prune
+.PHONY: all re build up stop clean fclean volume_rm prune
