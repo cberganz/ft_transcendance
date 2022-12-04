@@ -20,6 +20,6 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy) {
 		if(payload === null){
 			throw new UnauthorizedException();
         }
-		return { userId: payload.sub, username: payload.username };
+		return { id: payload.sub, username: payload.username, login: payload.login};
 	}
 }

@@ -10,18 +10,20 @@ const columns: GridColDef[] = [
 	{
 		field: 'User',
 		headerName: 'User',
-		width: 150,
+		minWidth: 120,
 		editable: false,
 		flex: 1,
-		align:'left'
+		align: 'center',
+		headerAlign: 'center',
 	},
 	{
 		field: 'status',
 		headerName: 'Status',
-		width: 150,
+		minWidth: 120,
 		editable: false,
 		flex: 1,
-		align:'left',
+		align: 'center',
+		headerAlign: 'center',
 		renderCell: (params) => {
 			let chip_color: "primary" | "warning";
 			(params.value === 'connected')
@@ -33,10 +35,11 @@ const columns: GridColDef[] = [
 	{
 		field: 'playgame',
 		headerName: 'Play Game',
-		width: 150,
+		minWidth: 120,
 		editable: false,
 		flex: 1,
-		align:'left',
+		align: 'center',
+		headerAlign: 'center',
 		renderCell: (params) => {
 			let chip_color: "primary" | "warning";
 			(params.value === 'Play')
@@ -48,10 +51,11 @@ const columns: GridColDef[] = [
 	{
 		field: 'friend',
 		headerName: 'Friend',
-		width: 150,
+		width: 120,
 		editable: false,
 		flex: 1,
-		align:'left'
+		align: 'center',
+		headerAlign: 'center',
 	}
 ];
 
