@@ -10,12 +10,14 @@ import Signup from "../Pages/Auth/SignUp"
 import PersistLogin from '../Hooks/persistLogin';
 import { selectCurrentToken } from '../Hooks/authSlice'
 import { useSelector } from "react-redux"
+import AlertPopup from '../Components/AlertPopup';
 
 function	OutletRoute() {
 	return (
 		<div>
 			<PrimarySearchAppBar />
 			<Outlet/>
+			<AlertPopup/>
 		</div>
 	)
 }
