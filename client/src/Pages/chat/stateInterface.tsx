@@ -1,44 +1,53 @@
+import Socket from "socket.io-client"
+
 export interface ChatState {
-    messages: Message[],
     actualUser: actualUser,
     joinedChans: Channel[],
     notJoinedChans: Channel[],
-    openedConversation: Message[],
+    userList: User[],
 }
 
 export interface actualUser {
     user: User,
     openedConvID: number
-}    
+}
+
+export interface ChatProps {
+    state: ChatState,
+    socket: any,
+}
+
 
 export interface User {
     id:          number,
-    login:       string,
-    username:    string,
-    avatar:      string,
-    friends:     Friendship[],
-    blacklisted: Blacklist[],
-    messages:    Message[],
-    channels:    Channel[],
-    admin_of:    Channel[],
-    p1_games:    Game[],
-    p2_games:    Game[],
-    friendship:  Friendship[],
-    blacklist:   Blacklist[]
-  }
-  
+    avatar?:      String,
+    login?:       String,
+    username:    String,
+    friends?:     Friendship[],
+    blacklisted?: Blacklist[],
+    messages?:    Message[],
+    channels?:    Channel[],
+    admin_of?:    Channel[],
+    owner_of?:    Channel[],
+    p1_games?:    Game[],
+    p2_games?:    Game[],
+    friendship?:  Friendship[],
+    blacklist?:   Blacklist[],
+}
+
 export interface Channel {
     id:        number,
-    owner:     User,
-    title:     string,
     members:   User[],
-    type:      string,
-    password:  string,
+    type:      String,
+    title:     String,
+    password:  String,
     admin:     User[],
-    Message:   Message[],
-    blacklist: Blacklist[],
+    Message?:   Message[],
+    blacklist?: Blacklist[],
+    owner?:     User,
+    ownerId?:   number,
 }
-  
+
 export interface Game {
     id:            number,
     player1:       User,
@@ -50,17 +59,17 @@ export interface Game {
     winner:        number,
     date:          Date,
 }
-  
+
 export interface Message {
     id:        number,
-    channel:   Channel,
+    channel?:   Channel,
     channelId: number,
     author:    User,
     authorId:  number,
     date:      Date,
-    content:   string,
+    content:   String,
 }
-  
+
 export interface Friendship {
     id:       number,
     user1:    User,
@@ -70,17 +79,16 @@ export interface Friendship {
     date:     Date,
     approved: Boolean,
 }
-  
+
 export interface Blacklist {
     id:        number,
     target:    User,
     target_id: number,
-    type:      string,
+    type:      String,
     date:      Date,
     delay:     number,
     channel:   Channel,
     channelId: number,
     creator:   User,
     creatorId: number,
-  }
-  
+}

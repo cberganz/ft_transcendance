@@ -1,15 +1,14 @@
 import { ChannelItem, DialogChannelItem } from './channelItem';
 import '../chat.css'
-import { Channel } from '../stateInterface'
 
 export function DMChannels(props: any) {
   return (
     <span>
     {
-        props.state.joinedChans.map((chan: Channel) => (
+        props.state.joinedChans?.map((chan: any) => (
               <div key={chan.id}>
-              {chan.type === 'dm' && chan.members[0].login === props.state.actualUser.user.login ? ChannelItem(chan, chan.members[1].login, chan.members[1].avatar, props) : null}
-              {chan.type === 'dm' && chan.members[1].login === props.state.actualUser.user.login ? ChannelItem(chan, chan.members[0].login, chan.members[0].avatar, props) : null}
+              {chan.type === 'dm' && chan.members[0].id === props.state.actualUser.user.id ? ChannelItem(chan, chan.members[1].username, chan.members[1].avatar, props) : null}
+              {chan.type === 'dm' && chan.members[1].id === props.state.actualUser.user.id ? ChannelItem(chan, chan.members[0].username, chan.members[0].avatar, props) : null}
               </div>
       ))
     }
@@ -21,7 +20,7 @@ export function JoinedChannels(props: any) {
   return (
     <span>
     {
-        props.state.joinedChans.map((chan: Channel) => (
+        props.state.joinedChans?.map((chan: any) => (
               <div key={chan.id}>
               {chan.type === 'dm' ? null : ChannelItem(chan, chan.title, "", props)}
               </div>
@@ -36,7 +35,7 @@ export function AllChannels(props: any) {
   return (
     <div>
     {
-        props.state.notJoinedChans.map((chan: Channel) => (
+        props.state.notJoinedChans?.map((chan: any) => (
           <div key={chan.id}>
               <DialogChannelItem chan={chan} chanName={chan.title} props={props} />
            </div>
@@ -46,8 +45,8 @@ export function AllChannels(props: any) {
   );
 }
 
-export default function showChannelItems(type: string, props: any) {
-    switch (type) {
+export default function showChannelItems(type: String, props: any) {    
+  switch (type) {
     case 'dm' :
       return DMChannels(props)
     case 'joined' :

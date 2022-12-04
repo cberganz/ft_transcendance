@@ -15,9 +15,33 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import CreateSharpIcon from '@mui/icons-material/CreateSharp';
 import AddCircleOutlineSharpIcon from '@mui/icons-material/AddCircleOutlineSharp';
 import Tooltip from '@mui/material/Tooltip';
-import { Channel } from '../stateInterface'
+import axios from 'axios';
+import { ChatProps, User, Channel } from '../stateInterface'
 
-// CREATE CHANNEL AND NEW MESSAGE FUNCTIONS
+// API REQUESTS ////////////////////////////////////
+async function postChan(chan: any, socket: any) {
+  axios.post('http://localhost:3000/channel/newChan/', chan)
+    .then(response => socket.emit("newChanFromClient", response.data))
+    .catch(error => alert("postChan: " + error.status + ": " + error.message)) 
+}
+async function postDMChan(chan: any, socket: any) {
+  axios.post('http://localhost:3000/channel/newDM/', chan)
+    .then(response => socket.emit("newChanFromClient", response.data))
+    .catch(error => alert("postDMChan: " + error.status + ": " + error.message)) 
+}
+////////////////////////////////////////////////////
+
+function titleAlreadyExists(title: string, notJoinedChans: Channel[], joinedChans: Channel[]) : boolean {
+  for (let chan of joinedChans) {
+    if (title === chan.title && chan.type !== 'dm')
+      return (true);
+  }
+  for (let chan of notJoinedChans) {
+    if (title === chan.title && chan.type !== 'dm')
+      return (true);
+  }
+  return (false);
+}
 
 function CreateChannelButton(props: any) {
     const [open, setOpen] = React.useState(false);
@@ -32,28 +56,22 @@ function CreateChannelButton(props: any) {
   
     const createChannel = (e: any) => {
       e.preventDefault()
+      if (e.target.name.value === "")
+        return (alert("Please a channel title."))
+      if (titleAlreadyExists(e.target.name.value, props.props.state.notJoinedChans, props.props.state.joinedChans))
+        return (setOpen(true), alert("Title already exists."))
       let chanType
-
       if (e.target.password.value === "")
         chanType = "public"
       else
         chanType = "private"
-      const newChan: Channel = {
-        id:        0, // ??????????????????????????????????????????????
-        owner:     props.props.actualUser.user,
-        title:     e.target.name.value,
-        members:   [],
+      const newChan = {
         type:      chanType,
         password:  e.target.password.value,
-        admin:     [],
-        Message:   [],
-        blacklist: [],
+        title:     e.target.name.value,
+        ownerId:   props.props.state.actualUser.user.id,
       }
-      newChan.members[0] = props.props.actualUser.user
-      newChan.admin[0] = props.props.actualUser.user
-
-      props.props.socket.emit("newChan", newChan)
-      // post chan to bdd
+      postChan(newChan, props.props.socket);
     }
 
     return (
@@ -62,7 +80,7 @@ function CreateChannelButton(props: any) {
           <AddCircleOutlineSharpIcon
             onClick={handleClickOpen}
             fontSize='medium'
-            sx={{color: 'black', cursor: 'pointer', marginTop: '10px'}} />
+            sx={{color: 'black', cursor: 'pointer', marginTop: '10px', marginLeft: '65%'}} />
           </Tooltip>
         <form  onSubmit={(e) => {createChannel(e)}}>
           <Dialog open={open} onClose={handleClose} disablePortal>
@@ -114,38 +132,44 @@ function SendMessageButton(props: any) {
         setLogin(event.target.value as string);
     };
     
-    const newDM = (e: any) => {
+    const newDM = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()
-
-      const newChan: Channel = {
-        id:        0, // ??????????????????????????????????????????????
-        owner:     props.props.actualUser.user,
-        title:     e.target.login.value,
-        members:   [],
-        type:      "dm",
-        password:  "",
-        admin:     [],
-        Message:   [],
-        blacklist: [],
+      const data = new FormData(e.currentTarget);
+      const newChan = {
+        user1: props.props.state.actualUser.user.id,
+        user2: data.get('login'),
       }
-      newChan.members[0] = props.props.actualUser.user
-      // newChan.members[1] = get user 
-
-      props.props.socket.emit("newChan", newChan)
-      // posrt chan to bdd
+      postDMChan(newChan, props.props.socket);
     }
-  
+
+    let userList = structuredClone(props.props.state.userList);
+    let dmList: User[] = []
+    for (let chan of props.props.state.joinedChans) {
+      if (chan.type === "dm") {
+        if (chan.members[0].id === props.props.state.actualUser.user.id)
+          dmList.push(structuredClone(chan.members[1]));
+        else
+          dmList.push(structuredClone(chan.members[0]));
+      }
+    }
+    for (let i = userList.length - 1; i >= 0; i--) {
+      for (let dmUser of dmList) {
+        if (dmUser.id === userList[i].id) {
+          userList.splice(i, 1);
+        }
+      }
+    }
     return (
       <div>
         <Tooltip title="Send message">
           <CreateSharpIcon
             onClick={handleClickOpen}
             fontSize='medium'
-            sx={{color: 'black', cursor: 'pointer', marginLeft: '15px', marginTop: '10px'}} />
+            sx={{color: 'black', cursor: 'pointer', marginTop: '10px'}} />
         </Tooltip>
 
         <form  onSubmit={(e) => {newDM(e)}}>
-        <Dialog open={open} onClose={handleClose}>
+        <Dialog open={open} onClose={handleClose} disablePortal>
           <DialogTitle>New DM</DialogTitle>
           <DialogContent>
 
@@ -153,15 +177,14 @@ function SendMessageButton(props: any) {
                 <FormControl fullWidth>
                     <InputLabel id="login">Login</InputLabel>
                     <Select
+                    name="login"
                     labelId="login"
                     id="login"
                     value={login}
                     label="login"
                     onChange={handleChange}
                     >
-                    <MenuItem value={10}>Ten</MenuItem>
-                    <MenuItem value={20}>Twenty</MenuItem>
-                    <MenuItem value={30}>Thirty</MenuItem>
+                    {userList.map((user: User) => <MenuItem value={user.id} key={user.id}>{user.login}</MenuItem>)}
                     </Select>
                 </FormControl>
             </Box>
@@ -169,7 +192,7 @@ function SendMessageButton(props: any) {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
-            <Button onClick={handleClose}>Open discussion</Button>
+            <Button type="submit" onClick={handleClose}>Open discussion</Button>
           </DialogActions>
         </Dialog>
         </form>
@@ -177,11 +200,11 @@ function SendMessageButton(props: any) {
     );
 }
 
-export default function HeaderChannels(props: any) {
+export default function HeaderChannels(props: ChatProps) {
     return (
-        <div className='ChannelHeader'>
-            <SendMessageButton props={props} />
-            <CreateChannelButton props={props} />
-        </div>
-    )
+    <div className='ChannelHeader'>
+        <SendMessageButton props={props} />
+        <CreateChannelButton props={props} />
+    </div>
+  )
 }

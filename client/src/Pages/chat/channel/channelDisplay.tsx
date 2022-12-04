@@ -5,19 +5,37 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import showChannelItems from './channelCategory';
-import { channelCategories } from "../bdd"
+import { ChatProps } from '../stateInterface'
+
+let channelCategories = [
+  {
+    type: 'dm', 
+    name: 'Private messages',
+    panel: 'panel1'
+  }, 
+  {
+    type: 'joined', 
+    name: 'Joined Channels',
+    panel: 'panel2'
+  }, 
+  {
+    type: 'all', 
+    name: 'All Channels',
+    panel: 'panel3'
+  }, 
+]
 
 
-function Channel(name: string, panel: string, type: string, props: any) {
-  const [expanded, setExpanded] = React.useState<string | false>(false);
+function Channel(name: String, panel: String, type: String, props: any) {
+  const [expanded, setExpanded] = React.useState<String | false>(false);
 
   const handleChange =
-    (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+    (panel: String) => (event: React.SyntheticEvent, isExpanded: boolean) => {
       setExpanded(isExpanded ? panel : false);
     };
 
   return (
-      <Accordion key={panel} expanded={expanded === panel} onChange={handleChange(panel)}>
+      <Accordion key={panel.valueOf()} expanded={expanded === panel} onChange={handleChange(panel)}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls={panel + "bh-content"}

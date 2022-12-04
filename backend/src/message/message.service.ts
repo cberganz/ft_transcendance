@@ -34,8 +34,31 @@ export class MessageService {
 			orderBy,
 		});
 	}
-
-	async createMessage(data: Prisma.MessageCreateInput): Promise<Message> {
+	
+	async createMessage(data: Prisma.MessageCreateInput, channelId: number, authorId: number): Promise<Message> {
+		let chan = await this.prisma.channel.findUnique({
+			where: {
+				id: channelId,
+			},
+			include: {
+				members: {
+					include: {
+						blacklist: true,
+					}
+				}
+			}
+		});
+		if (chan.type === "dm") {
+			let otherUser;
+			if (authorId === chan.members[0].id)
+				otherUser = chan.members[1];
+			else
+				otherUser = chan.members[0];
+			for (let blacklist of otherUser.blacklist) {
+				if (blacklist.target_id === authorId)
+					return (null); ////////////////////// error
+			}
+		}
 		return this.prisma.message.create({
 			data,
 		});

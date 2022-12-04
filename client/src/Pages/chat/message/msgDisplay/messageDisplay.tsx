@@ -4,15 +4,20 @@ import Stack from '@mui/material/Stack';
 import AlertTitle from '@mui/material/AlertTitle';
 import { Player } from '@lottiefiles/react-lottie-player';
 import '../../chat.css'
-import { Message } from '../../stateInterface'
+import { Message, User, Channel } from '../../stateInterface'
+import { getChan, isBlocked } from '../../utils'
 
-function MessageItemReceiver(avatar: string, name: string, text: string) {
+function MessageItemReceiver(author: User, text: String, chan: Channel | undefined, actualUser: User) {
+  if (author.avatar === undefined || author.avatar === null)
+    author.avatar = "";
+  if (chan === undefined || (isBlocked(actualUser, author) && chan.type != 'dm'))
+    return (<div></div>)
   return (
     <div className="leftChat">
-      <div className="leftChatAvatar"><Avatar src={avatar}></Avatar></div>
+      <div className="leftChatAvatar"><Avatar src={author.avatar.valueOf()}></Avatar></div>
       <div className="leftChatContent">
         <Alert severity="success" icon={false}>
-          <AlertTitle><b>{name}</b></AlertTitle>
+          <AlertTitle><b>{author.username}</b></AlertTitle>
           {text}
         </Alert>
       </div>
@@ -20,22 +25,25 @@ function MessageItemReceiver(avatar: string, name: string, text: string) {
   )
 }
 
-function MessageItemSender(avatar: string, name: string, text: string) {
+function MessageItemSender(author: User, text: String) {
+  if (author.avatar === undefined || author.avatar === null)
+    author.avatar = "";
   return (
     <div className="rightChat">
       <div className="rightChatContent">
         <Alert severity="info" icon={false}>
-          <AlertTitle><b>{name}</b></AlertTitle>
+          <AlertTitle><b>{author.username}</b></AlertTitle>
           {text}
         </Alert>
       </div>
-      <div className="rightChatAvatar"><Avatar src={avatar}></Avatar></div>
+      <div className="rightChatAvatar"><Avatar src={author.avatar.valueOf()}></Avatar></div>
     </div>
   )
 }
 
 export default function MessageDisplay(props: any) {
-  if (props.state.actualUser.openedConvID === -1)
+  let chan = getChan(props.state.actualUser.openedConvID, props.state);
+  if (props.state.actualUser.openedConvID === -1 || chan?.Message === undefined)
     return (
     <div>
       <Player
@@ -50,10 +58,10 @@ export default function MessageDisplay(props: any) {
   else {
     return (
       <Stack sx={{ width: '100%' }} spacing={2}>
-          {props.state.openedConversation.map((msg: Message) => (
+          {chan.Message.map((msg: Message) => (
             <div key={msg.id}>
-              {msg.author.login === props.state.user.login ? MessageItemSender(msg.author.avatar, msg.author.login, msg.content) : 
-                MessageItemReceiver(msg.author.avatar, msg.author.login, msg.content)}
+              {msg.author.id === props.state.actualUser.user.id ? MessageItemSender(msg.author, msg.content) : 
+                MessageItemReceiver(msg.author, msg.content, chan, props.state.actualUser.user)}
             </div>
           ))}
       </Stack>
