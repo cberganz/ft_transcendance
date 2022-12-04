@@ -1,7 +1,7 @@
 import { type } from '@testing-library/user-event/dist/type';
 import { createContext, ReactElement, useState } from 'react';
 
-const ALERT_TIME = 5000;
+const ALERT_TIME = 3000;
 
 type AlertColor =  'error' | 'info' | 'success' | 'warning'
 
@@ -16,13 +16,13 @@ const initialState: AlertHooksType = {
 
 const AlertContext = createContext({
   ...initialState,
-  setAlert: (text: string, type: AlertColor ) => {},
+  setAlert: (text: string, type: AlertColor ) => {(void text); (void type)},
 });
 
 export const AlertProvider = ({ children } : any) => {
   const [text, setText] = useState('');
   const [type, setType]: [any, React.Dispatch<React.SetStateAction<any>>]
-  	= useState("error");
+  	= useState('');
 
   const setAlert = (text: string, type: AlertColor ) => {
     setText(text);

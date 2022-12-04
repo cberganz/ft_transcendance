@@ -1,20 +1,22 @@
 import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import MenuItem from '@mui/material/MenuItem';
-import Menu from '@mui/material/Menu';
+import {
+	AppBar,
+	Box,
+	Toolbar,
+	IconButton,
+	MenuItem,
+	Menu,
+	Typography,
+	ListItemText,
+	ListItemIcon,
+	Divider,
+	Grid,
+} from '@mui/material';
+import SwipeableTemporaryDrawer from './MenuDrawer'
 import SearchIcon from '@mui/icons-material/Search';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MoreIcon from '@mui/icons-material/MoreVert';
-import SwipeableTemporaryDrawer from './MenuDrawer'
-import Typography from '@mui/material/Typography';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Divider from '@mui/material/Divider';
 import { Stack } from '@mui/system';
-import Grid from '@mui/material/Grid';
 import SettingsDialog from './SettingsDialog';
 import { selectCurrentUser } from '../Hooks/authSlice'
 import { useSelector } from "react-redux"

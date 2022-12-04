@@ -1,17 +1,19 @@
 import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemText from '@mui/material/ListItemText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Dialog from '@mui/material/Dialog';
-import PersonIcon from '@mui/icons-material/Person';
-import TextField from '@mui/material/TextField';
+import {
+	Avatar,
+	List,
+	ListItem,
+	ListItemAvatar,
+	ListItemText,
+	DialogTitle,
+	Dialog,
+	TextField,
+	MenuItem,
+	ListItemIcon,
+	Button,
+} from '@mui/material';
 import { blue } from '@mui/material/colors';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Button from '@mui/material/Button';
+import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { selectCurrentUser } from '../Hooks/authSlice'
 import { useSelector } from "react-redux"
@@ -20,27 +22,20 @@ import useAlert from "../Hooks/useAlert";
 
 export interface SimpleDialogProps {
 	open: boolean;
-	// selectedValue: string;
 	onClose: (value: string) => void;
 }
 
 function SimpleDialog(props: SimpleDialogProps) {
 	const currentUser = useSelector(selectCurrentUser)
-	const { onClose, /* selectedValue, */ open } = props;
+	const { onClose, open } = props;
 	const [username, setMessage] = React.useState(currentUser.username);
 	const { setAlert } = useAlert();
+	const [updateUser] = useUpdateUserMutation()
 
 	const handleChange = (event: any) => {
 	  setMessage(event.target.value);
 	};
 
-	const [updateUser, {
-		data: data,
-		isLoading,
-		isError,
-		isSuccess,
-		error
-	}] = useUpdateUserMutation()
 
 	const handleClose = () => {
 		onClose(username);
@@ -58,8 +53,12 @@ function SimpleDialog(props: SimpleDialogProps) {
 				username: username,
 			}
 		}
-		updateUser(input)// verifier que le username n'existe pas deja
-	}	
+		updateUser(input)
+			.then(() => setAlert("Username has been updated", "success"))// verifier que le username n'existe pas deja
+			.catch(() => setAlert("Failed updating userdata", "error"))
+		handleClose()
+	}
+
 
 	return (
 		<Dialog onClose={handleClose} open={open}>
@@ -117,7 +116,6 @@ export default function SettingsDialog() {
 				<ListItemText>Settings</ListItemText>
 			</MenuItem>
 			<SimpleDialog
-				// selectedValue={selectedValue}
 				open={open}
 				onClose={handleClose}
 			/>
