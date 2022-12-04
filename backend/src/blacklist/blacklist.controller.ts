@@ -1,5 +1,6 @@
 import {
 	Controller,
+	Query,
 	Get,
 	Param,
 	Post,
@@ -9,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { BlacklistService } from './blacklist.service';
 import { Blacklist as BlacklistMode1 } from '@prisma/client';
+import { query } from 'express';
 
 @Controller('blacklist')
 export class BlacklistController {
@@ -52,10 +54,5 @@ export class BlacklistController {
 	@Delete(':id')
 	async deleteBlacklist(@Param('id') id: string): Promise<BlacklistMode1> {
 		return this.blacklistService.deleteBlacklist({ id: Number(id) });
-	}
-
-	@Delete()
-	async deleteBlockBlacklist(data: {target_id: string, creatorId: string}): Promise<BlacklistMode1> {
-		return this.blacklistService.deleteBlockBlacklist({target_id: Number(data.target_id), creatorId: Number(data.creatorId)});
 	}
 }

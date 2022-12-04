@@ -1,4 +1,4 @@
-import { ChatState } from './stateInterface'
+import { Blacklist, ChatState } from './stateInterface'
 import axios from 'axios'
 import { getChan } from './utils';
 
@@ -122,11 +122,13 @@ export class ChatCommands {
     }
 
     async Unblock(inputs: string[], state: ChatState, chanId: any) {
-        const chan = getChan(chanId, state);
-        if (inputs.length === 1 || chan === undefined)
+        const   chan = getChan(chanId, state);
+        let     blockedId = -1;
+        let     blacklistId = -1;
+
+        if (inputs.length === 1 || chan === undefined || state.actualUser.user.blacklist === undefined)
             return ;
 
-        let blockedId = -1;
         for (let user of chan?.members) {
             if (user.username === inputs[1]) {
                 blockedId = user.id;
@@ -135,8 +137,13 @@ export class ChatCommands {
         }
         if (blockedId === -1)
             return ;
-
-        await axios.post("http://localhost:3000/blacklist", {target_id: blockedId, type: "block", channelId: chanId, creatorId: state.actualUser.user.id})
+        for (let blacklist of state.actualUser.user.blacklist) {
+            if (blacklist.target_id === blockedId)
+                blacklistId = blacklist.id;
+        }
+        if (blacklistId === -1)
+            return ;
+        await axios.delete("http://localhost:3000/blacklist/" + blacklistId)
             .then()
             .catch(error => alert(error.status + ": " + error.message));
         axios.get("http://localhost:3000/user/" + state.actualUser.user.id)

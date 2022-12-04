@@ -57,15 +57,4 @@ export class BlacklistService {
 			where,
 		});
 	}
-	
-	async deleteBlockBlacklist(data: {target_id: number, creatorId: number}): Promise<Blacklist> {
-		let blacklist = this.prisma.blacklist.findMany({
-			where: {
-				type: "block",
-				target_id: data.target_id,
-				creatorId: data.creatorId,
-			}
-		});
-		
-	}
 }
