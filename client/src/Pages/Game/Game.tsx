@@ -1,14 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
-import Ball from "./ball";
-import Player from "./player";
-import StartingScreen from "./StartingScreen";
-import io from "socket.io-client";
-import WaitingStart from "./WaitingStart";
-import "./game.css"
+import Ball from "./classes/Ball";
+import Player from "./classes/Player";
+import StartingScreen from "./components/StartingScreen/StartingScreen";
+import io, { Socket } from "socket.io-client";
+import WaitingStart from "./components/WaitingStart/WaitingStart";
+import EnterQueue from "./components/EnterQueue/EnterQueue";
+import "./game.css";
+import { selectCurrentUser } from "../../Hooks/authSlice";
+import { useSelector } from "react-redux";
 
 function Game() {
-  const socket = io("http://localhost:3000/game");
+  console.log(useSelector(selectCurrentUser).id);
 
+  const socket: Socket = io("http://localhost:3000/game", {
+    query: {
+      id: useSelector(selectCurrentUser).id,
+    },
+  });
+
+  const [enterQueue, setEnterQueue] = useState<boolean>(false);
   const [startButton, setStartButton] = useState<boolean>(false);
   const [win, setWin] = useState<number>(0);
   const [ready, setReady] = useState<boolean>(false);
@@ -188,8 +198,8 @@ function Game() {
     const handleResize = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.width / factor;
-      heightRef.current = canvas.offsetHeight;
-      widthRef.current = canvas.offsetWidth;
+      heightRef.current = canvas.height;
+      widthRef.current = canvas.width;
       boardHeightRef.current = heightRef.current / 6;
       boardWidthRef.current = heightRef.current / 50;
       ballSizeRef.current = heightRef.current / 50;
@@ -224,7 +234,7 @@ function Game() {
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      socket.emit("leaveRoom");
+      //   socket.emit("leaveRoom");
       window.removeEventListener("resize", handleResize);
     };
   });
@@ -477,25 +487,25 @@ function Game() {
   }
 
   return (
-	<div className={'gameContainer'}>
-		<div className={/* `game`  */'gameWidth'}>
-		{!startButton ? (
-			<StartingScreen
-			setStartButton={setStartButton}
-			setWin={setWin}
-			win={win}
-			updateReady={updateReady}
-			ready={ready}
-			/>
-		) : !ready ? (
-			<WaitingStart />
-		) : null}
-		<canvas
-			className={`${!startButton && "display-none"}`}
-			ref={canvasRef}
-		></canvas>
-		</div>
-	</div>
+    <div className={"gameContainer"}>
+      <div className={"gameWidth"}>
+        {!enterQueue ? (
+          <EnterQueue setEnterQueue={setEnterQueue} socket={socket} />
+        ) : !startButton ? (
+          <StartingScreen
+            setStartButton={setStartButton}
+            setWin={setWin}
+            win={win}
+          />
+        ) : !ready ? (
+          <WaitingStart />
+        ) : null}
+        <canvas
+          className={`${!startButton && "display-none"}`}
+          ref={canvasRef}
+        ></canvas>
+      </div>
+    </div>
   );
 }
 
