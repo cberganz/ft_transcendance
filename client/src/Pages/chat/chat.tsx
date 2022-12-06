@@ -46,7 +46,7 @@ class Chat extends React.Component<Props, ChatState> {
       userList: [],
     };
     this.socket = io("http://localhost:3000/chat"); 
-    this.userID = this.props.user.userId;
+    this.userID = this.props.user.id;
     this.getData();
     this.state = this.ChatData;
     this.chatCommands = new ChatCommands(this.socket, this.openConvHandler);
@@ -70,7 +70,7 @@ class Chat extends React.Component<Props, ChatState> {
   async getActualUser(): Promise<any> {
     this.ChatData.actualUser = {
       openedConvID: -1,
-      user: await axios.get("http://localhost:3000/user/" + this.props.user.userId)
+      user: await axios.get("http://localhost:3000/user/" + this.props.user.id)
         .then(response => response.data)
         .catch(error => alert("getActualUser " + error.status + ": " + error.message))
     }
@@ -152,9 +152,20 @@ class Chat extends React.Component<Props, ChatState> {
   }
 
   socketUpdateUser(user: User) {
-    console.log(user)
     let ChatData: ChatState = structuredClone(this.state);
     ChatData.actualUser.user = user;
+    this.setState(ChatData);
+  }
+
+  socketUpdateUserlist(userUpdate: User) {
+    let ChatData: ChatState = structuredClone(this.state);
+    
+    for (let i = 0; i < ChatData.userList.length; i++) {
+      if (ChatData.userList[i].id === userUpdate.id) {
+        ChatData.userList.splice(i, 1);
+        ChatData.userList.push(userUpdate);
+      }
+    }
     this.setState(ChatData);
   }
   
@@ -165,6 +176,7 @@ class Chat extends React.Component<Props, ChatState> {
     this.socket.off('newChanFromServer').on('newChanFromServer', (chan) => this.socketNewChan(chan));
     this.socket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.socketNewMsg(msg));
     this.socket.off('updateUserFromServer').on('updateUserFromServer', (user) => this.socketUpdateUser(user));
+    this.socket.off('updateUserlistFromServer').on('updateUserlistFromServer', (user) => this.socketUpdateUserlist(user));
     return (
     <div className="chatContainer">
       

@@ -36,9 +36,26 @@ export class BlacklistService {
 	}
 
 	async createBlacklist(data: Prisma.BlacklistCreateInput): Promise<Blacklist> {
-		return this.prisma.blacklist.create({
-			data,
+		let user = await this.prisma.user.findUnique({
+			where: {
+				id: data.creator.connect.id,
+			},
+			include: {
+				admin_of: true,
+			}
 		});
+		let isAdmin = false;
+		for (let i = 0; i < user.admin_of.length; i++) {
+			if (user.admin_of[i].id == data.channel.connect.id) {
+				isAdmin = true;
+				break ;
+			}
+		}
+		if (isAdmin || data.type === "block")
+			return this.prisma.blacklist.create({
+				data,
+			});
+		return (null); // ERROOOOOOOOOOOOOOR
 	}
 
 	async updateBlacklist(params: {

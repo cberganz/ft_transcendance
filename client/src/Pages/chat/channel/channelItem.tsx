@@ -26,7 +26,7 @@ export function DialogChannelItem(props: any) {
   const joinChan = (e: any) => {
     e.preventDefault()
     if (props.chan.type === "public" || (props.chan.type === "private" && props.chan.password === e.target.password.value))
-      props.props.chatCommands.handler("/join", props.props.state, props.chan.id);
+      props.props.chatCommands.JoinChan("/join", props.props.state, props.chan.id);
     else if (props.chan.type === "private" && props.chan.password !== e.target.password.value)
       alert("Wrong password.")
   }

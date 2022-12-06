@@ -154,7 +154,7 @@ function SendMessageButton(props: any) {
     }
     for (let i = userList.length - 1; i >= 0; i--) {
       for (let dmUser of dmList) {
-        if (dmUser.id === userList[i].id) {
+        if (userList[i] && dmUser.id === userList[i].id) {
           userList.splice(i, 1);
         }
       }
