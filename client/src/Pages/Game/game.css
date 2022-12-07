@@ -1,4 +1,5 @@
 .gameContainer {
+  margin-top: 20vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -8,4 +9,8 @@
 
 .gameWidth {
   width: 60%;
+}
+
+.btn {
+  padding: 1rem;
 }

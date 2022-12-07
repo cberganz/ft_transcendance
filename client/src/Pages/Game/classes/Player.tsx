@@ -13,7 +13,7 @@ class Player {
     this.startingPosition = [...position];
     this.position = [...position];
     this.speed = 100;
-    this.score = 0;
+    this.score = 9;
     this.direction = "n";
     this.canHit = true;
     this.relativePosition = 1;
