@@ -43,7 +43,7 @@ function MessageItemSender(author: User, text: String) {
 
 export default function MessageDisplay(props: any) {
   let chan = getChan(props.state.actualUser.openedConvID, props.state);
-  if (props.state.actualUser.openedConvID === -1 || chan?.Message === undefined)
+  if (props.state.actualUser.openedConvID === -1 || chan?.Message === undefined) {
     return (
     <div>
       <Player
@@ -55,6 +55,7 @@ export default function MessageDisplay(props: any) {
       ></Player>
     </div>
     )
+  }
   else {
     return (
       <Stack sx={{ width: '100%' }} spacing={2}>

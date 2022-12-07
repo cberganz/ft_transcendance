@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Channel, Prisma } from '@prisma/client';
 
@@ -166,7 +166,7 @@ export class ChannelService {
 			}) ;
 		}
 		else
-			return chan;
+			throw ForbiddenException ;
 	}
 
 	async addAdmin(data: {adminId: number, chanId: number, userId: number}): Promise<Channel> {
@@ -189,7 +189,7 @@ export class ChannelService {
 		let userIsAdmin = false ;
 		for (let admin of chan.admin) {
 			if (admin.id === data.adminId)
-				return chan ;
+				throw ForbiddenException ;
 			if (admin.id === data.userId) {
 				userIsAdmin = true ;
 				break ;
@@ -221,7 +221,7 @@ export class ChannelService {
 			}) ;
 		}
 		else
-			return chan ;
+			throw ForbiddenException ;
 
 
 	}

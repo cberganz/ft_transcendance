@@ -21,6 +21,7 @@ export class ChatCommands extends React.Component<Props> {
     private socket: any;
     private commands: Map<string, Function>;
     private openConvHandler: Function;
+    private alert: any;
     
     constructor(socket: any, openConvHandler: Function) {
         super(socket, openConvHandler);
@@ -36,6 +37,7 @@ export class ChatCommands extends React.Component<Props> {
         this.Ban = this.Ban.bind(this);
         this.Mute = this.Mute.bind(this);
 
+        this.alert = this.props.alert;
         this.openConvHandler = openConvHandler;
         this.socket = socket;
         this.commands = new Map([
@@ -86,7 +88,7 @@ export class ChatCommands extends React.Component<Props> {
 
         axios.post("http://localhost:3000/channel/setPwd/", {pwd: inputs[1], channelId: chanId, userId: state.actualUser.user.id})
             .then(response => this.socket.emit('updateChanFromClient', response.data))
-            .catch(error => alert(error.status + ": " + error.message)) 
+            .catch(error => alert("You don't have the rights.")) 
     }
 
     RmPwd(inputs: string[], state: ChatState, chanId: any) {
@@ -96,7 +98,7 @@ export class ChatCommands extends React.Component<Props> {
 
         axios.post("http://localhost:3000/channel/setPwd/", {pwd: "", channelId: chanId, userId: state.actualUser.user.id})
             .then(response => this.socket.emit('updateChanFromClient', response.data))
-            .catch(error => alert(error.status + ": " + error.message)) 
+            .catch(error => alert("You don't have the rights.")) 
     }
 
     AddAdmin(inputs: string[], state: ChatState, chanId: any) {
@@ -115,7 +117,7 @@ export class ChatCommands extends React.Component<Props> {
             return ;
         axios.post("http://localhost:3000/channel/addAdmin/", {adminId: adminId, chanId: chanId, userId: state.actualUser.user.id})
             .then(response => this.socket.emit('updateChanFromClient', response.data))
-            .catch(error => alert(error.status + ": " + error.message)) 
+            .catch(error => alert("You don't have the rights.")) 
     }
 
     async Block(inputs: string[], state: ChatState, chanId: any) {

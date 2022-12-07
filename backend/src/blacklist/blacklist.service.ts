@@ -44,11 +44,28 @@ export class BlacklistService {
 				admin_of: true,
 			}
 		});
+		let chan = await this.prisma.channel.findUnique({
+			where: {
+				id: data.channel.connect.id,
+			},
+			include: {
+				admin: true,
+				owner: true,
+			}
+		});
 		let isAdmin = false;
 		for (let i = 0; i < user.admin_of.length; i++) {
 			if (user.admin_of[i].id == data.channel.connect.id) {
 				isAdmin = true;
 				break ;
+			}
+		}
+		if (chan.owner.id !== data.creator.connect.id) {
+			for (let admin of chan.admin) {
+				if (admin.id === data.target.connect.id){
+					isAdmin = false;
+					break ;
+				}
 			}
 		}
 		let blacklist = await this.prisma.blacklist.findMany({
@@ -58,7 +75,8 @@ export class BlacklistService {
 				channelId: data.channel.connect.id,
 			}
 		})
-		if ((isAdmin || data.type === "block") && blacklist.length === 0)
+		if ((isAdmin || data.type === "block") && blacklist.length === 0 
+			&& chan.ownerId != data.target.connect.id)
 			return this.prisma.blacklist.create({
 				data,
 			});

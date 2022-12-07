@@ -126,12 +126,11 @@ class Chat extends React.Component<Props, ChatState> {
   }
 
   socketUpdateChan(newChan: Channel) {
-    let ChatData = structuredClone(this.state)
-    let which
+    let ChatData = structuredClone(this.state);
+    let which;
 
-    if (newChan.id === undefined){
+    if (newChan.id === undefined)
       return ;
-    }
     for (let chan of ChatData.joinedChans) {
       if (chan.id === newChan.id) {
         ChatData.joinedChans.splice(ChatData.joinedChans.findIndex((chan_: Channel) => chan_.id === newChan.id), 1)
@@ -151,6 +150,12 @@ class Chat extends React.Component<Props, ChatState> {
     which.push(newChan)
     if (which === ChatData.joinedChans)
       sortChannels(which)
+    for (let chan of ChatData.notJoinedChans) {
+      if (chan.id === this.state.actualUser.openedConvID) {
+        ChatData.actualUser.openedConvID = -1;
+        break ;
+      }
+    }
     this.setState(ChatData)
   }
 
