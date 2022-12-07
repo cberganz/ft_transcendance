@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Blacklist, Prisma } from '@prisma/client';
 
@@ -51,11 +51,18 @@ export class BlacklistService {
 				break ;
 			}
 		}
-		if (isAdmin || data.type === "block")
+		let blacklist = await this.prisma.blacklist.findMany({
+			where: {
+				target_id: data.target.connect.id,
+				type: data.type,
+				channelId: data.channel.connect.id,
+			}
+		})
+		if ((isAdmin || data.type === "block") && blacklist.length === 0)
 			return this.prisma.blacklist.create({
 				data,
 			});
-		return (null); // ERROOOOOOOOOOOOOOR
+		throw ForbiddenException;
 	}
 
 	async updateBlacklist(params: {

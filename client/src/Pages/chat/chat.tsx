@@ -66,7 +66,7 @@ class Chat extends React.Component<Props, ChatState> {
     }
     for (const chan of this.state.joinedChans)
       this.socket.emit('joinChatRoom', chan.id)
-    }
+  }
   async getActualUser(): Promise<any> {
     this.ChatData.actualUser = {
       openedConvID: -1,
@@ -129,6 +129,9 @@ class Chat extends React.Component<Props, ChatState> {
     let ChatData = structuredClone(this.state)
     let which
 
+    if (newChan.id === undefined){
+      return ;
+    }
     for (let chan of ChatData.joinedChans) {
       if (chan.id === newChan.id) {
         ChatData.joinedChans.splice(ChatData.joinedChans.findIndex((chan_: Channel) => chan_.id === newChan.id), 1)

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Message, Prisma } from '@prisma/client';
 
@@ -45,7 +45,8 @@ export class MessageService {
 					include: {
 						blacklist: true,
 					}
-				}
+				},
+				blacklist: true,
 			}
 		});
 		if (chan.type === "dm") {
@@ -55,8 +56,24 @@ export class MessageService {
 			else
 				otherUser = chan.members[0];
 			for (let blacklist of otherUser.blacklist) {
-				if (blacklist.target_id === authorId)
-					return (null); ////////////////////// error
+				if (blacklist.target_id === authorId && blacklist.type === "block")
+					throw ForbiddenException;
+			}
+		}
+		else {
+			for (let blacklist of chan.blacklist) {
+				if (blacklist.target_id === authorId && blacklist.type === "mute") {
+					if (new Date().getTime() / 1000 - new Date(blacklist.date).getTime() / 1000 >= 60 * blacklist.delay) {
+						await this.prisma.blacklist.delete({
+							where: {
+								id: blacklist.id,
+							}
+						});
+						break ;
+					}
+					else
+						throw ForbiddenException ;
+				}
 			}
 		}
 		return this.prisma.message.create({

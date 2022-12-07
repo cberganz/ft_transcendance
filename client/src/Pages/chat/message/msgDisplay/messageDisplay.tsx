@@ -17,7 +17,7 @@ function MessageItemReceiver(author: User, text: String, chan: Channel | undefin
       <div className="leftChatAvatar"><Avatar src={author.avatar.valueOf()}></Avatar></div>
       <div className="leftChatContent">
         <Alert severity="success" icon={false}>
-          <AlertTitle><b>{author.username}</b></AlertTitle>
+          <b>{author.username}</b><br />
           {text}
         </Alert>
       </div>

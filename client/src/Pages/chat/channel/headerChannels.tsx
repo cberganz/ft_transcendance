@@ -22,12 +22,12 @@ import { ChatProps, User, Channel } from '../stateInterface'
 async function postChan(chan: any, socket: any) {
   axios.post('http://localhost:3000/channel/newChan/', chan)
     .then(response => socket.emit("newChanFromClient", response.data))
-    .catch(error => alert("postChan: " + error.status + ": " + error.message)) 
+    .catch(error => alert("Error creating channel."))
 }
 async function postDMChan(chan: any, socket: any) {
   axios.post('http://localhost:3000/channel/newDM/', chan)
     .then(response => socket.emit("newChanFromClient", response.data))
-    .catch(error => alert("postDMChan: " + error.status + ": " + error.message)) 
+    .catch(error => alert("Error sending DM.")) 
 }
 ////////////////////////////////////////////////////
 
@@ -55,10 +55,11 @@ function CreateChannelButton(props: any) {
     };
   
     const createChannel = (e: any) => {
-      e.preventDefault()
-      if (e.target.name.value === "")
+      e.preventDefault();
+      var title = e.target.name.value.trim();
+      if (title === "")
         return (alert("Please a channel title."))
-      if (titleAlreadyExists(e.target.name.value, props.props.state.notJoinedChans, props.props.state.joinedChans))
+      if (titleAlreadyExists(title, props.props.state.notJoinedChans, props.props.state.joinedChans))
         return (setOpen(true), alert("Title already exists."))
       let chanType
       if (e.target.password.value === "")
@@ -68,7 +69,7 @@ function CreateChannelButton(props: any) {
       const newChan = {
         type:      chanType,
         password:  e.target.password.value,
-        title:     e.target.name.value,
+        title:     title,
         ownerId:   props.props.state.actualUser.user.id,
       }
       postChan(newChan, props.props.socket);

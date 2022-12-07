@@ -7,7 +7,7 @@ import { isBlocked } from '../../utils'
 function postMsg(msg: any, socket: any, chanId: number) {
   axios.post("http://localhost:3000/message", msg)
     .then(response => socket.emit("newMsgFromClient", {room: "chat" + chanId, message: response.data}))
-    .catch(error => alert(error.status + ": " + error.message)) 
+    .catch(error => alert("You've been blocked or mute.")) 
 }
 /////////////////////////////////////////
 

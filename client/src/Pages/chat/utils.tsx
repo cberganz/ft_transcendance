@@ -37,7 +37,7 @@ export function sortChannels(chans: Channel[]) {
       return (false);
     for (let blacklist of actualUser.blacklist) {
       if (blacklist.target_id === otherDMUser.id &&
-        (blacklist.type === "blocked" || blacklist.type === "mute"))
+        (blacklist.type === "block"))
         return (true);
     }
     return (false)

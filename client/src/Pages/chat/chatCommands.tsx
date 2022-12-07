@@ -1,13 +1,30 @@
 import { Blacklist, ChatState } from './stateInterface'
 import axios from 'axios'
 import { getChan } from './utils';
+import useAlert from "../../Hooks/useAlert";
+import { setDefaultResultOrder } from 'dns';
+import React from 'react';
 
-export class ChatCommands {
+
+function ChatCommandWithHook(component: any) {
+    return function WrappedChat(props: any) {
+        const { setAlert } = useAlert();
+        return (<ChatCommands alert={setAlert} />)
+    }
+}
+
+interface Props {
+    alert: any,
+}
+
+export class ChatCommands extends React.Component<Props> {
     private socket: any;
     private commands: Map<string, Function>;
     private openConvHandler: Function;
     
     constructor(socket: any, openConvHandler: Function) {
+        super(socket, openConvHandler);
+
         this.JoinChan = this.JoinChan.bind(this);
         this.LeaveChan = this.LeaveChan.bind(this);
         this.SetPwd = this.SetPwd.bind(this);
@@ -47,7 +64,7 @@ export class ChatCommands {
             return ;
         axios.post("http://localhost:3000/channel/Member/", {channelId: chanId, memberId: state.actualUser.user.id})
             .then(response => this.socket.emit('updateChanFromClient', response.data))
-            .catch(error => alert(error.status + ": " + error.message)) 
+            .catch(error => alert("You're banned from this chan.")) 
     }
     
     LeaveChan(inputs: string[], state: ChatState, chanId: any) {
@@ -113,9 +130,8 @@ export class ChatCommands {
                 break ;
             }
         }
-        if (blockedId === -1)
+        if (blockedId === -1 || blockedId === state.actualUser.user.id)
             return ;
-
         await axios.post("http://localhost:3000/blacklist", {target_id: blockedId, type: "block", channelId: chanId, creatorId: state.actualUser.user.id})
             .then()
             .catch(error => alert(error.status + ": " + error.message));
@@ -166,12 +182,14 @@ export class ChatCommands {
                 break ;
             }
         }
-        if (blockedId === -1)
+        if (blockedId === -1 || blockedId === state.actualUser.user.id)
             return ;
-            
-        await axios.post("http://localhost:3000/blacklist", {target_id: blockedId, type: "ban", delay: inputs[2], channelId: chanId, creatorId: state.actualUser.user.id})
+
+        let isError = await axios.post("http://localhost:3000/blacklist", {target_id: blockedId, type: "ban", delay: inputs[2], channelId: chanId, creatorId: state.actualUser.user.id})
             .then()
-            .catch(error => alert(error.status + ": " + error.message));
+            .catch(error => error.code);
+        if (isError === "ERR_BAD_RESPONSE")
+            return alert("You don't have the rights.");
         axios.delete("http://localhost:3000/channel/Member/", {data: {channelId: chanId, memberId: blockedId}})
             .then(response => this.socket.emit('updateChanFromClient', response.data))
             .catch(error => alert(error.status + ": " + error.message)) 
@@ -189,11 +207,14 @@ export class ChatCommands {
                 break ;
             }
         }
-        if (blockedId === -1)
+        if (blockedId === -1 || blockedId === state.actualUser.user.id)
             return ;
-            
-        await axios.post("http://localhost:3000/blacklist", {target_id: blockedId, type: "mute", delay: inputs[2], channelId: chanId, creatorId: state.actualUser.user.id})
+        
+        let isError = await axios.post("http://localhost:3000/blacklist", {target_id: blockedId, type: "mute", delay: inputs[2], channelId: chanId, creatorId: state.actualUser.user.id})
             .then()
-            .catch(error => alert(error.status + ": " + error.message));
+            .catch(error => error.code);
+        if (isError === "ERR_BAD_RESPONSE")
+            return alert("You don't have the rights.");
     }
 }
+export default ChatCommandWithHook(ChatCommands);

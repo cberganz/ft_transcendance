@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Channel, Prisma } from '@prisma/client';
 
@@ -107,7 +107,7 @@ export class ChannelService {
 			return this.prisma.channel.create({
 				data,
 			});
-		////////////// handle error
+		throw ForbiddenException ;
 	}
 
 	async updateChannel(params: {
@@ -274,18 +274,17 @@ export class ChannelService {
 			}
 		})
 		for (let blacklist of chan.blacklist) {
-			if (blacklist.target_id === data.memberId) {
-				if (new Date().getTime() - new Date(blacklist.date).getTime() >= 60 * blacklist.delay) {
+			if (blacklist.target_id === data.memberId && blacklist.type === "ban") {
+				if (new Date().getTime() / 1000 - new Date(blacklist.date).getTime() / 1000 >= 60 * blacklist.delay) {
 					await this.prisma.blacklist.delete({
 						where: {
 							id: blacklist.id,
 						}
 					});
-					console.log("blacklist deleted")
 					break ;
 				}
 				else
-					return (console.log("nulkl"), null); // ERRRRRRRRRRRROOOOOOOOOOOOOOOOOOOR
+					throw ForbiddenException ;
 			}
 		}
 		if (chan.admin.length === 0)
