@@ -20,8 +20,8 @@ export class ChannelService {
 				blacklist: true,
 				admin: true,
 				members: true,
-				owner: true
-			}
+				owner: true,
+			},
 		});
 	}
 
@@ -161,7 +161,7 @@ export class ChannelService {
 					blacklist: true,
 					admin: true,
 					members: true,
-					owner: true
+					owner: true,
 				}
 			}) ;
 		}
