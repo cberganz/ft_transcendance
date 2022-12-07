@@ -16,20 +16,12 @@ class Ball {
     this.speed = 100;
     this.dx = this.initializeDirection()[0];
     this.dy = this.initializeDirection()[1];
-    // this.initializeDirection();
     this.relativePosition = [1, 1];
   }
 
   private getRandomRange(min: number, max: number): number {
     return Math.random() * (max - min) + min;
   }
-
-  //   initializeDirection(): void {
-  //     this.dx = this.getRandomRange(0.4, 0.8);
-  //     this.dy = 1 - this.dx;
-  //     Math.random() < 0.5 ? (this.dx *= 1) : (this.dx *= -1);
-  //     Math.random() < 0.5 ? (this.dy *= 1) : (this.dy *= -1);
-  //   }
 
   initializeDirection(): Array<number> {
     const arr: Array<number> = [];
