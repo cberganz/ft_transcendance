@@ -64,9 +64,11 @@ export class ChatCommands extends React.Component<Props> {
         const chan = getChan(chanId, state);
         if (chan?.type === 'dm')
             return ;
-        axios.post("http://localhost:3000/channel/Member/", {channelId: chanId, memberId: state.actualUser.user.id})
+        if (chan?.type === "private" && inputs.length <= 1)
+            return alert("Please enter a password.");
+        axios.post("http://localhost:3000/channel/Member/", {channelId: chanId, memberId: state.actualUser.user.id, pwd: inputs[1]})
             .then(response => this.socket.emit('updateChanFromClient', response.data))
-            .catch(error => alert("You're banned from this chan.")) 
+            .catch(error => alert("Can't access this channel.")) 
     }
     
     LeaveChan(inputs: string[], state: ChatState, chanId: any) {
