@@ -5,7 +5,7 @@
       "ChannelMenu ChatDisplay"
       "ChannelMenu ChatDisplay";
       width: 100vw;
-      height: 93vh;
+      height: 95vh;
   }
   
  
@@ -22,7 +22,7 @@
     grid-auto-rows: 1fr;
     gap: 0px 0px;
     grid-auto-flow: row;
-    height: 50px;
+    height: 48px;
   }
   .ChannelItem {
     border-top: solid;
@@ -36,6 +36,7 @@
       "ChatHeader"
       "MessageDisplay"
       "SendMessage";
+    position: relative;
   }
   .ChatHeader { 
     grid-area: ChatHeader;
@@ -51,14 +52,17 @@
     padding-left: 10px;
     padding-right: 25px;
     overflow-y: scroll;
-    height: 80vh;
+    height: 86vh;
   }
   
   .SendMessage { 
     grid-area: SendMessage;
-    padding-left:10px;
-    padding-right:10px;
+    margin-left: 0.5vw;
     margin-top: 5px;
+    margin-bottom: 5px;
+    position: absolute;
+    bottom: 0;
+    width: 99%;
   }
   
 
@@ -94,4 +98,36 @@
     margin-left: 50px;
     margin-right: 30%;
     text-align: left;
+  }
+   
+  .searchBar {
+    width: 98%;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 8px;
+  }
+  
+  #searchQueryInput {
+    width: 100%;
+    height: 2rem;
+    background: white;
+    outline: none;
+    border: none;
+    border-radius: 1.625rem;
+    padding: 0 3.5rem 0 1.5rem;
+    font-size: 1rem;
+    margin-left: 0.2rem;
+  }
+  
+  #searchQuerySubmit {
+    width: 3.5rem;
+    height: 2.rem;
+    margin-left: -3.5rem;
+    background: none;
+    border: none;
+    outline: none;
+  }
+  
+  #searchQuerySubmit:hover {
+    cursor: pointer;
   }

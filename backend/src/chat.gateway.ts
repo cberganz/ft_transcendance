@@ -78,7 +78,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
     let isInChan: boolean;
     let withoutMessageChan = {... chan};
     delete withoutMessageChan.Message;
-    
+
     this.server.to("chat" + chan.id).emit('updateChanFromServer', chan)
     for (let [userSocket, login] of this.userSockets) {
       isInChan = false;

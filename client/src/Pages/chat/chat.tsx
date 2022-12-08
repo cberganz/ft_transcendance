@@ -1,4 +1,4 @@
-import ChannelDisplay from "./channel/channelDisplay";
+import ChannelDisplay from "./channel/channels/channelDisplay";
 import MessageDisplay from "./message/msgDisplay/messageDisplay";
 import ChatHeader from "./message/msgDisplay/header";
 import SendBox from "./message/sendMsg/SendBox";
@@ -13,6 +13,7 @@ import { InfoDialog } from "./channel/infoDialog"
 import { ChatCommands } from './chatCommands'
 import { selectCurrentUser } from '../../Hooks/authSlice'
 import { useSelector } from "react-redux"
+import SearchBar from "./channel/searchBar"
 
 function ChatWithHook(component: any) {
   return function WrappedChat(props: any) {
@@ -59,7 +60,7 @@ class Chat extends React.Component<Props, ChatState> {
       notJoinedChans: await this.getNotJoinedChans(),
       userList: await this.getUserList(),
     }
-    for (const chan of this.state.joinedChans)
+    for (const chan of ChatData.joinedChans) 
       this.socket.emit('joinChatRoom', chan.id)
     this.setState(ChatData);
   }
@@ -186,6 +187,7 @@ class Chat extends React.Component<Props, ChatState> {
       
         <div className="ChannelMenu">
             <HeaderChannels state={this.state} socket={this.socket} />
+            <SearchBar state={this.state} socket={this.socket} openConvHandler={this.openConvHandler}  />
             <ChannelDisplay state={this.state} socket={this.socket} 
                   openConvHandler={this.openConvHandler} chatCommands={this.chatCommands} />
             <InfoDialog />

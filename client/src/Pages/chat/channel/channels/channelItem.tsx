@@ -5,14 +5,14 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import LockIcon from '@mui/icons-material/Lock';
-import '../chat.css'
+import '../../chat.css'
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
-import { isBlocked } from '../utils';
+import { isBlocked } from '../../utils';
 
 
 export function DialogChannelItem(props: any) {
