@@ -25,7 +25,10 @@ export function DialogChannelItem(props: any) {
   };
   const joinChan = (e: any) => {
     e.preventDefault()
-    props.props.chatCommands.JoinChan(["/join ", e.target.password.value], props.props.state, props.chan.id);
+    let pwd = "";
+    if (e.target.password !== undefined)
+      pwd = e.target.password.value;
+    props.props.chatCommands.JoinChan(["/join ", pwd], props.props.state, props.chan.id);
   }
   const lastMsg = props.chan?.Message?.slice(-1);
   return (

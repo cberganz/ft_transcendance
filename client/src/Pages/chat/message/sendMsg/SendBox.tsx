@@ -37,9 +37,8 @@ function onKeyPress(e: any, props: any) {
 
     target.value = ""
     if (value.length) {
-      if (value[0] === '/') {
+      if (value[0] === '/')
         props.chatCommands.handler(value, props.state, props.state.actualUser.openedConvID);
-      }
       else 
         newMessage(value, props);
     }

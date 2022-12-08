@@ -27,11 +27,9 @@ interface Props {
 class Chat extends React.Component<Props, ChatState> {
   constructor(props: any) {
     super(props)
-
     this.openConvHandler = this.openConvHandler.bind(this)
     
-    // FILL WITH API REQUESTS
-    this.ChatData = {
+    this.state = {
       actualUser: {
         openedConvID: -1,
         user: {
@@ -45,20 +43,17 @@ class Chat extends React.Component<Props, ChatState> {
       notJoinedChans: [],
       userList: [],
     };
+    
     this.socket = io("http://localhost:3000/chat"); 
-    this.userID = this.props.user.id;
     this.getData();
-    this.state = this.ChatData;
     this.chatCommands = new ChatCommands(this.socket, this.openConvHandler);
   }
   private chatCommands: ChatCommands
   private socket
-  private ChatData: ChatState
-  private userID
 
   /** INIT DATA **/
   async getData(): Promise<void> {
-    this.ChatData = {
+    let ChatData = {
       actualUser: await this.getActualUser(),
       joinedChans: await this.getJoinedChans(),
       notJoinedChans: await this.getNotJoinedChans(),
@@ -66,35 +61,36 @@ class Chat extends React.Component<Props, ChatState> {
     }
     for (const chan of this.state.joinedChans)
       this.socket.emit('joinChatRoom', chan.id)
+    this.setState(ChatData);
   }
   async getActualUser(): Promise<any> {
-    this.ChatData.actualUser = {
+    let actualUser = {
       openedConvID: -1,
       user: await axios.get("http://localhost:3000/user/" + this.props.user.id)
         .then(response => response.data)
         .catch(error => alert("getActualUser " + error.status + ": " + error.message))
     }
-    this.socket.emit('initTable', this.ChatData.actualUser.user.username)
-    return (this.ChatData.actualUser)
+    this.socket.emit('initTable', actualUser.user.username)
+    return (actualUser)
   }
   async getJoinedChans(): Promise<any> {
-    this.ChatData.joinedChans = await axios.get("http://localhost:3000/channel/joinedChannels/" + this.userID)
+    let joinedChans = await axios.get("http://localhost:3000/channel/joinedChannels/" + this.props.user.id)
       .then(response => response.data)
       .catch(error => alert("getJoinedChan " + error.status + ": " + error.message))
-    sortChannels(this.ChatData.joinedChans)
-    return (this.ChatData.joinedChans)
+    sortChannels(joinedChans)
+    return (joinedChans)
     }
   async getNotJoinedChans(): Promise<any> {
-    this.ChatData.notJoinedChans = await axios.get("http://localhost:3000/channel/notJoinedChannels/" + this.userID)
+    let notJoinedChans = await axios.get("http://localhost:3000/channel/notJoinedChannels/" + this.props.user.id)
       .then(response => response.data)
       .catch(error => alert("getNotJoinedChans " + error.status + ": " + error.message))
-    return (this.ChatData.notJoinedChans)
+    return (notJoinedChans)
   }
   async getUserList(): Promise<any> {
-    this.ChatData.userList = await axios.get('http://localhost:3000/user/list/' + this.userID)
+    let userList = await axios.get('http://localhost:3000/user/list/' + this.props.user.id)
       .then(response => response.data)
       .catch(error => alert("getUserList " + error.status + ": " + error.message))
-    return (this.ChatData.userList)
+    return (userList)
   }
     
     /** RENDERING FUNCTIONS */

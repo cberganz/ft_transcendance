@@ -95,7 +95,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   @SubscribeMessage('newMsgFromClient')
   handleNewMessage(socket: Socket, message: {room: string, message: any}) : void {
-    // check if user not MUTE
     this.server.to(message.room).emit('newMsgFromServer', message.message)
   }
 
@@ -107,7 +106,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
   @SubscribeMessage('leaveChatRoom')
   handleLeaveRoom(socket: Socket, chanID: number): void {
     socket.leave("chat" + chanID);
-    // remove member from chan members (BAN)
   }
 
   @SubscribeMessage('updateUserFromClient')
