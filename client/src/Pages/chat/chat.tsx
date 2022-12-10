@@ -14,6 +14,7 @@ import { ChatCommands } from './chatCommands'
 import { selectCurrentUser } from '../../Hooks/authSlice'
 import { useSelector } from "react-redux"
 import SearchBar from "./channel/searchBar"
+import { usersStatusSocket } from "../../Router/Router";
 
 function ChatWithHook(component: any) {
   return function WrappedChat(props: any) {
@@ -48,12 +49,13 @@ class Chat extends React.Component<Props, ChatState> {
     this.socket = io("http://localhost:3000/chat"); 
     this.getData();
     this.chatCommands = new ChatCommands(this.socket, this.openConvHandler);
+    usersStatusSocket.emit("updateStatus", "online");
   }
   private chatCommands: ChatCommands
   private socket
 
   /** INIT DATA **/
-  async getData(): Promise<void> {
+  async getData() {
     let ChatData = {
       actualUser: await this.getActualUser(),
       joinedChans: await this.getJoinedChans(),
@@ -64,7 +66,7 @@ class Chat extends React.Component<Props, ChatState> {
       this.socket.emit('joinChatRoom', chan.id)
     this.setState(ChatData);
   }
-  async getActualUser(): Promise<any> {
+  async getActualUser(): Promise<actualUser> {
     let actualUser = {
       openedConvID: -1,
       user: await axios.get("http://localhost:3000/user/" + this.props.user.id)
@@ -74,20 +76,20 @@ class Chat extends React.Component<Props, ChatState> {
     this.socket.emit('initTable', actualUser.user.username)
     return (actualUser)
   }
-  async getJoinedChans(): Promise<any> {
+  async getJoinedChans(): Promise<Channel[]> {
     let joinedChans = await axios.get("http://localhost:3000/channel/joinedChannels/" + this.props.user.id)
       .then(response => response.data)
       .catch(error => alert("getJoinedChan " + error.status + ": " + error.message))
     sortChannels(joinedChans)
     return (joinedChans)
     }
-  async getNotJoinedChans(): Promise<any> {
+  async getNotJoinedChans(): Promise<Channel[]> {
     let notJoinedChans = await axios.get("http://localhost:3000/channel/notJoinedChannels/" + this.props.user.id)
       .then(response => response.data)
       .catch(error => alert("getNotJoinedChans " + error.status + ": " + error.message))
     return (notJoinedChans)
   }
-  async getUserList(): Promise<any> {
+  async getUserList(): Promise<User[]> {
     let userList = await axios.get('http://localhost:3000/user/list/' + this.props.user.id)
       .then(response => response.data)
       .catch(error => alert("getUserList " + error.status + ": " + error.message))
@@ -173,15 +175,33 @@ class Chat extends React.Component<Props, ChatState> {
     }
     this.setState(ChatData);
   }
+
+  socketUpdateUsersStatus(usersStatusList: any) {
+    let ChatData: ChatState = structuredClone(this.state);
+
+    ChatData.statusList = new Map(JSON.parse(usersStatusList));
+    this.setState(ChatData);
+  }
   
+  async socketNewUser() {
+    let ChatData: ChatState = structuredClone(this.state);
+
+    ChatData.userList = await this.getUserList();
+    this.setState(ChatData);
+  }
   /** CHAT COMMANDS **/
   
   render() {
+    console.log(this.state.statusList)
+
     this.socket.off('updateChanFromServer').on('updateChanFromServer', (chan) => this.socketUpdateChan(chan));
     this.socket.off('newChanFromServer').on('newChanFromServer', (chan) => this.socketNewChan(chan));
     this.socket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.socketNewMsg(msg));
     this.socket.off('updateUserFromServer').on('updateUserFromServer', (user) => this.socketUpdateUser(user));
     this.socket.off('updateUserlistFromServer').on('updateUserlistFromServer', (user) => this.socketUpdateUserlist(user));
+    usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (statusList) => this.socketUpdateUsersStatus(statusList));
+    usersStatusSocket.off('newUserFromServer').on('newUserFromServer', () => this.socketNewUser());
+
     return (
     <div className="chatContainer">
       

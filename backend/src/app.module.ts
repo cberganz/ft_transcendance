@@ -12,6 +12,7 @@ import { MessageModule } from './message/message.module';
 import { GameGateway } from './game.gateway';
 import { AuthModule } from './auth/auth.module';
 import { ChatGateway } from './chat.gateway';
+import { AppGateway } from './app.gateway';
 
 @Module({
   imports: [
@@ -25,6 +26,6 @@ import { ChatGateway } from './chat.gateway';
 		AuthModule
 	],
   controllers: [AppController],
-  providers: [AppService, PrismaService, GameGateway, ChatGateway],
+  providers: [AppService, PrismaService, GameGateway, ChatGateway, AppGateway],
 })
 export class AppModule {}
