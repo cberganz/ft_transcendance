@@ -14,9 +14,14 @@ import { AuthModule } from './auth/auth.module';
 import { ChatGateway } from './chat.gateway';
 import { MulterModule } from '@nestjs/platform-express';
 import { FileModule } from './file/file.module';
+import { getEnvPath } from './utils/env.helper';
+import { ConfigModule } from '@nestjs/config';
+
+const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
 
 @Module({
   imports: [
+		ConfigModule.forRoot({ envFilePath, isGlobal: true }),
 		PrismaModule,
 		UserModule,
 		ChannelModule,

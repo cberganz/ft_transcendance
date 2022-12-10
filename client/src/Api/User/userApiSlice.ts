@@ -18,7 +18,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
 			query: ({id, newUserData}) => ({
 				url: `/user/${id}`,
 				method: 'PUT',
-				body: { ...newUserData }
+				newUserData
 			})
 		}),
 	})

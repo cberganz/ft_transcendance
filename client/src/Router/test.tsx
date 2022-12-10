@@ -1,12 +1,32 @@
 import * as React from "react"
-import { useUpdateUserMutation, useGetUserMutation } from "../Api/User/userApiSlice"
+import { 
+	useUpdateUserMutation,
+	useGetUserMutation
+} from "../Api/User/userApiSlice"
 import { selectCurrentUser } from '../Hooks/authSlice'
 import { useSelector } from "react-redux"
-import { Button } from '@mui/material';
+import { Button, Avatar } from '@mui/material';
 import useSimpleRequest from '../Api/useSimpleRequest';
 import useAlert from "../Hooks/useAlert";
 import axios from "axios";
+import { AvatarUpload } from "../Components/AvatarUpload";
 
+// const AvatarUpload = () => {
+// 	const [file, setFile] = React.useState('')
+
+// 	const handleChange = (event: any) => {
+// 		setFile(URL.createObjectURL(event.target.files[0]))
+// 	}
+// 	return (
+// 		<div>
+// 		  <input type="file" onChange={handleChange}/>
+// 		  <Avatar 
+// 		  	src={file}
+// 			sx={{ width: 100, height: 100 }}
+// 			/>
+// 		</div>
+// 	)
+// }
 
 const UploadFile = () => {
     const [file, setFile] = React.useState<any>();
@@ -27,11 +47,9 @@ const UploadFile = () => {
             // headers:{
             //     Authorization: `Bearer your token`
             // },
-            data:formData
+            data: formData
         }).then((r: any) => r);
-
         console.log(upload);
-        
     }
 
     return (
@@ -75,7 +93,8 @@ export function Dashboard() {
 			<h1>Dashboard</h1>
 			 <Content></Content>
 			 <UploadFile/>
-			 <img src="http://localhost:3000/file/avatar/test.png"></img>
+			 {/* <AvatarUpload/> */}
+			 {/* <img src="http://localhost:3000/file/avatar/test.png"></img> */}
 		</div>
 	);
 }

@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-	Avatar,
 	List,
 	ListItem,
 	ListItemAvatar,
@@ -12,13 +11,12 @@ import {
 	ListItemIcon,
 	Button,
 } from '@mui/material';
-import { blue } from '@mui/material/colors';
-import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { selectCurrentUser } from '../Hooks/authSlice'
-import { useSelector } from "react-redux"
-import { useUpdateUserMutation } from "../Api/User/userApiSlice"
+import { selectCurrentUser, selectCurrentToken, setCredentials } from '../Hooks/authSlice'
+import { useSelector, useDispatch } from "react-redux"
 import useAlert from "../Hooks/useAlert";
+import { AvatarUpload } from './AvatarUpload';
+import axios from 'axios'
 
 export interface SimpleDialogProps {
 	open: boolean;
@@ -30,68 +28,86 @@ function SimpleDialog(props: SimpleDialogProps) {
 	const { onClose, open } = props;
 	const [username, setMessage] = React.useState(currentUser.username);
 	const { setAlert } = useAlert();
-	const [updateUser] = useUpdateUserMutation()
+    const [file, setFile] = React.useState<any>();
+	const dispatch = useDispatch()
+	const token = useSelector(selectCurrentToken)
 
-	const handleChange = (event: any) => {
+	const handleMessageChange = (event: any) => {
 	  setMessage(event.target.value);
 	};
-
 
 	const handleClose = () => {
 		onClose(username);
 	};
 
-	const handleSubmit = (e: any) => {
+	const onFileChange = (file: React.ChangeEvent) => {
+        const { files } = file.target as HTMLInputElement;
+        if (files && files.length !== 0) {
+          setFile(files[0]);
+        }
+    }
+
+	const handleSubmit = async (e: any) => {
 		e.preventDefault()
 		if (!username.length) {
 			setAlert("Username must be provided", "error")
 			return ;
 		}
-		const input = {
-			id: currentUser.id,
-			newUserData: {
-				username: username,
+		const formData = new FormData();
+		formData.append('file', file, currentUser.login)
+		formData.append('username', username)
+		const upload = await axios({
+			withCredentials: true,
+			url: `http://localhost:3000/user/${currentUser.id}`,
+			method: "put",
+			// headers:{
+			// 	Authorization: `Bearer ${currentUser.token}`
+			// },
+			data: formData
+		})
+		.then((req: any) => {
+			console.log(req.data)
+			if (req.status !== 200) {
+				setAlert("Failed updating userdata", "error")
+				return
 			}
-		}
-		updateUser(input)
-			.then(() => setAlert("Username has been updated", "success"))// verifier que le username n'existe pas deja
-			.catch(() => setAlert("Failed updating userdata", "error"))
+			setAlert("Username has been updated", "success")
+			dispatch(setCredentials({ user: req.data, accessToken: token }))
+		})
+		.catch(() => setAlert("Failed updating userdata", "error"))
 		handleClose()
 	}
 
 
 	return (
 		<Dialog onClose={handleClose} open={open}>
-		<DialogTitle sx={{width:'300px'}}>Settings</DialogTitle>
-		<List sx={{ pt: 0 }}>
-			<ListItem>
-				<ListItemAvatar>
-					<Avatar sx={{
-						width: 56,
-						height: 56,
-						bgcolor: blue[100],
-						color: blue[600]
-					}}>
-						<PersonIcon />
-					</Avatar>
-				</ListItemAvatar>
-			</ListItem>
-			<ListItem>
-				<TextField
-				type="text"
-				id="username"
-				name="username"
-				label="update username"
-				onChange={handleChange}
-				value={username}
-				/>
-			</ListItem>
-			<ListItem>
-				<Button onClick={handleSubmit} variant="contained" disableElevation>
-					update changes
-				</Button>
-			</ListItem>
-		</List>
+		<form onSubmit={e => e.preventDefault()}>
+			<DialogTitle sx={{width:'300px'}}>Settings</DialogTitle>
+			<List sx={{ pt: 0 }}>
+				<ListItem>
+					<ListItemAvatar>
+						<AvatarUpload onChange={onFileChange}/>
+					</ListItemAvatar>
+				</ListItem>
+				<br/>
+				<ListItem>
+					<TextField
+					type="text"
+					id="username"
+					name="username"
+					label="update username"
+					onChange={handleMessageChange}
+					value={username}
+					/>
+				</ListItem>
+				<br/>
+				<ListItem>
+					<Button onClick={handleSubmit} variant="contained" disableElevation>
+						update changes
+					</Button>
+				</ListItem>
+			</List>
+		</form>
 		</Dialog>
 	);
 }

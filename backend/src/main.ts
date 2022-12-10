@@ -2,10 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+var passport = require('passport');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser())
+  app.use(passport.initialize());
   app.enableCors({
 	credentials: true,
 	origin: ['http://localhost:3001', 'http://127.0.0.1:3001']

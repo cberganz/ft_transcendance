@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
 	AppBar,
+	Avatar,
 	Box,
 	Toolbar,
 	IconButton,
@@ -111,7 +112,7 @@ function ProfileBox() {
 					sx={{cursor:'pointer'}}
 				>
 					<Grid item xs={4}>
-							<AccountCircle/>
+						<Avatar src={user.avatar}/>
 					</Grid>
 					<Grid item xs={8}>
 						<Typography sx={{ fontWeight:'bold'}}>{user.username}</Typography>
