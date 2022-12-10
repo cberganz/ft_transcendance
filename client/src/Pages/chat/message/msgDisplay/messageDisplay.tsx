@@ -6,37 +6,46 @@ import { Player } from '@lottiefiles/react-lottie-player';
 import '../../chat.css'
 import { Message, User, Channel } from '../../stateInterface'
 import { getChan, isBlocked } from '../../utils'
+import Tooltip from '@mui/material/Tooltip';
 
-function MessageItemReceiver(author: User, text: String, chan: Channel | undefined, actualUser: User) {
-  if (author.avatar === undefined || author.avatar === null)
-    author.avatar = "";
-  if (chan === undefined || (isBlocked(actualUser, author) && chan.type != 'dm'))
+function MessageItemReceiver(msg: Message, chan: Channel | undefined, actualUser: User) {
+  if (msg.author.avatar === undefined || msg.author.avatar === null)
+    msg.author.avatar = "";
+  if (chan === undefined || (isBlocked(actualUser, msg.author) && chan.type != 'dm'))
     return (<div></div>)
+  let date: Date = new Date(msg.date);
+  let msgDate: String = String(date.getDay()) + "/" + String(date.getMonth()) + "/" + String(date.getFullYear()) + " " + String(date.getHours()) + ":" + String(date.getMinutes()); 
   return (
     <div className="leftChat">
-      <div className="leftChatAvatar"><Avatar src={author.avatar.valueOf()}></Avatar></div>
+      <div className="leftChatAvatar"><Avatar src={msg.author.avatar.valueOf()}></Avatar></div>
+      <Tooltip title={msgDate}>
       <div className="leftChatContent">
         <Alert severity="success" icon={false}>
-          <b>{author.username}</b><br />
-          {text}
+          <b>{msg.author.username}</b><br />
+          {msg.content}
         </Alert>
       </div>
+      </Tooltip>
     </div>
   )
 }
 
-function MessageItemSender(author: User, text: String) {
-  if (author.avatar === undefined || author.avatar === null)
-    author.avatar = "";
+function MessageItemSender(msg: Message) {
+  if (msg.author.avatar === undefined || msg.author.avatar === null)
+    msg.author.avatar = "";
+  let date: Date = new Date(msg.date);
+  let msgDate: String = String(date.getDay()) + "/" + String(date.getMonth()) + "/" + String(date.getFullYear()) + " " + String(date.getHours()) + ":" + String(date.getMinutes()); 
   return (
     <div className="rightChat">
+      <Tooltip title={msgDate}>
       <div className="rightChatContent">
         <Alert severity="info" icon={false}>
-          <AlertTitle><b>{author.username}</b></AlertTitle>
-          {text}
+          <AlertTitle><b>{msg.author.username}</b></AlertTitle>
+          {msg.content}
         </Alert>
       </div>
-      <div className="rightChatAvatar"><Avatar src={author.avatar.valueOf()}></Avatar></div>
+      </Tooltip>
+      <div className="rightChatAvatar"><Avatar src={msg.author.avatar.valueOf()}></Avatar></div>
     </div>
   )
 }
@@ -61,8 +70,8 @@ export default function MessageDisplay(props: any) {
       <Stack sx={{ width: '100%' }} spacing={2}>
           {chan.Message.map((msg: Message) => (
             <div key={msg.id}>
-              {msg.author.id === props.state.actualUser.user.id ? MessageItemSender(msg.author, msg.content) : 
-                MessageItemReceiver(msg.author, msg.content, chan, props.state.actualUser.user)}
+              {msg.author.id === props.state.actualUser.user.id ? MessageItemSender(msg) : 
+                MessageItemReceiver(msg, chan, props.state.actualUser.user)}
             </div>
           ))}
       </Stack>

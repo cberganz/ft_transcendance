@@ -22,6 +22,7 @@ model User {
   p2_games    Game[]       @relation("player2")
   friendship  Friendship[]
   blacklist   Blacklist[]
+  status      String?
 }
 
 model Channel {

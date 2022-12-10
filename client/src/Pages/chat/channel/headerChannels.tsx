@@ -7,13 +7,6 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import Box from '@mui/material/Box';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import CreateSharpIcon from '@mui/icons-material/CreateSharp';
-import AddCircleOutlineSharpIcon from '@mui/icons-material/AddCircleOutlineSharp';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
 import { ChatProps, User, Channel } from '../stateInterface'
@@ -79,7 +72,7 @@ function CreateChannelButton(props: any) {
           <Icon icon="jam:write"
             onClick={handleClickOpen}
             fontSize='medium'
-            style={{color: 'black', cursor: 'pointer', marginTop: '14px', marginLeft: '70%'}}
+            style={{color: 'black', cursor: 'pointer', marginTop: '14px', marginLeft: '75%'}}
             width="23" height="23" />
           </Tooltip>
         <form  onSubmit={(e) => {createChannel(e)}}>
@@ -121,10 +114,10 @@ export default function HeaderChannels(props: ChatProps) {
   let avatar = props.state.actualUser.user.username;
     return (
     <div className='ChannelHeader'>
-        <Avatar 
+        <Tooltip title={props.state.actualUser.user.username}><Avatar 
           alt={avatar.toString()} 
-          src={""}
-          sx={{ width: 30, height: 30, marginTop: '10px', marginLeft: '15px' }} />
+          src={avatar.toString()}
+          sx={{ width: 30, height: 30, marginTop: '10px', marginLeft: '15px' }} /></Tooltip>
         <CreateChannelButton props={props} />
     </div>
   )

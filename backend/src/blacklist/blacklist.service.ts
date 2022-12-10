@@ -60,7 +60,7 @@ export class BlacklistService {
 				break ;
 			}
 		}
-		if (chan.type !== "dm" && chan.owner.id !== data.creator.connect.id) {
+		if (chan.type !== "dm" && chan.owner?.id !== data.creator.connect.id) {
 			for (let admin of chan.admin) {
 				if (admin.id === data.target.connect.id){
 					isAdmin = false;
