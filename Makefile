@@ -1,6 +1,6 @@
 # VARIABLES
 
-COMPOSE=docker-compose -p transcendance
+COMPOSE=docker compose -p transcendance
 
 # GENERAL RULES
 

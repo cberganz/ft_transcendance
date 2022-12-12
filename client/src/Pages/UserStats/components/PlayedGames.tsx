@@ -1,6 +1,7 @@
 import * as React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 
 const columns: GridColDef[] = [
@@ -54,30 +55,33 @@ const columns: GridColDef[] = [
 		flex: 1,
 		align: 'center',
 		headerAlign: 'center',
+		renderCell: (params) => {
+			let chip_color: "primary" | "warning" | "error";
+			(params.value === 'Winner')
+				? chip_color = "primary"
+				: (params.value === 'Loser') 
+					? chip_color = "error"
+					: chip_color = "warning"
+			return <Chip color={chip_color} label={params.value}></Chip>;
+		}
 	},
 ];
 
-const rows = [
-	{ id: 1, date: '12/01/2022', playerScore: 2,  opponent: 'Robin',  opponentScore: 12, result: 'Eq'	  },
-	{ id: 2, date: '12/01/2022', playerScore: 2,  opponent: 'Celine', opponentScore: 12, result: 'Loser'  },
-	{ id: 3, date: '12/01/2022', playerScore: 2,  opponent: 'Ugo',    opponentScore: 12, result: 'Loser'  },
-	{ id: 4, date: '12/01/2022', playerScore: 2,  opponent: 'Julien', opponentScore: 12, result: 'Loser'  },
-	{ id: 5, date: '12/01/2022', playerScore: 12, opponent: 'Robin',  opponentScore: 2,  result: 'Winner' },
-	{ id: 6, date: '12/01/2022', playerScore: 12, opponent: 'Celine', opponentScore: 2,  result: 'Winner' },
-	{ id: 7, date: '12/01/2022', playerScore: 12, opponent: 'Ugo',    opponentScore: 2,  result: 'Winner' },
-	{ id: 8, date: '12/01/2022', playerScore: 12, opponent: 'Julien', opponentScore: 2,  result: 'Winner' },
-];
-
-export default function PlayedGames() {
-	return (
-		<React.Fragment>
-    	  <CssBaseline />
-			<Box sx={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-				<DataGrid
-		  		    rows={rows}
-		  		    columns={columns}
-				/>
-	      	</Box>
-    	</React.Fragment>
-	);
+export default class PlayedGames extends React.Component<{ games: any }, {}> {
+	render() {
+		return (
+			<React.Fragment>
+				<CssBaseline />
+					<Box sx={{ height: 400 }}>
+					{ this.props.games ?
+							(<DataGrid
+								rows={this.props.games}
+								columns={columns}
+							/>)
+					:
+						("No game to display")
+					}
+					</Box>
+			</React.Fragment>);
+	}
 }

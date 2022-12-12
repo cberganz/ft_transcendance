@@ -32,19 +32,25 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-export default function BadgeAvatar() {
-  return (
-      <StyledBadge
-        overlap="circular"
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        variant="dot"
-		sx={{ width: '100%', height: '100%' }}
-      >
-        <Avatar
-			alt="Charles Berganza"
-			src="https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=400"
-			sx={{ width: '100%', height: '100%' }}
-		/>
-      </StyledBadge>
-  );
+export default class BadgeAvatar extends React.Component<{
+		username: string,
+		avatar: string
+	}, {}> {
+
+	render() {
+		return (
+		    <StyledBadge
+		      overlap="circular"
+		      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+		      variant="dot"
+		  	sx={{ width: '100%', height: '100%' }}
+		    >
+		      <Avatar
+		  		alt={this.props.username}
+		  		src={this.props.avatar}
+		  		sx={{ width: '100%', height: '100%' }}
+		  	/>
+		    </StyledBadge>
+		);
+	}
 }

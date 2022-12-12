@@ -24,6 +24,7 @@ function ChatWithHook(component: any) {
 interface Props {
   user: any;
 }
+
 class Chat extends React.Component<Props, ChatState> {
   constructor(props: any) {
     super(props)
