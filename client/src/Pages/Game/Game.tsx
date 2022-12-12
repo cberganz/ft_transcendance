@@ -181,6 +181,10 @@ function Game() {
       }
     };
 
+    const updateAlreadyStarted = () => {
+      startRef.current = true;
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
     window.addEventListener("blur", handleBlur);
@@ -193,6 +197,7 @@ function Game() {
     socket.on("reconnectNotStartClient", reconnectNotStart);
     socket.on("reconnectStartClient", reconnectStart);
     socket.on("reconnectReadyClient", reconnectReady);
+    socket.on("updateAlreadyStarted", updateAlreadyStarted);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
@@ -207,6 +212,7 @@ function Game() {
       socket.off("reconnectNotStartClient", reconnectNotStart);
       socket.off("reconnectStartClient", reconnectStart);
       socket.off("reconnectReadyClient", reconnectReady);
+      socket.off("updateAlreadyStarted", updateAlreadyStarted);
       socket.disconnect();
     };
   });
@@ -275,8 +281,9 @@ function Game() {
     p1.setX(widthRef.current / 50);
     p2.setX(widthRef.current - boardWidthRef.current - widthRef.current / 50);
     p2.setY(heightRef.current * p2.getRelativePosition());
-    ball.setX(widthRef.current / 2 - ballSizeRef.current / 2);
-    ball.setY(heightRef.current / 2 - ballSizeRef.current / 2);
+    // ball.setX(ball.getX() - ballSizeRef.current / 2);
+    // ball.setY(ball.getY() - ballSizeRef.current / 2);
+    ball.resetPosition();
     ball.setRelativePosition([
       ball.getX() / widthRef.current,
       ball.getY() / heightRef.current,
@@ -483,6 +490,14 @@ function Game() {
     timerRef.current && clearTimeout(timerRef.current);
     p1.setScore(0);
     p2.setScore(0);
+    socket.emit("updateScoreServer", {
+      playerNumber: 1,
+      score: 0,
+    });
+    socket.emit("updateScoreServer", {
+      playerNumber: 2,
+      score: 0,
+    });
     p1.resetPosition();
     p2.resetPosition();
   }

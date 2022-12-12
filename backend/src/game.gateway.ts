@@ -15,6 +15,11 @@ interface Room {
   players: string[];
   spectators: string[];
   ready: boolean[];
+  pause: boolean[];
+  playerPosition: number[];
+  ballPosition: number[];
+  ballDirection: number[];
+  score: number[];
 }
 
 @WebSocketGateway({
@@ -39,12 +44,29 @@ export class GameGateway
       `Client connected: ID ${client.handshake.query.id.toString()}`
     );
     this.reconnectRoom(client);
+    if (this.findCurrentRoom(client) === -1) {
+      return;
+    }
+    if (this.isPlayerOne(client)) {
+      this.rooms[this.findCurrentRoom(client)].pause[0] = false;
+    } else {
+      this.rooms[this.findCurrentRoom(client)].pause[1] = false;
+    }
+    this.rejoinGame(client);
   }
 
   handleDisconnect(client: Socket) {
     this.logger.log(
       `Client disconnected: ID ${client.handshake.query.id.toString()}`
     );
+    if (this.findCurrentRoom(client) === -1) {
+      return;
+    }
+    if (this.isPlayerOne(client)) {
+      this.rooms[this.findCurrentRoom(client)].pause[0] = true;
+    } else {
+      this.rooms[this.findCurrentRoom(client)].pause[1] = true;
+    }
   }
 
   joinRoom(client: Socket): void {
@@ -94,6 +116,43 @@ export class GameGateway
     return false;
   }
 
+  rejoinGame(client: Socket): void {
+    if (this.findCurrentRoom(client) === -1) {
+      return;
+    }
+    const playerPosition: Array<number> = [...this.roomPlayerPosition(client)];
+    const ballPosition: Array<number> = [...this.roomBallPosition(client)];
+    const ballDirection: Array<number> = [...this.roomBallDirection(client)];
+    const score: Array<number> = [...this.roomScore(client)];
+    if (ballPosition[0] === undefined) {
+      return;
+    }
+    if (playerPosition[0] !== undefined) {
+      this.server
+        .to(this.roomId(client))
+        .emit("updatePlayerPosClient", { pos: playerPosition[0], id: 1 });
+    }
+    if (playerPosition[1] !== undefined) {
+      this.server
+        .to(this.roomId(client))
+        .emit("updatePlayerPosClient", { pos: playerPosition[1], id: 2 });
+    }
+    this.server.to(this.roomId(client)).emit("updateBallPosClient", {
+      posX: ballPosition[0],
+      posY: ballPosition[1],
+    });
+    this.server
+      .to(this.roomId(client))
+      .emit("updateBallDirClient", ballDirection);
+    this.server
+      .to(this.roomId(client))
+      .emit("updateScoreClient", { playerNumber: 1, score: score[0] });
+    this.server
+      .to(this.roomId(client))
+      .emit("updateScoreClient", { playerNumber: 2, score: score[1] });
+    this.server.to(this.roomId(client)).emit("updateAlreadyStarted");
+  }
+
   leaveRoom(client: Socket): void {
     if (this.findCurrentRoom(client) === -1) {
       return;
@@ -113,6 +172,9 @@ export class GameGateway
   @SubscribeMessage("msgToServer")
   handleMessage(client: Socket, message: string): void {
     if (this.findCurrentRoom(client) === -1) {
+      return;
+    }
+    if (this.roomPause(client)) {
       return;
     }
     if (
@@ -152,41 +214,76 @@ export class GameGateway
   }
 
   @SubscribeMessage("updatePlayerPosServer")
-  handleUpdatePlayerPos(client: Socket, param): void {
+  handleUpdatePlayerPos(
+    client: Socket,
+    param: { pos: number; id: number }
+  ): void {
     if (this.findCurrentRoom(client) === -1) {
       return;
     }
+    if (this.roomPause(client)) {
+      return;
+    }
     if (this.isPlayerOne(client)) {
+      if (param.id === 1) {
+        this.roomPlayerPosition(client)[0] = param.pos;
+      } else {
+        this.roomPlayerPosition(client)[1] = param.pos;
+      }
       this.server.to(this.roomId(client)).emit("updatePlayerPosClient", param);
     }
   }
 
   @SubscribeMessage("updateBallPosServer")
-  handleUpdateBallPos(client: Socket, param): void {
+  handleUpdateBallPos(
+    client: Socket,
+    param: { posX: number; posY: number }
+  ): void {
     if (this.findCurrentRoom(client) === -1) {
       return;
     }
+    if (this.roomPause(client)) {
+      return;
+    }
     if (this.isPlayerOne(client)) {
+      this.roomBallPosition(client)[0] = param.posX;
+      this.roomBallPosition(client)[1] = param.posY;
       this.server.to(this.roomId(client)).emit("updateBallPosClient", param);
     }
   }
 
   @SubscribeMessage("updateBallDirServer")
-  handleUpdateBallDirection(client: Socket, param): void {
+  handleUpdateBallDirection(client: Socket, param: Array<number>): void {
     if (this.findCurrentRoom(client) === -1) {
       return;
     }
+    if (this.roomPause(client)) {
+      return;
+    }
     if (this.isPlayerOne(client)) {
+      this.roomBallDirection(client)[0] = param[0];
+      this.roomBallDirection(client)[1] = param[1];
       this.server.to(this.roomId(client)).emit("updateBallDirClient", param);
     }
   }
 
   @SubscribeMessage("updateScoreServer")
-  handleUpdateScore(client: Socket, param): void {
+  handleUpdateScore(
+    client: Socket,
+    param: { playerNumber: number; score: number }
+  ): void {
     if (this.findCurrentRoom(client) === -1) {
       return;
     }
+    if (this.roomPause(client)) {
+      return;
+    }
     if (this.isPlayerOne(client)) {
+      if (param.playerNumber === 1) {
+        this.roomScore(client)[0] = param.score;
+      } else {
+        this.roomScore(client)[1] = param.score;
+      }
       this.server.to(this.roomId(client)).emit("updateScoreClient", param);
     }
   }
@@ -251,6 +348,11 @@ export class GameGateway
       players: ["", ""],
       spectators: [],
       ready: [false, false],
+      pause: [false, false],
+      playerPosition: [],
+      ballPosition: [],
+      ballDirection: [],
+      score: [0, 0],
     };
     this.rooms.push(newRoom);
   }
@@ -292,5 +394,31 @@ export class GameGateway
 
   roomReady(client: Socket): Array<boolean> {
     return this.rooms[this.findCurrentRoom(client)].ready;
+  }
+
+  roomPause(client: Socket): boolean {
+    if (
+      this.rooms[this.findCurrentRoom(client)].pause[0] ||
+      this.rooms[this.findCurrentRoom(client)].pause[1]
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  roomPlayerPosition(client: Socket): Array<number> {
+    return this.rooms[this.findCurrentRoom(client)].playerPosition;
+  }
+
+  roomBallPosition(client: Socket): Array<number> {
+    return this.rooms[this.findCurrentRoom(client)].ballPosition;
+  }
+
+  roomBallDirection(client: Socket): Array<number> {
+    return this.rooms[this.findCurrentRoom(client)].ballDirection;
+  }
+
+  roomScore(client: Socket): Array<number> {
+    return this.rooms[this.findCurrentRoom(client)].score;
   }
 }
