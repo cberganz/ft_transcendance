@@ -1,14 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
-import Ball from "./ball";
-import Player from "./player";
-import StartingScreen from "./StartingScreen";
-import io from "socket.io-client";
-import WaitingStart from "./WaitingStart";
-import "./game.css"
+import Ball from "./classes/Ball";
+import Player from "./classes/Player";
+import StartButton from "./components/StartButton/StartButton";
+import io, { Socket } from "socket.io-client";
+import EnterQueue from "./components/EnterQueue/EnterQueue";
+import "./game.css";
+import { selectCurrentUser } from "../../Hooks/authSlice";
+import { useSelector } from "react-redux";
+import LeaveButton from "./components/LeaveButton/LeaveButton";
 
 function Game() {
-  const socket = io("http://localhost:3000/game");
+  const socket: Socket = io("http://localhost:3000/game", {
+    query: {
+      id: useSelector(selectCurrentUser).id,
+    },
+  });
 
+  const [enterQueue, setEnterQueue] = useState<boolean>(false);
+  const [queueStatus, setQueueStatus] = useState<boolean>(false);
   const [startButton, setStartButton] = useState<boolean>(false);
   const [win, setWin] = useState<number>(0);
   const [ready, setReady] = useState<boolean>(false);
@@ -140,11 +149,40 @@ function Game() {
     const updateReadyListener = (value: boolean) => {
       if (value === true && ready === false) {
         setReady(true);
+      } else if (value === false && ready === true) {
+        resetGame();
       }
     };
 
-    const updateCancel = () => {
-      if (ready) resetGame(p1, p2);
+    const reconnectNotStart = () => {
+      if (!enterQueue) {
+        setEnterQueue(true);
+      }
+    };
+
+    const reconnectStart = () => {
+      if (!enterQueue) {
+        setEnterQueue(true);
+      }
+      if (!startButton) {
+        setStartButton(true);
+      }
+    };
+
+    const reconnectReady = () => {
+      if (!enterQueue) {
+        setEnterQueue(true);
+      }
+      if (!startButton) {
+        setStartButton(true);
+      }
+      if (!ready) {
+        setReady(true);
+      }
+    };
+
+    const updateAlreadyStarted = () => {
+      startRef.current = true;
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -156,7 +194,10 @@ function Game() {
     socket.on("updateBallPosClient", updateBallPos);
     socket.on("updateScoreClient", updateScore);
     socket.on("updateReadyClient", updateReadyListener);
-    socket.on("updateCancelClient", updateCancel);
+    socket.on("reconnectNotStartClient", reconnectNotStart);
+    socket.on("reconnectStartClient", reconnectStart);
+    socket.on("reconnectReadyClient", reconnectReady);
+    socket.on("updateAlreadyStarted", updateAlreadyStarted);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
@@ -168,7 +209,10 @@ function Game() {
       socket.off("updateBallPosClient", updateBallPos);
       socket.off("updateScoreClient", updateScore);
       socket.off("updateReadyClient", updateReadyListener);
-      socket.off("updateCancelClient", updateCancel);
+      socket.off("reconnectNotStartClient", reconnectNotStart);
+      socket.off("reconnectStartClient", reconnectStart);
+      socket.off("reconnectReadyClient", reconnectReady);
+      socket.off("updateAlreadyStarted", updateAlreadyStarted);
       socket.disconnect();
     };
   });
@@ -188,8 +232,8 @@ function Game() {
     const handleResize = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.width / factor;
-      heightRef.current = canvas.offsetHeight;
-      widthRef.current = canvas.offsetWidth;
+      heightRef.current = canvas.height;
+      widthRef.current = canvas.width;
       boardHeightRef.current = heightRef.current / 6;
       boardWidthRef.current = heightRef.current / 50;
       ballSizeRef.current = heightRef.current / 50;
@@ -217,14 +261,13 @@ function Game() {
       if (p1.getScore() < 10 && p2.getScore() < 10) {
         animationFrameId = requestAnimationFrame(loopGame);
       } else {
-        resetGame(p1, p2);
+        resetGame();
       }
     };
     loopGame();
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      socket.emit("leaveRoom");
       window.removeEventListener("resize", handleResize);
     };
   });
@@ -238,8 +281,9 @@ function Game() {
     p1.setX(widthRef.current / 50);
     p2.setX(widthRef.current - boardWidthRef.current - widthRef.current / 50);
     p2.setY(heightRef.current * p2.getRelativePosition());
-    ball.setX(widthRef.current / 2 - ballSizeRef.current / 2);
-    ball.setY(heightRef.current / 2 - ballSizeRef.current / 2);
+    // ball.setX(ball.getX() - ballSizeRef.current / 2);
+    // ball.setY(ball.getY() - ballSizeRef.current / 2);
+    ball.resetPosition();
     ball.setRelativePosition([
       ball.getX() / widthRef.current,
       ball.getY() / heightRef.current,
@@ -433,7 +477,7 @@ function Game() {
     drawScore(ctx, p1, p2);
   }
 
-  function resetGame(p1: Player, p2: Player): void {
+  function resetGame(): void {
     updateReady(false);
     setReady(false);
     setStartButton(false);
@@ -446,6 +490,14 @@ function Game() {
     timerRef.current && clearTimeout(timerRef.current);
     p1.setScore(0);
     p2.setScore(0);
+    socket.emit("updateScoreServer", {
+      playerNumber: 1,
+      score: 0,
+    });
+    socket.emit("updateScoreServer", {
+      playerNumber: 2,
+      score: 0,
+    });
     p1.resetPosition();
     p2.resetPosition();
   }
@@ -456,7 +508,6 @@ function Game() {
     p2: Player
   ): void => {
     if (startButton) {
-      //   updateReady(true);
       if (ready) {
         if (scorePoint(p1, p2)) {
           timerRef.current = setTimeout(() => {
@@ -477,25 +528,64 @@ function Game() {
   }
 
   return (
-	<div className={'gameContainer'}>
-		<div className={/* `game`  */'gameWidth'}>
-		{!startButton ? (
-			<StartingScreen
-			setStartButton={setStartButton}
-			setWin={setWin}
-			win={win}
-			updateReady={updateReady}
-			ready={ready}
-			/>
-		) : !ready ? (
-			<WaitingStart />
-		) : null}
-		<canvas
-			className={`${!startButton && "display-none"}`}
-			ref={canvasRef}
-		></canvas>
-		</div>
-	</div>
+    <div className={"gameContainer"}>
+      <div className={"gameWidth"}>
+        {!enterQueue ? (
+          <>
+            <EnterQueue
+              setEnterQueue={setEnterQueue}
+              socket={socket}
+              queueStatus={queueStatus}
+              setQueueStatus={setQueueStatus}
+            />
+            {queueStatus && (
+              <LeaveButton
+                setEnterQueue={setEnterQueue}
+                setQueueStatus={setQueueStatus}
+                setStartButton={setStartButton}
+                setReady={setReady}
+                setWin={setWin}
+                socket={socket}
+                resetGame={resetGame}
+              />
+            )}
+          </>
+        ) : !ready ? (
+          <>
+            <StartButton
+              setStartButton={setStartButton}
+              setWin={setWin}
+              startButton={startButton}
+              win={win}
+            />
+            <LeaveButton
+              setEnterQueue={setEnterQueue}
+              setQueueStatus={setQueueStatus}
+              setStartButton={setStartButton}
+              setReady={setReady}
+              setWin={setWin}
+              socket={socket}
+              resetGame={resetGame}
+            />
+          </>
+        ) : null}
+        <canvas
+          className={`${!ready && "display-none"}`}
+          ref={canvasRef}
+        ></canvas>
+        {startButton && ready && (
+          <LeaveButton
+            setEnterQueue={setEnterQueue}
+            setQueueStatus={setQueueStatus}
+            setStartButton={setStartButton}
+            setReady={setReady}
+            setWin={setWin}
+            socket={socket}
+            resetGame={resetGame}
+          />
+        )}
+      </div>
+    </div>
   );
 }
 
