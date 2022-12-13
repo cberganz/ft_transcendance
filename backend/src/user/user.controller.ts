@@ -20,7 +20,7 @@ import { fileInterceptorOptions } from '../file/fileInterceptorOptions';
 import { DeleteFileOnErrorFilter } from '../file/fileUpload.filter'
 import { fileValidator } from '../file/ConstantfileValidator'
 import OwnGuard from '../auth/own.guard'
-
+import { updateUserDto } from "./upateUserDto"
 
 class CreateUser {
 	username:	string;
@@ -71,11 +71,13 @@ export class UserController {
 	async updateUser(
 		@UploadedFile(fileValidator) file: Express.Multer.File,
 		@Param('id') id: string,
-		@Body() body: Prisma.UserUpdateInput
+		@Body() body: updateUserDto
 		): Promise<UserMode1> {
-			let updatedData = {
+			console.log(body)
+			const imageUrl = file ? `http://localhost:3000/file/avatar/${file.filename}` : undefined
+			let updatedData = { 
 				...body,
-				avatar: `http://localhost:3000/file/avatar/${file.filename}`
+				avatar: imageUrl,
 			}
 			const userWithSameUsername =
 				await this.userService.user({username: String(updatedData.username)});

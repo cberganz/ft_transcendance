@@ -37,13 +37,13 @@ function SimpleDialog(props: SimpleDialogProps) {
 	};
 
 	const handleClose = () => {
-		onClose(username);
+		onClose(username)
 	};
 
 	const onFileChange = (file: React.ChangeEvent) => {
         const { files } = file.target as HTMLInputElement;
         if (files && files.length !== 0) {
-          setFile(files[0]);
+          setFile(files[0])
         }
     }
 
@@ -51,10 +51,12 @@ function SimpleDialog(props: SimpleDialogProps) {
 		e.preventDefault()
 		if (!username.length) {
 			setAlert("Username must be provided", "error")
+			handleClose()
 			return ;
 		}
 		const formData = new FormData();
-		formData.append('file', file, currentUser.login)
+		if (file)
+			formData.append('file', file, currentUser.login)
 		formData.append('username', username)
 		const upload = await axios({
 			withCredentials: true,
@@ -72,9 +74,10 @@ function SimpleDialog(props: SimpleDialogProps) {
 				return
 			}
 			setAlert("Username has been updated", "success")
+			req.data.avatar = "https://miro.medium.com/max/700/1*JJIYMJIIMg8rjkuoPnAeAA.png"
 			dispatch(setCredentials({ user: req.data, accessToken: token }))
 		})
-		.catch(() => setAlert("Failed updating userdata", "error"))
+		.catch((error: any) => setAlert("Failed updating userdata catch", "error"))
 		handleClose()
 	}
 
@@ -86,7 +89,7 @@ function SimpleDialog(props: SimpleDialogProps) {
 			<List sx={{ pt: 0 }}>
 				<ListItem>
 					<ListItemAvatar>
-						<AvatarUpload onChange={onFileChange}/>
+						<AvatarUpload onChange={onFileChange} avatarSrc={currentUser.avatar}/>
 					</ListItemAvatar>
 				</ListItem>
 				<br/>

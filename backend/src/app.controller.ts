@@ -16,9 +16,8 @@ import { fileValidator } from './file/ConstantfileValidator'
 @Controller()
 export class AppController {
 	@Post('upload')
-	// @UseInterceptors(FileInterceptor('file', fileInterceptorOptions))
-	// @UseFilters(DeleteFileOnErrorFilter)
+	@UseInterceptors(FileInterceptor('file', fileInterceptorOptions))
+	@UseFilters(DeleteFileOnErrorFilter)
 	uploadFile(@UploadedFile(fileValidator) file: Express.Multer.File) {
-		console.log(file.mimetype);
 	}
 }

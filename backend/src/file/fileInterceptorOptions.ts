@@ -14,7 +14,6 @@ export const fileInterceptorOptions = {
 			cb(null, uploadPath);
 		},	
 		filename: function (req, file, cb) {
-			console.log(file.mimetype)
 			const extension: string = mimeMap.get(file.mimetype);
 			cb(null, `${file.originalname}${extension}`) // get user login
 		},

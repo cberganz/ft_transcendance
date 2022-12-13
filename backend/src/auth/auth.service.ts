@@ -29,7 +29,6 @@ export class AuthService {
 
 	async refreshTokens(user?: UserMode1) {
 		const payload 		= { username: user.username, sub: user.id };
-		console.log(payload)
 		const refreshToken	=
 			this.jwtService.sign(
 				payload,
@@ -47,7 +46,6 @@ export class AuthService {
 
 	async whoAmI(@Req() req) {
 		const jwtData: jwt.JwtPayload = jwt_decode(req?.cookies["jwt"]);
-		console.log(jwtData)
 		return await this.userService.user({ id: Number(jwtData.sub) });
 	}
 }

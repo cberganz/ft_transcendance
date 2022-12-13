@@ -1,14 +1,15 @@
-import { ReactNode, useState, ChangeEvent } from "react"
+import { useState, ChangeEvent } from "react"
 import { Avatar, Stack } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import '../styles/index.scss'
 
 interface PropsAvatarUpload {
-	onChange: (file: ChangeEvent<Element>) => void
+	onChange: (file: ChangeEvent<Element>) => void,
+	avatarSrc: string
 }
 
 export const AvatarUpload = (PropsAvatarUpload: PropsAvatarUpload) => {
-	const [fileSrc, setFileSrc] = useState('')
+	const [fileSrc, setFileSrc] = useState(PropsAvatarUpload.avatarSrc)
 
 	const handleChange = (event: any) => {
 		if (event.target.files) {

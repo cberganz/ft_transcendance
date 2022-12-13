@@ -19,7 +19,6 @@ export class AuthController {
 	@Post('login')
 	async login(@Res({ passthrough: true }) response: Response, @Req() req) {
 		const jwt_tokens = await this.authService.login(req.user)
-		console.log("Login User: ", req.user)
 		response.cookie(
 			'jwt', 
 			jwt_tokens.refresh_token,
@@ -38,7 +37,6 @@ export class AuthController {
 	@Get('refresh')
 	async refresh(@Req() req) {
 		const user: UserMode1 = await this.authService.whoAmI(req)
-		console.log('test')
 		const jwt_tokens = await this.authService.refreshTokens(user)
 		return { user: user, jwt_token: jwt_tokens.access_token };
 	}
