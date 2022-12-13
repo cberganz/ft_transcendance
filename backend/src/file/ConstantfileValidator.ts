@@ -9,7 +9,7 @@ export const fileValidator =
 			fileType: 'jpeg',
 		})
 		.addMaxSizeValidator({
-			maxSize: 100000
+			maxSize: 10000000
 		})
 		.build({
 			errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY

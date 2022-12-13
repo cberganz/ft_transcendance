@@ -10,6 +10,7 @@ import {
 	MenuItem,
 	ListItemIcon,
 	Button,
+	Grid
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { selectCurrentUser, selectCurrentToken, setCredentials } from '../Hooks/authSlice'
@@ -23,14 +24,44 @@ export interface SimpleDialogProps {
 	onClose: (value: string) => void;
 }
 
+const uploadFile = (file: any, currentUser: any, token: string) => {
+	const formDataFile = new FormData();
+	formDataFile.append('file', file, currentUser.login)
+	return axios({
+		withCredentials: true,
+		url: `http://localhost:3000/user/upload/avatar/${currentUser.id}`,
+		method: "put",
+		headers:{
+			Authorization: `Bearer ${currentUser.token}`
+		},
+		data: formDataFile
+	})
+}
+
+const updateUsername = (username: string, currentUser: any, token: string) => {
+	const formData = new FormData();
+	formData.append('username', username)
+	return axios({
+		withCredentials: true,
+		url: `http://localhost:3000/user/${currentUser.id}`,
+		method: "put",
+		headers:{
+			Authorization: `Bearer ${currentUser.token}`
+		},
+		data: {
+			username: username
+		}
+	})
+}
+
 function SimpleDialog(props: SimpleDialogProps) {
 	const currentUser = useSelector(selectCurrentUser)
+	const token = useSelector(selectCurrentToken)
 	const { onClose, open } = props;
 	const [username, setMessage] = React.useState(currentUser.username);
 	const { setAlert } = useAlert();
     const [file, setFile] = React.useState<any>();
 	const dispatch = useDispatch()
-	const token = useSelector(selectCurrentToken)
 
 	const handleMessageChange = (event: any) => {
 	  setMessage(event.target.value);
@@ -49,38 +80,37 @@ function SimpleDialog(props: SimpleDialogProps) {
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault()
-		if (!username.length) {
-			setAlert("Username must be provided", "error")
-			handleClose()
-			return ;
+		let uploadReq, updateReq
+		let newUserData = currentUser
+ 
+		if (file) {
+			uploadReq = await uploadFile(file, currentUser, token)
+			.then((req: any) => {
+				if (req.status === 200){
+					newUserData.avatar = `${req.data.avatar}?${Date.now()}`
+					dispatch(setCredentials({ user: newUserData, accessToken: token }))
+				}
+				return req
+			})
+			.catch(() => setAlert("Failed updating userdata", "error"))
 		}
-		const formData = new FormData();
-		if (file)
-			formData.append('file', file, currentUser.login)
-		formData.append('username', username)
-		const upload = await axios({
-			withCredentials: true,
-			url: `http://localhost:3000/user/${currentUser.id}`,
-			method: "put",
-			// headers:{
-			// 	Authorization: `Bearer ${currentUser.token}`
-			// },
-			data: formData
-		})
-		.then((req: any) => {
-			console.log(req.data)
-			if (req.status !== 200) {
-				setAlert("Failed updating userdata", "error")
-				return
-			}
-			setAlert("Username has been updated", "success")
-			req.data.avatar = "https://miro.medium.com/max/700/1*JJIYMJIIMg8rjkuoPnAeAA.png"
-			dispatch(setCredentials({ user: req.data, accessToken: token }))
-		})
-		.catch((error: any) => setAlert("Failed updating userdata catch", "error"))
+		if (username.length) {
+			updateReq = await updateUsername(username, currentUser, token)
+			.then((req: any) => {
+				if (req.status === 200) {
+					newUserData.username = req.data.username
+					dispatch(setCredentials({ user: newUserData, accessToken: token }))
+				}
+				return req
+			})
+			.catch(() => setAlert("Failed updating userdata", "error"))
+		}
+		// (updateReq.status === 200 && updateReq.status === 200)
+		// 	? setAlert("Userdata has been updated", "success")
+		// 	: setAlert("Failed updating userdata", "error")
+		dispatch(setCredentials({ user: newUserData, accessToken: token }))
 		handleClose()
 	}
-
 
 	return (
 		<Dialog onClose={handleClose} open={open}>
@@ -102,6 +132,7 @@ function SimpleDialog(props: SimpleDialogProps) {
 					onChange={handleMessageChange}
 					value={username}
 					/>
+					<br/>
 				</ListItem>
 				<br/>
 				<ListItem>

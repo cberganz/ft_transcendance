@@ -21,6 +21,7 @@ import { DeleteFileOnErrorFilter } from '../file/fileUpload.filter'
 import { fileValidator } from '../file/ConstantfileValidator'
 import OwnGuard from '../auth/own.guard'
 import { updateUserDto } from "./upateUserDto"
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 class CreateUser {
 	username:	string;
@@ -40,6 +41,7 @@ export class UserController {
 	}
 
 	@Get(':id')
+	@UseGuards(JwtAuthGuard)
 	@UseFilters(BackendException)
 	async getUserById(@Param('id') id: string): Promise<UserMode1> {
 		return this.userService.user({ id: Number(id) });
@@ -49,7 +51,7 @@ export class UserController {
 	async getAllUsers(@Param('id') id: string): Promise<UserMode1[]> {
 		return this.userService.users({where: {NOT: {id: Number(id)}}, orderBy: {username: 'asc'}});
 	}
-	
+
 	@Post('signup')
 	@UseFilters(BackendException)
 	async signupUser (
@@ -64,30 +66,46 @@ export class UserController {
 		return this.userService.deleteUser({ id: Number(id) });
 	}
 
-	@Put(':id')
+	@Put('/upload/avatar/:id')
 	@UseGuards(OwnGuard)
 	@UseInterceptors(FileInterceptor('file', fileInterceptorOptions))
 	@UseFilters(DeleteFileOnErrorFilter)
-	async updateUser(
+	async uploadAvatar(
 		@UploadedFile(fileValidator) file: Express.Multer.File,
 		@Param('id') id: string,
-		@Body() body: updateUserDto
 		): Promise<UserMode1> {
-			console.log(body)
-			const imageUrl = file ? `http://localhost:3000/file/avatar/${file.filename}` : undefined
-			let updatedData = { 
-				...body,
+			const imageUrl = `http://localhost:3000/file/avatar/${file.filename}`
+			let updatedData = {
 				avatar: imageUrl,
 			}
-			const userWithSameUsername =
-				await this.userService.user({username: String(updatedData.username)});
-			if (userWithSameUsername && userWithSameUsername.id !== Number(id))
-				throw new UnprocessableEntityException();
 			return this.userService.updateUser({
 				where: {
 					id: Number(id)
 				},
 				data: updatedData
+			});
+	}
+
+	@Put(':id')
+	@UseGuards(OwnGuard)
+	async updateUserName(
+		@Param('id') id: string,
+		@Body() body: any//updateUserDto
+		): Promise<UserMode1> {
+			console.log("test")
+			const user = await this.userService.user({id: Number(id)})
+			const userWithSameUsername =
+				await this.userService.user({username: String(body.username)});
+			if (userWithSameUsername && userWithSameUsername.id !== Number(id))
+				throw new UnprocessableEntityException();
+			user.username = body.username
+			return this.userService.updateUser({
+				where: {
+					id: Number(id)
+				},
+				data: {
+					username: user.username,
+				}
 			});
 	}
 }

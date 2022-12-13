@@ -49,7 +49,6 @@ const UploadFile = () => {
             // },
             data: formData
         }).then((r: any) => r);
-        console.log(upload);
     }
 
     return (
@@ -66,33 +65,53 @@ const UploadFile = () => {
 
 export function Dashboard() {
 	const currentUser = useSelector(selectCurrentUser)
-	const userData = useSimpleRequest(useGetUserMutation, 1)
-	const [updateUser, {
+	const [Content, setContent] = React.useState(<></>) 
+	// const userData = useSimpleRequest(useGetUserMutation, 1)
+	// const [updateUser, {
+	// 	data: data,
+	// 	isLoading,
+	// 	isError,
+	// 	isSuccess,
+	// 	error
+	// }] = useUpdateUserMutation()
+	const [getUserData, {
 		data: data,
 		isLoading,
 		isError,
 		isSuccess,
 		error
-	}] = useUpdateUserMutation()
-	// const userData = useSimpleRequest(useGetUsersMutation, {})
-	let Content =() => <p>{JSON.stringify(userData)}</p> 
-	
-	const handleSubmit = (e: any) => {
-		e.preventDefault()
-		const input = {
-			id: currentUser.userId,
-			newUserData: {
-				username: "test",
-				login: "test"
-			}
-		}
-		updateUser(input)
+	}] = useGetUserMutation()
+
+	// let Content = () => <></>
+
+	const handleClick = () => {
+		getUserData(1)
+		.then(() => setContent(<p>{JSON.stringify(data)}</p>))
+
+		// if (isSuccess)
+		// 	setContent(<p>{JSON.stringify(data)}</p>)
+		// <p>{JSON.stringify(userData)}</p>
+		// get
 	}
+	
+	// const handleSubmit = (e: any) => {
+	// 	e.preventDefault()
+	// 	const input = {
+	// 		id: currentUser.userId,
+	// 		newUserData: {
+	// 			username: "test",
+	// 			login: "test"
+	// 		}
+	// 	}
+	// 	updateUser(input)
+	// }
 	return (
 		<div>
 			<h1>Dashboard</h1>
-			 <Content></Content>
-			 <UploadFile/>
+			<Button onClick={handleClick}>Click</Button>
+			{Content}
+			{/* <Content></Content> */}
+			 {/* <UploadFile/> */}
 			 {/* <AvatarUpload/> */}
 			 {/* <img src="http://localhost:3000/file/avatar/test.png"></img> */}
 		</div>

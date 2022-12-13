@@ -70,7 +70,7 @@ export class UserService {
 	}
 
 	async findOrCreate(data: Prisma.UserCreateInput): Promise<User> {
-		const user = await this.user({username: data.username});
+		const user = await this.user({login: data.login});
 		if (user)
 			return user
 		return this.createUser(data)
