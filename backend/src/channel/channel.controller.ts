@@ -6,7 +6,8 @@ import {
 	Body,
 	Put,
 	UseFilters,
-	Delete
+	Delete,
+	ForbiddenException
 } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { Channel as ChannelMode1 } from '@prisma/client';
@@ -45,8 +46,15 @@ export class ChannelController {
 
 	@Post('/Member/')
 	async PostAddMember(
-		@Body() data: { channelId: string; memberId: string; }
+		@Body() data: { channelId: string; memberId: string; pwd: string; }
 	) : Promise<ChannelMode1> {
+		let chan = await this.getChannelById(data.channelId);
+
+		if (chan.type === "private") {
+			const bcrypt = require ('bcrypt');
+			if (!bcrypt.compareSync(data.pwd, chan.password))
+				throw new ForbiddenException ;
+		}
 		return this.channelService.addMember({channelId: Number(data.channelId), memberId: Number(data.memberId)})
 	}
 
@@ -54,7 +62,13 @@ export class ChannelController {
 	async PostSetPwd(
 		@Body() data: { pwd: string; channelId: string; userId: string;}
 	) : Promise<ChannelMode1> {
-		return this.channelService.setPwd({pwd: data.pwd, channelId: Number(data.channelId), userId: Number(data.userId)})
+		const bcrypt = require ('bcrypt');
+
+		const salt = bcrypt.genSaltSync(10);
+		let hash = bcrypt.hashSync(data.pwd, salt);
+		if (data.pwd === "")
+			hash = "";
+		return this.channelService.setPwd({pwd: hash, channelId: Number(data.channelId), userId: Number(data.userId)})
 	}
 
 	@Post('/addAdmin/')
@@ -69,9 +83,15 @@ export class ChannelController {
 	async newChannel (
 		@Body() channelData: { type: string; password: string; title: string; ownerId: string }
 	): Promise<ChannelMode1> {
+		const bcrypt = require ('bcrypt');
+
+		const salt = bcrypt.genSaltSync(10);
+		let hash = bcrypt.hashSync(channelData.password, salt);
+		if (channelData.password === "")
+			hash = "";
 		let newChan = await this.channelService.createChannel({
 			type: channelData.type,
-			password: channelData.password,
+			password: hash,
 			title: channelData.title,
 			owner: { connect: { id: Number(channelData.ownerId) } },
 			members: { connect: { id: Number(channelData.ownerId) } },

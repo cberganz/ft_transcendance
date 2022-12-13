@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Channel, Prisma } from '@prisma/client';
+import { retry } from 'rxjs';
 
 @Injectable()
 export class ChannelService {
@@ -9,7 +10,7 @@ export class ChannelService {
 	async channel(
 		channelWhereUniqueInput: Prisma.ChannelWhereUniqueInput
 	): Promise<Channel | null> {
-		return this.prisma.channel.findUnique({
+		let chan = await this.prisma.channel.findUnique({
 			where: channelWhereUniqueInput,
 			include: {
 				Message:  {
@@ -20,13 +21,14 @@ export class ChannelService {
 				blacklist: true,
 				admin: true,
 				members: true,
-				owner: true
-			}
+				owner: true,
+			},
 		});
+		return chan ;
 	}
 
 	async allChannels(): Promise<Channel[] | null> {
-		return this.prisma.channel.findMany({
+		let chans = await this.prisma.channel.findMany({
 			include: {
 				blacklist: true,
 				admin: true,
@@ -34,10 +36,14 @@ export class ChannelService {
 				owner: true
 			}
 		});
+		for (let chan of chans) {
+			delete chan.password ;
+		}
+		return chans ;
 	}
 
 	async joinedChannels(userId: number): Promise<Channel[] | null> {
-		return this.prisma.channel.findMany({
+		let chans = await this.prisma.channel.findMany({
 			where: {
 				members: {
 					some: {
@@ -57,10 +63,14 @@ export class ChannelService {
 				owner: true
 			},
 		});
+		for (let chan of chans) {
+			delete chan.password ;
+		}
+		return chans ;
 	}
 
 	async notJoinedChannels(userId: number): Promise<Channel[] | null> {
-		return this.prisma.channel.findMany({
+		let chans = await this.prisma.channel.findMany({
 			where: {
 				members: {
 					none: {
@@ -78,6 +88,10 @@ export class ChannelService {
 				owner: true
 			},
 		});
+		for (let chan of chans) {
+			delete chan.password ;
+		}
+		return chans;
 	}
 
 	async channels(params: {
@@ -88,13 +102,17 @@ export class ChannelService {
 		orderBy?: Prisma.ChannelOrderByWithRelationInput;
 	}): Promise<Channel[]> {
 		const { skip, take, cursor, where, orderBy } = params;
-		return this.prisma.channel.findMany({
+		let chans = await this.prisma.channel.findMany({
 			skip,
 			take,
 			cursor,
 			where,
 			orderBy,
 		});
+		for (let chan of chans) {
+			delete chan.password ;
+		}
+		return chans ;
 	}
 
 	async createChannel(data: Prisma.ChannelCreateInput): Promise<Channel> {
@@ -103,11 +121,14 @@ export class ChannelService {
 				title: data.title,
 			}
 		});
-		if (chan.length === 0 || data.type === 'dm')
-			return this.prisma.channel.create({
+		if (chan.length === 0 || data.type === 'dm') {
+			let chan = await this.prisma.channel.create({
 				data,
 			});
-		////////////// handle error
+			delete chan.password ;
+			return chan ;
+		}
+		throw new ForbiddenException ;
 	}
 
 	async updateChannel(params: {
@@ -115,10 +136,12 @@ export class ChannelService {
 		data: Prisma.ChannelUpdateInput;
 	}): Promise<Channel> {
 		const { where, data } = params;
-		return this.prisma.channel.update({
+		let chan = await this.prisma.channel.update({
 			data,
 			where,
 		});
+		delete chan.password ;
+		return chan ;
 	}
 
 	async setPwd(data: {pwd: string, channelId: number, userId: number}): Promise<Channel> {
@@ -144,7 +167,7 @@ export class ChannelService {
 		else
 			type = "private";
 		if (chan.ownerId && chan.ownerId === data.userId) {
-			return this.prisma.channel.update({
+			let chan = await this.prisma.channel.update({
 				where: {
 					id : data.channelId,
 				},
@@ -161,12 +184,14 @@ export class ChannelService {
 					blacklist: true,
 					admin: true,
 					members: true,
-					owner: true
+					owner: true,
 				}
-			}) ;
+			});
+			delete chan.password ;
+			return chan ;
 		}
 		else
-			return chan;
+			throw new ForbiddenException ;
 	}
 
 	async addAdmin(data: {adminId: number, chanId: number, userId: number}): Promise<Channel> {
@@ -189,14 +214,14 @@ export class ChannelService {
 		let userIsAdmin = false ;
 		for (let admin of chan.admin) {
 			if (admin.id === data.adminId)
-				return chan ;
+				throw new ForbiddenException ;
 			if (admin.id === data.userId) {
 				userIsAdmin = true ;
 				break ;
 			}
 		}
 		if (userIsAdmin) {
-			return this.prisma.channel.update({
+			let chan = await this.prisma.channel.update({
 				where: {
 					id : data.chanId,
 				},
@@ -218,10 +243,12 @@ export class ChannelService {
 					members: true,
 					owner: true
 				}
-			}) ;
+			});
+			delete chan.password ;
+			return chan ;
 		}
 		else
-			return chan ;
+			throw new ForbiddenException ;
 
 
 	}
@@ -232,7 +259,7 @@ export class ChannelService {
 			}
 		})
 		
-		return this.prisma.channel.update({
+		let ret_chan = await this.prisma.channel.update({
 			where: {
 				id: data.channelId,
 			},
@@ -261,6 +288,8 @@ export class ChannelService {
 				owner: true
 			},
 		});
+		delete ret_chan.password ;
+		return ret_chan ;
 	}
 
 	async addMember(data: {channelId: number, memberId: number}): Promise<Channel> {
@@ -270,10 +299,26 @@ export class ChannelService {
 			},
 			include: {
 				admin: true,
+				blacklist: true,
 			}
 		})
-		if (chan.admin.length === 0)
-			return this.prisma.channel.update({
+		for (let blacklist of chan.blacklist) {
+			if (blacklist.target_id === data.memberId && blacklist.type === "ban") {
+				if (new Date().getTime() / 1000 - new Date(blacklist.date).getTime() / 1000 >= 60 * blacklist.delay) {
+					await this.prisma.blacklist.delete({
+						where: {
+							id: blacklist.id,
+						}
+					});
+					break ;
+				}
+				else
+					throw new ForbiddenException() ;
+			}
+		}
+		let ret_chan ;
+		if (chan.admin.length === 0){
+			ret_chan = await this.prisma.channel.update({
 				where: {
 					id: data.channelId,
 				},
@@ -301,8 +346,9 @@ export class ChannelService {
 					owner: true
 				},
 			});
-		else
-			return this.prisma.channel.update({
+		}
+		else {
+			ret_chan = await this.prisma.channel.update({
 				where: {
 					id: data.channelId,
 				},
@@ -325,11 +371,16 @@ export class ChannelService {
 					owner: true
 				},
 			});
+		}
+		delete ret_chan.password ;
+		return ret_chan ;
 	}
 
 	async deleteChannel(where: Prisma.ChannelWhereUniqueInput): Promise<Channel> {
-		return this.prisma.channel.delete({
+		let chan = await this.prisma.channel.delete({
 			where,
 		});
+		delete chan.password ;
+		return chan ;
 	}
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Blacklist, Prisma } from '@prisma/client';
 
@@ -36,9 +36,52 @@ export class BlacklistService {
 	}
 
 	async createBlacklist(data: Prisma.BlacklistCreateInput): Promise<Blacklist> {
-		return this.prisma.blacklist.create({
-			data,
+		let user = await this.prisma.user.findUnique({
+			where: {
+				id: data.creator.connect.id,
+			},
+			include: {
+				admin_of: true,
+			}
 		});
+		let chan = await this.prisma.channel.findUnique({
+			where: {
+				id: data.channel.connect.id,
+			},
+			include: {
+				admin: true,
+				owner: true,
+			}
+		});
+		let isAdmin = false;
+		for (let i = 0; i < user.admin_of.length; i++) {
+			if (user.admin_of[i].id == data.channel.connect.id) {
+				isAdmin = true;
+				break ;
+			}
+		}
+		if (chan.type !== "dm" && chan.owner?.id !== data.creator.connect.id) {
+			for (let admin of chan.admin) {
+				if (admin.id === data.target.connect.id){
+					isAdmin = false;
+					break ;
+				}
+			}
+		}
+		let blacklist = await this.prisma.blacklist.findMany({
+			where: {
+				target_id: data.target.connect.id,
+				type: data.type,
+				channelId: data.channel.connect.id,
+			}
+		})
+		if (((isAdmin && chan.ownerId != data.target.connect.id) || data.type === "block")
+			&& blacklist.length === 0) {
+			return this.prisma.blacklist.create({
+				data,
+			});
+		}
+		throw new ForbiddenException;
 	}
 
 	async updateBlacklist(params: {
