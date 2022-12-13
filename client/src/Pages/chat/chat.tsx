@@ -72,7 +72,7 @@ class Chat extends React.Component<Props, ChatState> {
   }
   async getActualUser(): Promise<actualUser> {
     let actualUser = {
-      openedConvID: this.props.openConv !== null ? this.props.openConv : -1,
+      openedConvID: this.props.openConv !== 0 ? this.props.openConv : -1,
       user: await axios.get("http://localhost:3000/user/" + this.props.user.id)
         .then(response => response.data)
         .catch(error => alert("getActualUser " + error.status + ": " + error.message))
