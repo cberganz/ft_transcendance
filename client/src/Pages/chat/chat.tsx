@@ -14,17 +14,22 @@ import { selectCurrentUser } from '../../Hooks/authSlice'
 import { useSelector } from "react-redux"
 import SearchBar from "./channel/searchBar"
 import { usersStatusSocket } from "../../Router/Router";
+import { useSearchParams } from 'react-router-dom';
 
 
 function ChatWithHook(component: any) {
   return function WrappedChat(props: any) {
     const user = useSelector(selectCurrentUser);
-    return (<Chat user={user} />)
+    const [ openConv ] = useSearchParams();
+    let   openConvId: number | null = Number(openConv.get("openConv"));
+
+    return (<Chat user={user} openConv={openConvId} />)
   }
 }
 
 interface Props {
   user: any;
+  openConv: number;
 }
 class Chat extends React.Component<Props, ChatState> {
   constructor(props: any) {
@@ -48,6 +53,7 @@ class Chat extends React.Component<Props, ChatState> {
     
     this.socket = io("http://localhost:3000/chat"); 
     this.getData();
+    this.emitNewChan();
     usersStatusSocket.emit("updateStatus", "online");
   }
   private socket
@@ -66,7 +72,7 @@ class Chat extends React.Component<Props, ChatState> {
   }
   async getActualUser(): Promise<actualUser> {
     let actualUser = {
-      openedConvID: -1,
+      openedConvID: this.props.openConv !== null ? this.props.openConv : -1,
       user: await axios.get("http://localhost:3000/user/" + this.props.user.id)
         .then(response => response.data)
         .catch(error => alert("getActualUser " + error.status + ": " + error.message))
@@ -93,6 +99,13 @@ class Chat extends React.Component<Props, ChatState> {
       .catch(error => alert("getUserList " + error.status + ": " + error.message))
     return (userList)
   }
+  async emitNewChan() {
+    if (this.props.openConv !== 0) {
+      axios.get("http://localhost:3000/channel" + this.props.openConv)
+        .then(response => this.socket.emit("newChanFromClient", response.data))
+        .catch()
+    }
+  }
     
     /** RENDERING FUNCTIONS */
   openConvHandler(chanID: number) {
@@ -115,6 +128,14 @@ class Chat extends React.Component<Props, ChatState> {
   socketNewChan(chan: Channel) {
     let ChatData = structuredClone(this.state)
 
+    for (let channel of this.state.joinedChans) {
+      if (channel.id === chan.id)
+        return ;
+    }
+    for (let channel of this.state.notJoinedChans) {
+      if (channel.id === chan.id)
+        return ;
+    }
     if (userIsInChan(chan, this.state.actualUser.user.id))
       ChatData.joinedChans.push(chan)
     else

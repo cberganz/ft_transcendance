@@ -8,8 +8,7 @@ import { Icon } from '@iconify/react';
 import { Channel, User } from '../../stateInterface'
 import ChatCommands from '../../chatCommands'
 import useAlert from "../../../../Hooks/useAlert";
-
-// check dans blacklist de l'user si blocked
+import { useNavigate } from "react-router-dom";
 
 
 function isAdmin(userId: number, chan?: Channel) : boolean {
@@ -22,14 +21,16 @@ function isAdmin(userId: number, chan?: Channel) : boolean {
   return (false);
 }
 
-// invite for a game, leave chan ou block/unblock
 export default function ChatHeader(props:any) {
+  const navigate = useNavigate();
   const { setAlert } = useAlert();
   const chan = getChan(props.state.actualUser.openedConvID, props.state);
+  let   profileLink: string = "";
+
   if (chan === undefined)
     return (<div></div>)
   
-  let title: String;
+  let title: String = "";
   let dmUser = undefined;
   const chatCmd = async (cmd: string) => {
     let errorLog: string | undefined = await ChatCommands(cmd, props.state, props.socket, {chanId: chan.id, openConvHandler: props.openConvHandler});
@@ -46,7 +47,7 @@ export default function ChatHeader(props:any) {
       dmUser = chan.members[1];
     else
       dmUser = chan.members[0];
-    title = dmUser.username;
+    profileLink = "http://localhost/profile?userId=" + dmUser.id.toString();
   }
   else
     title = chan?.title;
@@ -61,7 +62,7 @@ export default function ChatHeader(props:any) {
         gridAutoFlow: 'row',
         }}>
       <div style={{textAlign: 'left', marginLeft: '25px'}}>
-        {<span style={{marginRight: "10px"}}>{title}</span>} 
+        {dmUser === undefined ? <span style={{marginRight: "10px"}}>{title}</span> : <span onClick={() => navigate(profileLink)} style={{cursor: 'pointer', marginRight: "10px"}}>{dmUser.username}</span>} 
         {dmUser !== undefined && isBlocked(props.state.actualUser.user, dmUser) ? <i style={{fontSize: '10px'}}>[blocked]</i> : null}
         {chan?.ownerId === props.state.actualUser.user.id ? <Tooltip title="Owner"><Icon icon="mdi:shield-crown" color="gray" inline={true} /></Tooltip> : null}
         {isAdmin(props.state.actualUser.user.id, chan) ? <Tooltip title="Group administrator"><Icon icon="dashicons:admin-users" color="gray" inline={true} /></Tooltip> : null}

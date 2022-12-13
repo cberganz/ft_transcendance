@@ -14,6 +14,7 @@ import { StyledBadge } from '../utils'
 import Avatar from '@mui/material/Avatar';
 import { Icon } from '@iconify/react';
 import useAlert from "../../../Hooks/useAlert";
+import { useNavigate } from "react-router-dom";
 
 function titleAlreadyExists(title: string, notJoinedChans: Channel[], joinedChans: Channel[]) : boolean {
   for (let chan of joinedChans) {
@@ -110,8 +111,10 @@ function CreateChannelButton(props: any) {
 }
 
 export default function HeaderChannels(props: ChatProps) {
+  const navigate = useNavigate();
   let avatar = props.state.actualUser.user.username;
-    return (
+  const   profileLink: string = "http://localhost/profile?userId=" + props.state.actualUser.user.id.toString();
+  return (
     <div className='ChannelHeader'>
         <Tooltip title={props.state.actualUser.user.username}>
         <StyledBadge
@@ -123,7 +126,8 @@ export default function HeaderChannels(props: ChatProps) {
           <Avatar 
           alt={avatar.toString()} 
           src={avatar.toString()}
-          sx={{ width: 30, height: 30, marginTop: '10px', marginLeft: '15px' }} />
+          sx={{ width: 30, height: 30, marginTop: '10px', marginLeft: '15px', cursor: 'pointer' }}
+          onClick={() => navigate(profileLink)} />
         </StyledBadge>
         </Tooltip>
         <CreateChannelButton props={props} />
