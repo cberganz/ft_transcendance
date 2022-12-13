@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import { User } from '../stateInterface'
 import axios from 'axios';
+import useAlert from "../../../Hooks/useAlert";
 
 async function postDMChan(chan: any, socket: any, opendConv: Function) {
     axios.post('http://localhost:3000/channel/newDM/', chan)
@@ -13,6 +14,7 @@ async function postDMChan(chan: any, socket: any, opendConv: Function) {
 
 export default function SearchBar(props: any) {
     const [searchInput, setSearchInput] = useState("");
+    const { setAlert } = useAlert();
     const handleChange = (e: any) => {
         e.preventDefault();
       };
@@ -27,7 +29,7 @@ export default function SearchBar(props: any) {
                 otherUserId = user.id;
         }
         if (otherUserId === -1) {
-            alert(data.get('username') + " can't be found or is already in your dms.");
+            setAlert(data.get('username') + " can't be found or is already in your dms.", "error");
             return e.currentTarget.reset();
         }
         const newChan = {

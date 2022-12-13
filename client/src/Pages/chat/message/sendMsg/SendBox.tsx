@@ -37,8 +37,12 @@ export default function SendBox(props: any) {
         if (value[0] === '/') {
           let errorLog: string | undefined = await ChatCommands(value, props.state, props.socket, 
             {chanId: props.state.actualUser.openedConvID, openConvHandler: props.openConvHandler})
-          if (errorLog !== undefined)
-            setAlert(errorLog, "error")
+          if (errorLog !== undefined) {
+            if (errorLog.substring(0, 5) === "Error")
+              setAlert(errorLog, "error");
+            else
+              setAlert(errorLog, "success");
+          }
         }
         else 
           newMessage(value);

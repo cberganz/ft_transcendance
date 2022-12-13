@@ -13,15 +13,7 @@ import { ChatProps, User, Channel } from '../stateInterface'
 import { StyledBadge } from '../utils'
 import Avatar from '@mui/material/Avatar';
 import { Icon } from '@iconify/react';
-
-
-// API REQUESTS ////////////////////////////////////
-async function postChan(chan: any, socket: any) {
-  axios.post('http://localhost:3000/channel/newChan/', chan)
-    .then(response => socket.emit("newChanFromClient", response.data))
-    .catch(error => alert("Error creating channel."))
-}
-////////////////////////////////////////////////////
+import useAlert from "../../../Hooks/useAlert";
 
 function titleAlreadyExists(title: string, notJoinedChans: Channel[], joinedChans: Channel[]) : boolean {
   for (let chan of joinedChans) {
@@ -37,6 +29,7 @@ function titleAlreadyExists(title: string, notJoinedChans: Channel[], joinedChan
 
 function CreateChannelButton(props: any) {
     const [open, setOpen] = React.useState(false);
+    const { setAlert } = useAlert();
   
     const handleClickOpen = () => {
       setOpen(true);
@@ -46,7 +39,7 @@ function CreateChannelButton(props: any) {
       setOpen(false);
     };
   
-    const createChannel = (e: any) => {
+    const createChannel = async (e: any) => {
       e.preventDefault();
       var title = e.target.name.value.trim();
       if (title === "")
@@ -64,7 +57,12 @@ function CreateChannelButton(props: any) {
         title:     title,
         ownerId:   props.props.state.actualUser.user.id,
       }
-      postChan(newChan, props.props.socket);
+      axios.post('http://localhost:3000/channel/newChan/', newChan)
+        .then(response => {
+          props.props.socket.emit("newChanFromClient", response.data);
+          setAlert("Channel successfully created.", "success");
+        })
+        .catch(error => setAlert("Error creating channel.", "error"))
     }
 
     return (

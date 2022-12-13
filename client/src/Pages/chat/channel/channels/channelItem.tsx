@@ -38,8 +38,12 @@ export function DialogChannelItem(props: any) {
       pwd = e.target.password.value;
     
     let errorLog: string | undefined = await ChatCommands("/join " + pwd, props.props.state, props.props.socket, {chanId: props.chan.id});
-    if (errorLog !== undefined)
-      setAlert(errorLog, "error")
+    if (errorLog !== undefined) {
+      if (errorLog.substring(0, 5) === "Error")
+        setAlert(errorLog, "error");
+      else
+        setAlert(errorLog, "success");
+    }
   }
 
   const lastMsg = props.chan?.Message?.slice(-1);

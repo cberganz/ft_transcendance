@@ -33,8 +33,12 @@ export default function ChatHeader(props:any) {
   let dmUser = undefined;
   const chatCmd = async (cmd: string) => {
     let errorLog: string | undefined = await ChatCommands(cmd, props.state, props.socket, {chanId: chan.id, openConvHandler: props.openConvHandler});
-    if (errorLog !== undefined)
-      setAlert(errorLog, "error")
+    if (errorLog !== undefined) {
+      if (errorLog.substring(0, 5) === "Error")
+        setAlert(errorLog, "error");
+      else
+        setAlert(errorLog, "success");
+    }
   }
 
   if (chan?.type === 'dm') {

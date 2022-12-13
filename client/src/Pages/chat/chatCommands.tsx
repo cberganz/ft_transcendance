@@ -40,14 +40,14 @@ async function JoinChan(inputs: string[], state: ChatState, socket: any, params:
     if (chan?.type === 'dm')
         return "";
     if (chan?.type === "private" && inputs.length <= 1)
-        return "Please enter a password.";
+        return "Error: Please enter a password.";
 
     let ret = await axios.post("http://localhost:3000/channel/Member/", {channelId: params.chanId, memberId: state.actualUser.user.id, pwd: inputs[1]})
         .then(response => {socket.emit('updateChanFromClient', response.data); return response})
         .catch((error) => "error")
     if (ret === "error")
-        return "Can't access this channel.";
-    return "";
+        return "Error: Can't access this channel.";
+    return "Chan joined.";
 }
 
 async function LeaveChan(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
@@ -61,8 +61,8 @@ async function LeaveChan(inputs: string[], state: ChatState, socket: any, params
         .catch(() => "error") 
     params.openConvHandler(-1);
     if (ret === "error")
-        return "Chan already left.";
-    return "";
+        return "Error: Chan already left.";
+    return "Chan left.";
 }
 
 async function SetPwd(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
@@ -74,8 +74,8 @@ async function SetPwd(inputs: string[], state: ChatState, socket: any, params: a
         .then(response => socket.emit('updateChanFromClient', response.data))
         .catch(error => "error") 
     if (ret === "error")
-        return "You don't have the rights.";
-    return "";
+        return "Error: You don't have the rights.";
+    return "Password successfully set.";
 }
 
 async function RmPwd(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
@@ -87,8 +87,8 @@ async function RmPwd(inputs: string[], state: ChatState, socket: any, params: an
         .then(response => socket.emit('updateChanFromClient', response.data))
         .catch(error => "error") 
     if (ret === "error")
-        return "You don't have the rights.";
-    return "";
+        return "Error: You don't have the rights.";
+    return "Password successfully removed.";
 }
 
 async function AddAdmin(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
@@ -110,8 +110,8 @@ async function AddAdmin(inputs: string[], state: ChatState, socket: any, params:
         .then(response => socket.emit('updateChanFromClient', response.data))
         .catch(error => "error") 
     if (ret === "error")
-        return "You don't have the rights.";
-    return "";
+        return "Error: You don't have the rights.";
+    return "User " + inputs[1] + " successfully added as administrator.";
 }
 
 async function Block(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
@@ -132,7 +132,7 @@ async function Block(inputs: string[], state: ChatState, socket: any, params: an
         .then()
         .catch(error => "error");
     if (ret === "error")
-        return "User already blocked.";
+        return "Error: User already blocked.";
     await axios.get("http://localhost:3000/user/" + state.actualUser.user.id)
         .then(response => socket.emit('updateUserFromClient', response.data))
         .catch()
@@ -159,12 +159,12 @@ async function Unblock(inputs: string[], state: ChatState, socket: any, params: 
             blacklistId = blacklist.id;
     }
     if (blacklistId === -1)
-        return "User not blocked.";
+        return "Error: User not blocked.";
     let ret = await axios.delete("http://localhost:3000/blacklist/" + blacklistId)
         .then()
         .catch(error => "error");
     if (ret === "error")
-        return "User not blocked.";
+        return "Error: User not blocked.";
     await axios.get("http://localhost:3000/user/" + state.actualUser.user.id)
         .then(response => socket.emit('updateUserFromClient', response.data))
         .catch()
@@ -192,12 +192,12 @@ async function Ban(inputs: string[], state: ChatState, socket: any, params: any)
         .then()
         .catch(error => "error");
     if (isError === "error")
-        return "You don't have the rights.";
+        return "Error: You don't have the rights.";
     axios.delete("http://localhost:3000/channel/Member/", {data: {channelId: params.chanId, memberId: blockedId}})
         .then(response => socket.emit('updateChanFromClient', response.data))
         .catch(error => alert(error.status + ": " + error.message)) 
     socket.emit('banFromClient', {bannedLogin: blockedLogin, chanId: params.chanId});
-    return "";
+    return "User " + inputs[1] + " successfully banned for " + inputs[2] + " minutes.";
 }
 
 async function Mute(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
@@ -219,6 +219,6 @@ async function Mute(inputs: string[], state: ChatState, socket: any, params: any
         .then()
         .catch(error => "error");
     if (isError === "error")
-        return "You don't have the rights.";
-    return "";
+        return "Error: You don't have the rights.";
+    return "User " + inputs[1] + " successfully muted for " + inputs[2] + " minutes.";
 }
