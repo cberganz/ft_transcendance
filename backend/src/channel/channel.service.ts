@@ -128,7 +128,7 @@ export class ChannelService {
 			delete chan.password ;
 			return chan ;
 		}
-		throw ForbiddenException ;
+		throw new ForbiddenException ;
 	}
 
 	async updateChannel(params: {
@@ -191,7 +191,7 @@ export class ChannelService {
 			return chan ;
 		}
 		else
-			throw ForbiddenException ;
+			throw new ForbiddenException ;
 	}
 
 	async addAdmin(data: {adminId: number, chanId: number, userId: number}): Promise<Channel> {
@@ -214,7 +214,7 @@ export class ChannelService {
 		let userIsAdmin = false ;
 		for (let admin of chan.admin) {
 			if (admin.id === data.adminId)
-				throw ForbiddenException ;
+				throw new ForbiddenException ;
 			if (admin.id === data.userId) {
 				userIsAdmin = true ;
 				break ;
@@ -248,7 +248,7 @@ export class ChannelService {
 			return chan ;
 		}
 		else
-			throw ForbiddenException ;
+			throw new ForbiddenException ;
 
 
 	}
@@ -313,7 +313,7 @@ export class ChannelService {
 					break ;
 				}
 				else
-					throw ForbiddenException ;
+					throw new ForbiddenException() ;
 			}
 		}
 		let ret_chan ;

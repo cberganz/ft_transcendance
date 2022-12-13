@@ -57,7 +57,7 @@ export class MessageService {
 				otherUser = chan.members[0];
 			for (let blacklist of otherUser.blacklist) {
 				if (blacklist.target_id === authorId && blacklist.type === "block")
-					throw ForbiddenException;
+					throw new ForbiddenException;
 			}
 		}
 		else {
@@ -72,7 +72,7 @@ export class MessageService {
 						break ;
 					}
 					else
-						throw ForbiddenException ;
+						throw new ForbiddenException ;
 				}
 			}
 		}

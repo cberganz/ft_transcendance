@@ -14,23 +14,34 @@ import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
 import { isBlocked, StyledBadge } from '../../utils';
 import { Channel } from '../../stateInterface';
+import ChatCommands from '../../chatCommands';
+import useAlert from "../../../../Hooks/useAlert";
 
 
 export function DialogChannelItem(props: any) {
+  const { setAlert } = useAlert();
   const [open, setOpen] = React.useState(false);
+  
   const handleClickOpen = () => {
     setOpen(true);
   };
+
   const handleClose = () => {
     setOpen(false);
   };
-  const joinChan = (e: any) => {
+
+  const joinChan = async (e: any) => {
     e.preventDefault()
     let pwd = "";
+
     if (e.target.password !== undefined)
       pwd = e.target.password.value;
-    props.props.chatCommands.JoinChan(["/join ", pwd], props.props.state, props.chan.id);
+    
+    let errorLog: string | undefined = await ChatCommands("/join " + pwd, props.props.state, props.props.socket, {chanId: props.chan.id});
+    if (errorLog !== undefined)
+      setAlert(errorLog, "error")
   }
+
   const lastMsg = props.chan?.Message?.slice(-1);
   return (
   <div>

@@ -53,7 +53,7 @@ export class ChannelController {
 		if (chan.type === "private") {
 			const bcrypt = require ('bcrypt');
 			if (!bcrypt.compareSync(data.pwd, chan.password))
-				throw ForbiddenException ;
+				throw new ForbiddenException ;
 		}
 		return this.channelService.addMember({channelId: Number(data.channelId), memberId: Number(data.memberId)})
 	}

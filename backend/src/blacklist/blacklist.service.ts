@@ -76,11 +76,12 @@ export class BlacklistService {
 			}
 		})
 		if ((isAdmin || data.type === "block") && blacklist.length === 0 
-			&& chan.ownerId != data.target.connect.id)
+			&& chan.ownerId != data.target.connect.id) {
 			return this.prisma.blacklist.create({
 				data,
 			});
-		throw ForbiddenException;
+		}
+		throw new ForbiddenException;
 	}
 
 	async updateBlacklist(params: {

@@ -10,11 +10,11 @@ import io from "socket.io-client";
 import axios from "axios"
 import { getChan, userIsInChan, sortChannels } from './utils'
 import { InfoDialog } from "./channel/infoDialog"
-import { ChatCommands } from './chatCommands'
 import { selectCurrentUser } from '../../Hooks/authSlice'
 import { useSelector } from "react-redux"
 import SearchBar from "./channel/searchBar"
 import { usersStatusSocket } from "../../Router/Router";
+
 
 function ChatWithHook(component: any) {
   return function WrappedChat(props: any) {
@@ -48,10 +48,8 @@ class Chat extends React.Component<Props, ChatState> {
     
     this.socket = io("http://localhost:3000/chat"); 
     this.getData();
-    this.chatCommands = new ChatCommands(this.socket, this.openConvHandler);
     usersStatusSocket.emit("updateStatus", "online");
   }
-  private chatCommands: ChatCommands
   private socket
 
   /** INIT DATA **/
@@ -192,8 +190,6 @@ class Chat extends React.Component<Props, ChatState> {
   /** CHAT COMMANDS **/
   
   render() {
-    console.log(this.state.statusList)
-
     this.socket.off('updateChanFromServer').on('updateChanFromServer', (chan) => this.socketUpdateChan(chan));
     this.socket.off('newChanFromServer').on('newChanFromServer', (chan) => this.socketNewChan(chan));
     this.socket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.socketNewMsg(msg));
@@ -209,13 +205,13 @@ class Chat extends React.Component<Props, ChatState> {
             <HeaderChannels state={this.state} socket={this.socket} />
             <SearchBar state={this.state} socket={this.socket} openConvHandler={this.openConvHandler}  />
             <ChannelDisplay state={this.state} socket={this.socket} 
-                  openConvHandler={this.openConvHandler} chatCommands={this.chatCommands} />
+                  openConvHandler={this.openConvHandler} />
             <InfoDialog />
         </div>
         <div className="ChatDisplay">
-            {this.state.actualUser.openedConvID === -1 ? null : <ChatHeader state={this.state} socket={this.socket} chatCommands={this.chatCommands} /> }
+            {this.state.actualUser.openedConvID === -1 ? null : <ChatHeader state={this.state} socket={this.socket} openConvHandler={this.openConvHandler} /> }
             <div className="MessageDisplay"><MessageDisplay state={this.state} socket={this.socket} /></div>
-            {this.state.actualUser.openedConvID === -1 ? null : <div className="SendMessage"><SendBox state={this.state} socket={this.socket} chatCommands={this.chatCommands} /></div>}
+            {this.state.actualUser.openedConvID === -1 ? null : <div className="SendMessage"><SendBox state={this.state} socket={this.socket} openConvHandler={this.openConvHandler} /></div>}
         </div>
 
     </div>
