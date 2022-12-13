@@ -75,8 +75,8 @@ export class BlacklistService {
 				channelId: data.channel.connect.id,
 			}
 		})
-		if ((isAdmin || data.type === "block") && blacklist.length === 0 
-			&& chan.ownerId != data.target.connect.id) {
+		if (((isAdmin && chan.ownerId != data.target.connect.id) || data.type === "block")
+			&& blacklist.length === 0) {
 			return this.prisma.blacklist.create({
 				data,
 			});

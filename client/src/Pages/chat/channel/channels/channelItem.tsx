@@ -37,11 +37,12 @@ export function DialogChannelItem(props: any) {
     if (e.target.password !== undefined)
       pwd = e.target.password.value;
     
-    let errorLog: string | undefined = await ChatCommands("/join " + pwd, props.props.state, props.props.socket, {chanId: props.chan.id});
+    let errorLog: string | undefined = await ChatCommands("/join " + pwd, props.props.state, props.props.socket, 
+      {chanId: props.chan.id, openConvHandler: props.props.openConvHandler});
     if (errorLog !== undefined) {
       if (errorLog.substring(0, 5) === "Error")
         setAlert(errorLog, "error");
-      else
+      else 
         setAlert(errorLog, "success");
     }
   }

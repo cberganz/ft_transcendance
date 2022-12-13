@@ -2,6 +2,7 @@ import { ChatState } from './stateInterface'
 import axios from 'axios'
 import { getChan } from './utils';
 import useAlert from "../../Hooks/useAlert";
+import { stringify } from 'querystring';
 
 const commands = new Map([
     ["/join", JoinChan],
@@ -43,10 +44,11 @@ async function JoinChan(inputs: string[], state: ChatState, socket: any, params:
         return "Error: Please enter a password.";
 
     let ret = await axios.post("http://localhost:3000/channel/Member/", {channelId: params.chanId, memberId: state.actualUser.user.id, pwd: inputs[1]})
-        .then(response => {socket.emit('updateChanFromClient', response.data); return response})
+        .then(response => {socket.emit('updateChanFromClient', response.data); return response.data})
         .catch((error) => "error")
     if (ret === "error")
         return "Error: Can't access this channel.";
+    params.openConvHandler(ret.id);
     return "Chan joined.";
 }
 
@@ -116,9 +118,14 @@ async function AddAdmin(inputs: string[], state: ChatState, socket: any, params:
 
 async function Block(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
     const chan = getChan(params.chanId, state);
-    if (inputs.length === 1 || chan === undefined)
+    if (chan === undefined)
         return "";
-
+    if (inputs.length === 1 && chan.type === 'dm') {
+        if (chan.members[0].id === state.actualUser.user.id)
+            inputs = [inputs[0], chan.members[1].username.valueOf()]
+        else
+           inputs = [inputs[0], chan.members[0].username.valueOf()]
+    }
     let blockedId = -1;
     for (let user of chan?.members) {
         if (user.username === inputs[1]) {
@@ -126,7 +133,9 @@ async function Block(inputs: string[], state: ChatState, socket: any, params: an
             break ;
         }
     }
-    if (blockedId === -1 || blockedId === state.actualUser.user.id)
+    if (blockedId === -1)
+        return "Error: " + inputs[1] + " is not part of the channel.";
+    if (blockedId === state.actualUser.user.id)
         return "";
     let ret = await axios.post("http://localhost:3000/blacklist", {target_id: blockedId, type: "block", channelId: params.chanId, creatorId: state.actualUser.user.id})
         .then()
@@ -136,7 +145,7 @@ async function Block(inputs: string[], state: ChatState, socket: any, params: an
     await axios.get("http://localhost:3000/user/" + state.actualUser.user.id)
         .then(response => socket.emit('updateUserFromClient', response.data))
         .catch()
-    return "";
+    return "User successfully blocked.";
 }
 
 async function Unblock(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
@@ -144,8 +153,14 @@ async function Unblock(inputs: string[], state: ChatState, socket: any, params: 
     let     blockedId = -1;
     let     blacklistId = -1;
 
-    if (inputs.length === 1 || chan === undefined || state.actualUser.user.blacklist === undefined)
+    if (chan === undefined || state.actualUser.user.blacklist === undefined)
         return "";
+    if (inputs.length === 1 && chan.type === 'dm') {
+        if (chan.members[0].id === state.actualUser.user.id)
+            inputs = [inputs[0], chan.members[1].username.valueOf()]
+        else
+            inputs = [inputs[0], chan.members[0].username.valueOf()]
+    }
     for (let user of chan?.members) {
         if (user.username === inputs[1]) {
             blockedId = user.id;
@@ -153,7 +168,7 @@ async function Unblock(inputs: string[], state: ChatState, socket: any, params: 
         }
     }
     if (blockedId === -1)
-        return "";
+        return "Error: " + inputs[1] + " is not part of the channel.";
     for (let blacklist of state.actualUser.user.blacklist) {
         if (blacklist.target_id === blockedId)
             blacklistId = blacklist.id;
@@ -168,11 +183,13 @@ async function Unblock(inputs: string[], state: ChatState, socket: any, params: 
     await axios.get("http://localhost:3000/user/" + state.actualUser.user.id)
         .then(response => socket.emit('updateUserFromClient', response.data))
         .catch()
-    return "";
+    return "User successfully unblocked.";
 }
 
 async function Ban(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
     const chan = getChan(params.chanId, state);
+    if (inputs.length === 2)
+        inputs = [inputs[0], inputs[1], "0"];
     if (inputs.length < 3 || chan === undefined || isNaN(Number(inputs[2])))
         return "";
     let blockedId = -1;
@@ -184,7 +201,9 @@ async function Ban(inputs: string[], state: ChatState, socket: any, params: any)
             break ;
         }
     }
-    if (blockedId === -1 || blockedId === state.actualUser.user.id)
+    if (blockedId === -1)
+        return "Error: " + inputs[1] + " is not part of the channel."
+    if (blockedId === state.actualUser.user.id)
         return "";
 
     let isError = await axios.post("http://localhost:3000/blacklist", 
@@ -211,7 +230,9 @@ async function Mute(inputs: string[], state: ChatState, socket: any, params: any
             break ;
         }
     }
-    if (blockedId === -1 || blockedId === state.actualUser.user.id)
+    if (blockedId === -1)
+        return "Error: " + inputs[1] + " is not part of the channel." 
+    if (blockedId === state.actualUser.user.id)
         return "";
     
     let isError = await axios.post("http://localhost:3000/blacklist", 

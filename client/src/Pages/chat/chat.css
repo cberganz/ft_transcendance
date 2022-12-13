@@ -37,6 +37,7 @@
       "MessageDisplay"
       "SendMessage";
     position: relative;
+    overflow: hidden;
   }
   .ChatHeader { 
     grid-area: ChatHeader;
@@ -69,6 +70,9 @@
   .rightChat {  
     display: grid;
     grid-template-columns: 2fr 0.05fr;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
   
   .rightChatContent { 
@@ -86,6 +90,9 @@
   .leftChat {  
     display: grid;
     margin-left: 15px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
   
   .leftChatAvatar { 
