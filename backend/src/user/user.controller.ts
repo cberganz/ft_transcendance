@@ -20,7 +20,7 @@ import { fileInterceptorOptions } from '../file/fileInterceptorOptions';
 import { DeleteFileOnErrorFilter } from '../file/fileUpload.filter'
 import { fileValidator } from '../file/ConstantfileValidator'
 import OwnGuard from '../auth/own.guard'
-import { updateUserDto } from "./upateUserDto"
+import { updateUserDto } from './upateUserDto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 class CreateUser {
@@ -57,7 +57,11 @@ export class UserController {
 	async signupUser (
 		@Body() userData: CreateUser
 	): Promise<UserMode1> {
-		return this.userService.createUser(userData);
+		let newUser = {
+			...userData,
+			avatar: "https://profile.intra.42.fr/assets/42_logo_black-684989d43d629b3c0ff6fd7e1157ee04db9bb7a73fba8ec4e01543d650a1c607.png"
+		}
+		return this.userService.createUser(newUser);
 	}
 
 	@Delete(':id')
@@ -86,13 +90,13 @@ export class UserController {
 			});
 	}
 
+
 	@Put(':id')
 	@UseGuards(OwnGuard)
 	async updateUserName(
 		@Param('id') id: string,
-		@Body() body: any//updateUserDto
+		@Body() body: updateUserDto
 		): Promise<UserMode1> {
-			console.log("test")
 			const user = await this.userService.user({id: Number(id)})
 			const userWithSameUsername =
 				await this.userService.user({username: String(body.username)});

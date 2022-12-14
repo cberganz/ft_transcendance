@@ -32,7 +32,7 @@ const uploadFile = (file: any, currentUser: any, token: string) => {
 		url: `http://localhost:3000/user/upload/avatar/${currentUser.id}`,
 		method: "put",
 		headers:{
-			Authorization: `Bearer ${currentUser.token}`
+			Authorization: `Bearer ${token}`
 		},
 		data: formDataFile
 	})
@@ -46,9 +46,9 @@ const updateUsername = (username: string, currentUser: any, token: string) => {
 		url: `http://localhost:3000/user/${currentUser.id}`,
 		method: "put",
 		headers:{
-			Authorization: `Bearer ${currentUser.token}`
+			Authorization: `Bearer ${token}`
 		},
-		data: {
+		data:  {
 			username: username
 		}
 	})
@@ -81,7 +81,7 @@ function SimpleDialog(props: SimpleDialogProps) {
 	const handleSubmit = async (e: any) => {
 		e.preventDefault()
 		let uploadReq, updateReq
-		let newUserData = currentUser
+		let newUserData = {...currentUser}
  
 		if (file) {
 			uploadReq = await uploadFile(file, currentUser, token)
@@ -92,23 +92,20 @@ function SimpleDialog(props: SimpleDialogProps) {
 				}
 				return req
 			})
-			.catch(() => setAlert("Failed updating userdata", "error"))
+			.catch(() => setAlert("Failed Upload File", "error"))
 		}
 		if (username.length) {
 			updateReq = await updateUsername(username, currentUser, token)
 			.then((req: any) => {
+				let newUserDataUpload = {...newUserData}
 				if (req.status === 200) {
-					newUserData.username = req.data.username
-					dispatch(setCredentials({ user: newUserData, accessToken: token }))
+					newUserDataUpload.username = req.data.username
+					dispatch(setCredentials({ user: newUserDataUpload, accessToken: token }))
 				}
 				return req
 			})
-			.catch(() => setAlert("Failed updating userdata", "error"))
+			.catch((err) => {setAlert(`Failed updating username`, "error"); alert(err)})
 		}
-		// (updateReq.status === 200 && updateReq.status === 200)
-		// 	? setAlert("Userdata has been updated", "success")
-		// 	: setAlert("Failed updating userdata", "error")
-		dispatch(setCredentials({ user: newUserData, accessToken: token }))
 		handleClose()
 	}
 

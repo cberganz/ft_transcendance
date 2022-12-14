@@ -17,7 +17,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser())
   app.use(passport.initialize());
-  app.useGlobalPipes(new ValidationPipe({forbidUnknownValues: true, whitelist: true,  }));
+//   app.useGlobalPipes(new ValidationPipe({forbidUnknownValues: true, whitelist: true,  })); 
+//	pose pb pour signup mais devrait etre mis voir si pb quand on remet
 
   app.enableCors({
 	credentials: true,
