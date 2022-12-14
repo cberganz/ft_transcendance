@@ -12,7 +12,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
-import { isBlocked, StyledBadge } from '../../utils';
+import { isBlocked, StyledBadge, getProfile } from '../../utils';
 import { Channel } from '../../stateInterface';
 import ChatCommands from '../../chatCommands';
 import useAlert from "../../../../Hooks/useAlert";
@@ -128,13 +128,13 @@ export function ChannelItem(chan: Channel, chanName: String, avatar: String, pro
 
   if (avatar === undefined || avatar === null)
     avatar = "";
-  if (chan.type === "dm" && props.state.statusList) {
+  if (chan.type === "dm" && props.state.usersProfiles) {
     let userId: number;
     if (chan.members[0].id === props.state.actualUser.user.id)
       userId = chan.members[1].id;
     else
       userId = chan.members[0].id;
-    if (props.state.statusList.get(userId) === 'online')
+    if (getProfile(props.state.usersProfiles, userId)?.status === 'online')
       isConnected = true;
   }
   if (props.state.actualUser.openedConvID === chan.id)

@@ -7,6 +7,13 @@ import {
   } from '@nestjs/websockets';
   import { Socket, Server } from 'socket.io';
   
+  interface userProfile {
+    id: number,
+    login?: string,
+    username?: string,
+    status?: string,
+    avatar?: string,
+  }
   @WebSocketGateway({
     namespace: '/app',
     cors: {
@@ -15,38 +22,64 @@ import {
   })
   export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect
   {
-    private usersStatus: Map<number, string>
+    private usersProfiles: userProfile[]
     private usersSockets: Map<Socket, number>
     constructor() {
       this.usersSockets = new Map<Socket, number>;
-      this.usersStatus = new Map<number, string>;
+      this.usersProfiles = [];
     }
 
     @WebSocketServer() public server: Server;
     
     handleConnection(socket: Socket) {}
     
+    getProfile(id: number) : userProfile {
+      for (let profile of this.usersProfiles) {
+        if (profile.id === id)
+          return profile;
+      }
+    }
+
+    setProfile(data: {id: number, username?: string, status?: string, avatar?: string}) {
+      let newProfile: userProfile;
+
+      for (let i = 0; i < this.usersProfiles.length; i++) {
+        if (this.usersProfiles[i].id === data.id) {
+          newProfile = {
+            id: this.usersProfiles[i].id,
+            login: this.usersProfiles[i].login,
+            username: data.username !== undefined ? data.username : this.usersProfiles[i].username,
+            status: data.status !== undefined ? data.status : this.usersProfiles[i].status,
+            avatar: data.avatar !== undefined ? data.avatar : this.usersProfiles[i].avatar,
+          }
+          this.usersProfiles.splice(i, 1);
+          return this.usersProfiles.push(newProfile);
+        }
+      }
+      return this.usersProfiles.push(data);
+    }
+
     @SubscribeMessage('connection')
-    handleInitTable(socket: Socket, id: number) {
-      this.usersSockets.set(socket, id);
-      if (this.usersStatus.get(id) === undefined)
+    handleInitTable(socket: Socket, data: userProfile) {
+      this.usersSockets.set(socket, data.id);
+      if (this.getProfile(data.id) === undefined)
         this.server.emit("newUserFromServer");
-      this.usersStatus.set(id, "online");
-      this.server.emit("updateStatusFromServer", JSON.stringify(Array.from(this.usersStatus)));
+      this.setProfile(data);
+      this.server.emit("updateStatusFromServer", this.usersProfiles);
     }
     
     // update to anything: online, offline, in game...
     @SubscribeMessage('updateStatus')
     handleUpdateStatus(socket: Socket, status: string) {
-      this.usersStatus.set(this.usersSockets.get(socket), status);
-      this.server.emit("updateStatusFromServer", JSON.stringify(Array.from(this.usersStatus)));
+      this.setProfile({id: this.usersSockets.get(socket), status: status});
+      this.server.emit("updateStatusFromServer", this.usersProfiles);
     }
     
     handleDisconnect(socket: Socket) {
       const userId: number = this.usersSockets.get(socket);
       if (userId !== undefined)
-        this.usersStatus.set(userId, "offline");
-      this.server.emit("updateStatusFromServer", JSON.stringify(Array.from(this.usersStatus)));
+        this.setProfile({id: userId, status: "offline"});
+      this.server.emit("updateStatusFromServer", this.usersProfiles);
       this.usersSockets.delete(socket);
     }
   }

@@ -1,0 +1,32 @@
+.dashboard {
+    font-family: calibri;
+    display: grid;
+    grid-template-columns: 250px auto;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px; 
+    }
+    
+    .userCol { 
+        display: grid;
+        grid-column-start: 1;
+        grid-column-end: 1; 
+        height: 100vh;
+        border-right-style:solid;
+        border-width: 1px;
+        border-right-color: rgb(193, 218, 216);
+    }
+
+    .contentCol { 
+        display: grid;
+        grid-area: 1 / 2 / 1 / 2; 
+        grid-column-start: 2;
+        grid-column-end: 2;
+        height: 100vh;
+        grid-template-rows: 6vw auto;
+    }
+
+    .homeHeader {
+        font-size: 4vw;
+        margin-top: 10px;
+    }
+    

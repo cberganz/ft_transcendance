@@ -1,4 +1,4 @@
-import { ChatState, Channel, User } from "./stateInterface"
+import { ChatState, Channel, User, userProfile } from "./stateInterface"
 import { styled } from '@mui/material/styles';
 import Badge from '@mui/material/Badge';
 
@@ -71,3 +71,11 @@ export function sortChannels(chans: Channel[]) {
       },
     },
   }));
+
+  export function getProfile(tab: userProfile[], id: number) {
+    for (let profile of tab) {
+      if (profile.id === id)
+        return profile;
+    }
+    return null;
+  }

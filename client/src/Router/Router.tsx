@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes, Outlet } from 'react-router-dom';
 import Login from '../Pages/Auth/Login'
-import ConnectedUsers from '../Pages/ConnectedUsers/ConnectedUsers'
-import {Dashboard} from './test'
+import ConnectedUsers from '../Pages/Dashboard/ConnectedUsers'
+import {Dashboard} from '../Pages/Dashboard/Dashboard'
 import PrimarySearchAppBar from "../Components/TopBar"
 import Game from "../Pages/Game/Game";
 import Chat from "../Pages/chat/chat"
@@ -17,7 +17,15 @@ import io from "socket.io-client";
 export const usersStatusSocket = io("http://localhost:3000/app");
 
 function	OutletRoute() {
-	usersStatusSocket.emit("connection", useSelector(selectCurrentUser).id);
+	const user = useSelector(selectCurrentUser);
+	const userData = {
+		id: user.id,
+		login: user.login,
+		username: user.username,
+		status: "online",
+		avatar: user.avatar,
+	}
+	usersStatusSocket.emit("connection", userData);
 	return (
 		<div>
 			<PrimarySearchAppBar />

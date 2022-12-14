@@ -5,6 +5,8 @@ import Stack from '@mui/material/Stack';
 import './ConnectedUsers.css'
 import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
+import { usersStatusSocket } from "../../Router/Router";
+import React, { useState } from 'react';
 
 const columns: GridColDef[] = [
 	{
@@ -72,25 +74,25 @@ const rows = [
 ];
 
 export default function ConnectedUsers() {
-	return (
-						
-		<Container >
+	// const [ userList, setUserList ] = useState(new Map);
+	// const socketUpdateUsersStatus = (usersStatusList: any) => {
+	//   setUserList(new Map(JSON.parse(usersStatusList)));
+	// }
+
+    // usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (statusList) => socketUpdateUsersStatus(statusList));
+	return (				
+		<div>
 			<Stack>
-				<Box className='data-grid-title'>
-					<h1>Connected Users:</h1>
-				</Box>
 				<Box className='data-grid'>
 					<DataGrid
 						className='grid'
 						rows={rows}
 						columns={columns}
-						pageSize={5}
-						rowsPerPageOptions={[5]}
 						disableSelectionOnClick
 						experimentalFeatures={{ newEditingApi: true }}
 					/>
 				</Box>
 			</Stack>
-		</Container>
+		</div>
 	);
 }

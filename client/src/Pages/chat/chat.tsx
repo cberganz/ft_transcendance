@@ -53,17 +53,15 @@ class Chat extends React.Component<Props, ChatState> {
       joinedChans: [],
       notJoinedChans: [],
       userList: [],
+      usersProfiles: [],
     };
-    
+
     this.socket = io("http://localhost:3000/chat"); 
-    this.getData();
-    this.emitNewChan();
-    usersStatusSocket.emit("updateStatus", "online");
   }
   private socket
-
+  
   /** INIT DATA **/
-  async getData() {
+  async componentDidMount() {
     let ChatData = {
       actualUser: await this.getActualUser(),
       joinedChans: await this.getJoinedChans(),
@@ -71,9 +69,12 @@ class Chat extends React.Component<Props, ChatState> {
       userList: await this.getUserList(),
     }
     for (const chan of ChatData.joinedChans) 
-      this.socket.emit('joinChatRoom', chan.id)
+    this.socket.emit('joinChatRoom', chan.id)
     this.setState(ChatData);
+    this.emitNewChan();
+    usersStatusSocket.emit("updateStatus", "online");
   }
+
   async getActualUser(): Promise<actualUser> {
     let actualUser = {
       token: this.props.token,
@@ -205,10 +206,11 @@ class Chat extends React.Component<Props, ChatState> {
     this.setState(ChatData);
   }
 
-  socketUpdateUsersStatus(usersStatusList: any) {
+  socketUpdateUsersStatus(usersProfiles: any) {
     let ChatData: ChatState = structuredClone(this.state);
 
-    ChatData.statusList = new Map(JSON.parse(usersStatusList));
+    console.log(usersProfiles);
+    ChatData.usersProfiles = usersProfiles;
     this.setState(ChatData);
   }
   
@@ -226,7 +228,7 @@ class Chat extends React.Component<Props, ChatState> {
     this.socket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.socketNewMsg(msg));
     this.socket.off('updateUserFromServer').on('updateUserFromServer', (user) => this.socketUpdateUser(user));
     this.socket.off('updateUserlistFromServer').on('updateUserlistFromServer', (user) => this.socketUpdateUserlist(user));
-    usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (statusList) => this.socketUpdateUsersStatus(statusList));
+    usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (profilesList) => this.socketUpdateUsersStatus(profilesList));
     usersStatusSocket.off('newUserFromServer').on('newUserFromServer', () => this.socketNewUser());
 
     return (

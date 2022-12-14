@@ -5,8 +5,16 @@ export interface ChatState {
     joinedChans: Channel[],
     notJoinedChans: Channel[],
     userList: User[],
-    statusList?: Map<number, string>,
+    usersProfiles: userProfile[],
 }
+
+export interface userProfile {
+    id: number,
+    login: string,
+    username: string,
+    status: string,
+    avatar: string,
+  }
 
 export interface actualUser {
     user: User,
