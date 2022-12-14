@@ -5,31 +5,48 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import LockIcon from '@mui/icons-material/Lock';
-import '../chat.css'
+import '../../chat.css'
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
-import { isBlocked } from '../utils';
+import { isBlocked, StyledBadge } from '../../utils';
+import { Channel } from '../../stateInterface';
+import ChatCommands from '../../chatCommands';
+import useAlert from "../../../../Hooks/useAlert";
 
 
 export function DialogChannelItem(props: any) {
+  const { setAlert } = useAlert();
   const [open, setOpen] = React.useState(false);
+  
   const handleClickOpen = () => {
     setOpen(true);
   };
+
   const handleClose = () => {
     setOpen(false);
   };
-  const joinChan = (e: any) => {
+
+  const joinChan = async (e: any) => {
     e.preventDefault()
-    if (props.chan.type === "public" || (props.chan.type === "private" && props.chan.password === e.target.password.value))
-      props.props.chatCommands.handler("/join", props.props.state, props.chan.id);
-    else if (props.chan.type === "private" && props.chan.password !== e.target.password.value)
-      alert("Wrong password.")
+    let pwd = "";
+
+    if (e.target.password !== undefined)
+      pwd = e.target.password.value;
+    
+    let errorLog: string | undefined = await ChatCommands("/join " + pwd, props.props.state, props.props.socket, 
+      {chanId: props.chan.id, openConvHandler: props.props.openConvHandler});
+    if (errorLog !== undefined) {
+      if (errorLog.substring(0, 5) === "Error")
+        setAlert(errorLog, "error");
+      else 
+        setAlert(errorLog, "success");
+    }
   }
+
   const lastMsg = props.chan?.Message?.slice(-1);
   return (
   <div>
@@ -92,20 +109,34 @@ export function DialogChannelItem(props: any) {
 )
 }
 
-export function ChannelItem(chan: any, chanName: String, avatar: String, props: any) {
+export function ChannelItem(chan: Channel, chanName: String, avatar: String, props: any) {
   let lastMsg = null;
-  for (let i = chan.Message.length - 1; i >= 0; i--) {
-    if (!isBlocked(props.state.actualUser.user, chan?.Message[i].author)) {
-      lastMsg = chan?.Message[i];
-      break ;
+  let lastMsgContent: String = "";
+
+  if (chan.Message !== undefined) {
+    for (let i = chan.Message.length - 1; i >= 0; i--) {
+      if (!isBlocked(props.state.actualUser.user, chan?.Message[i].author)) {
+        lastMsg = chan?.Message[i];
+        break ;
+      }
     }
+    if (lastMsg !== null)
+      lastMsgContent = lastMsg.content
   }
-  let lastMsgContent: string = lastMsg?.content
   let bckgColor
+  let isConnected = false;
 
   if (avatar === undefined || avatar === null)
     avatar = "";
-    
+  if (chan.type === "dm" && props.state.statusList) {
+    let userId: number;
+    if (chan.members[0].id === props.state.actualUser.user.id)
+      userId = chan.members[1].id;
+    else
+      userId = chan.members[0].id;
+    if (props.state.statusList.get(userId) === 'online')
+      isConnected = true;
+  }
   if (props.state.actualUser.openedConvID === chan.id)
     bckgColor = '#f5f5f5'
   else
@@ -115,7 +146,22 @@ export function ChannelItem(chan: any, chanName: String, avatar: String, props: 
       <ListItem onClick={event => {props.openConvHandler(chan.id)}} alignItems="flex-start" className="ChannelItem" sx={{backgroundColor: bckgColor, cursor: 'pointer'}}>
 
           <ListItemAvatar>
-            {chan.type === 'dm' ? <Avatar alt={chanName?.valueOf()} src={avatar.valueOf()} /> : <Avatar alt={chanName?.valueOf()} src="-" />}
+            {chan.type === 'dm' && isConnected ? 
+            <StyledBadge
+              overlap="circular"
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              variant="dot"
+              sx={{ marginRight: '10px', marginBottom: '10px' }}
+            >
+              <Avatar alt={chanName?.valueOf()} src={avatar.valueOf()} /> 
+            </StyledBadge>
+            : null}
+            {chan.type === 'dm' && !isConnected ? 
+              <Avatar alt={chanName?.valueOf()} src={avatar.valueOf()} />
+              : null}
+            {chan.type !== 'dm' ? 
+              <Avatar alt={chanName?.valueOf()} src="-" />
+              : null}
           </ListItemAvatar>
 
           <ListItemText

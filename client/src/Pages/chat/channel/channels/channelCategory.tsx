@@ -1,5 +1,5 @@
 import { ChannelItem, DialogChannelItem } from './channelItem';
-import '../chat.css'
+import '../../chat.css'
 
 export function DMChannels(props: any) {
   return (

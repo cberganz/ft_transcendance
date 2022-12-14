@@ -78,7 +78,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
     let isInChan: boolean;
     let withoutMessageChan = {... chan};
     delete withoutMessageChan.Message;
-    
+
     this.server.to("chat" + chan.id).emit('updateChanFromServer', chan)
     for (let [userSocket, login] of this.userSockets) {
       isInChan = false;
@@ -95,7 +95,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   @SubscribeMessage('newMsgFromClient')
   handleNewMessage(socket: Socket, message: {room: string, message: any}) : void {
-    // check if user not MUTE
     this.server.to(message.room).emit('newMsgFromServer', message.message)
   }
 
@@ -107,11 +106,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
   @SubscribeMessage('leaveChatRoom')
   handleLeaveRoom(socket: Socket, chanID: number): void {
     socket.leave("chat" + chanID);
-    // remove member from chan members (BAN)
   }
 
   @SubscribeMessage('updateUserFromClient')
   updateUser(socket: Socket, user: any): void {
     socket.emit('updateUserFromServer', user);
   }
+
+  @SubscribeMessage('updateUserlistFromClient')
+  updateUserList(socket: Socket, user: any): void {
+    socket.emit('updateUserlistFromServer', user);
+  }
+
+  @SubscribeMessage('banFromClient')
+  banUser(socket: Socket, data: {bannedLogin: string, chanId: number}): void {
+    for (let [userSocket, login] of this.userSockets) {
+      if (login === data.bannedLogin) {
+        userSocket.leave("chat" + data.chanId);
+        break ;
+      }
+    }
+  }
+  
 }

@@ -5,6 +5,7 @@ export interface ChatState {
     joinedChans: Channel[],
     notJoinedChans: Channel[],
     userList: User[],
+    statusList?: Map<number, string>,
 }
 
 export interface actualUser {

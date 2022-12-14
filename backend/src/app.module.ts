@@ -16,7 +16,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { FileModule } from './file/file.module';
 import { getEnvPath } from './utils/env.helper';
 import { ConfigModule } from '@nestjs/config';
-
+import { AppGateway } from './app.gateway';
 const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
 
 @Module({
@@ -36,6 +36,6 @@ const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
 		FileModule,
 	],
   controllers: [AppController],
-  providers: [AppService, PrismaService, GameGateway, ChatGateway],
+  providers: [AppService, PrismaService, GameGateway, ChatGateway, AppGateway],
 })
 export class AppModule {}

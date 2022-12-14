@@ -47,8 +47,8 @@ const rows = [
     createData('/setpwd [password]', 'Sets password for channel (only if owner).'),
     createData('/rmpwd', 'Removes password of channel (only if owner).'),
     createData('/addadmin [username]', 'Adds new administrator (only if administrator).'),
-    createData('/ban [username] [time]', 'Bans [username] for [time] minutes.'),
-    createData('/mute [username] [time]', 'Mutes [username] for [time] minutes.'),
+    createData('/ban [username] [time]', 'Bans [username] for [time] minutes (only if administrator).'),
+    createData('/mute [username] [time]', 'Mutes [username] for [time] minutes (only if administrator).'),
     createData('/game [username]', 'Sends game invitation to [username].'),
   ];
 

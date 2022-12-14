@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:17
 # AS builder
 
 # Create app directory
