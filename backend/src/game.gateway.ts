@@ -74,7 +74,7 @@ export class GameGateway
       return;
     }
     if (this.rooms.length === 0 || this.findAvailableRoom() === -1) {
-      this.createRoom();
+      this.createRoom(client);
       this.rooms[this.rooms.length - 1].players[0] =
         client.handshake.query.id.toString();
     } else if (this.rooms[this.findAvailableRoom()].players[0] === "") {
@@ -342,7 +342,7 @@ export class GameGateway
     return -1;
   }
 
-  createRoom(): void {
+  createRoom(client: Socket): void {
     const newRoom: Room = {
       roomId: randomUUID(),
       players: ["", ""],
@@ -355,6 +355,7 @@ export class GameGateway
       score: [0, 0],
     };
     this.rooms.push(newRoom);
+    this.logger.log(newRoom.ballPosition);
   }
 
   logRoom(): void {

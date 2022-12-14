@@ -8,6 +8,8 @@ import "./game.css";
 import { selectCurrentUser } from "../../Hooks/authSlice";
 import { useSelector } from "react-redux";
 import LeaveButton from "./components/LeaveButton/LeaveButton";
+import { FormControlLabel, FormGroup } from "@mui/material";
+import Switch from "@mui/material/Switch";
 
 function Game() {
   const socket: Socket = io("http://localhost:3000/game", {
@@ -21,6 +23,7 @@ function Game() {
   const [startButton, setStartButton] = useState<boolean>(false);
   const [win, setWin] = useState<number>(0);
   const [ready, setReady] = useState<boolean>(false);
+  const [customGame, setCustomGame] = useState<boolean>(false);
   const factor: number = 1.32;
   const heightRef = useRef(window.innerHeight / factor);
   const widthRef = useRef(window.innerWidth / factor);
@@ -58,6 +61,9 @@ function Game() {
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
+
+  const colors = ["red", "green", "blue"];
+  const customColor = colors[Math.floor(Math.random() * colors.length)];
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -295,6 +301,13 @@ function Game() {
     }
   }
 
+  function getColor(): string {
+    if (!customGame) {
+      return "white";
+    }
+    return customColor;
+  }
+
   function drawMap(ctx: CanvasRenderingContext2D): void {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, widthRef.current, heightRef.current);
@@ -307,7 +320,7 @@ function Game() {
   }
 
   function drawPlayer(ctx: CanvasRenderingContext2D, player: Player): void {
-    ctx.fillStyle = "white";
+    ctx.fillStyle = getColor();
     ctx.fillRect(
       player.getPosition()[0],
       player.getPosition()[1],
@@ -317,13 +330,29 @@ function Game() {
   }
 
   function drawBall(ctx: CanvasRenderingContext2D, ball: Ball): void {
-    ctx.fillStyle = "white";
+    ctx.fillStyle = getColor();
     ctx.fillRect(
       ball.getX(),
       ball.getY(),
       ballSizeRef.current,
       ballSizeRef.current
     );
+  }
+
+  function drawScore(
+    ctx: CanvasRenderingContext2D,
+    p1: Player,
+    p2: Player
+  ): void {
+    ctx.fillStyle = "white";
+    ctx.font = "40px sans-serif";
+    ctx.textBaseline = "top";
+    ctx.fillText(p1.getScore().toString(), 20, 20);
+    if (p2.getScore() < 10) {
+      ctx.fillText(p2.getScore().toString(), widthRef.current - 42, 20);
+    } else {
+      ctx.fillText(p2.getScore().toString(), widthRef.current - 64, 20);
+    }
   }
 
   function updatePlayerPosition(player: Player): void {
@@ -449,22 +478,6 @@ function Game() {
     return false;
   }
 
-  function drawScore(
-    ctx: CanvasRenderingContext2D,
-    p1: Player,
-    p2: Player
-  ): void {
-    ctx.fillStyle = "white";
-    ctx.font = "40px sans-serif";
-    ctx.textBaseline = "top";
-    ctx.fillText(p1.getScore().toString(), 20, 20);
-    if (p2.getScore() < 10) {
-      ctx.fillText(p2.getScore().toString(), widthRef.current - 42, 20);
-    } else {
-      ctx.fillText(p2.getScore().toString(), widthRef.current - 64, 20);
-    }
-  }
-
   function drawGame(
     ctx: CanvasRenderingContext2D,
     p1: Player,
@@ -557,7 +570,21 @@ function Game() {
               setWin={setWin}
               startButton={startButton}
               win={win}
+              message="START GAME"
             />
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={customGame}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      setCustomGame(event.target.checked);
+                    }}
+                  />
+                }
+                label="Custom Game"
+              />
+            </FormGroup>
             <LeaveButton
               setEnterQueue={setEnterQueue}
               setQueueStatus={setQueueStatus}
