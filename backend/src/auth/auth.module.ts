@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthController } from './auth.controller';
+import { FtStrategy } from './passeport-42.strategy';
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { AuthController } from './auth.controller';
 	  
 	],
 	providers: [
+		FtStrategy,
 		AuthService,
 		UserService,
 		LocalStrategy,

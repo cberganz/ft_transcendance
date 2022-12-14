@@ -1,11 +1,25 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import { ValidatorOptions, ValidationError } from 'class-validator';
+var passport = require('passport');
+
+export interface ValidationPipeOptions extends ValidatorOptions {
+  transform?: boolean;
+  disableErrorMessages?: boolean;
+  forbidUnknownValues?: boolean;
+  exceptionFactory?: (errors: ValidationError[]) => any;
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser())
+  app.use(passport.initialize());
+//   app.useGlobalPipes(new ValidationPipe({forbidUnknownValues: true, whitelist: true,  })); 
+//	pose pb pour signup mais devrait etre mis voir si pb quand on remet
+
   app.enableCors({
 	credentials: true,
 	origin: ['http://localhost:3001', 'http://127.0.0.1:3001']

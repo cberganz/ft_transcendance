@@ -70,6 +70,9 @@ function Login() {
 					<Typography component="h1" variant="h5">
 						Sign in
 					</Typography>
+					<Button variant="contained" href='http://localhost:3000/auth/42'>
+						42 Login
+					</Button>
 					<Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
 						<TextField
 						margin="normal"

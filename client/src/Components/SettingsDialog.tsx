@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-	Avatar,
 	List,
 	ListItem,
 	ListItemAvatar,
@@ -11,87 +10,135 @@ import {
 	MenuItem,
 	ListItemIcon,
 	Button,
+	Grid
 } from '@mui/material';
-import { blue } from '@mui/material/colors';
-import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { selectCurrentUser } from '../Hooks/authSlice'
-import { useSelector } from "react-redux"
-import { useUpdateUserMutation } from "../Api/User/userApiSlice"
+import { selectCurrentUser, selectCurrentToken, setCredentials } from '../Hooks/authSlice'
+import { useSelector, useDispatch } from "react-redux"
 import useAlert from "../Hooks/useAlert";
+import { AvatarUpload } from './AvatarUpload';
+import axios from 'axios'
 
 export interface SimpleDialogProps {
 	open: boolean;
 	onClose: (value: string) => void;
 }
 
+const uploadFile = (file: any, currentUser: any, token: string) => {
+	const formDataFile = new FormData();
+	formDataFile.append('file', file, currentUser.login)
+	return axios({
+		withCredentials: true,
+		url: `http://localhost:3000/user/upload/avatar/${currentUser.id}`,
+		method: "put",
+		headers:{
+			Authorization: `Bearer ${token}`
+		},
+		data: formDataFile
+	})
+}
+
+const updateUsername = (username: string, currentUser: any, token: string) => {
+	const formData = new FormData();
+	formData.append('username', username)
+	return axios({
+		withCredentials: true,
+		url: `http://localhost:3000/user/${currentUser.id}`,
+		method: "put",
+		headers:{
+			Authorization: `Bearer ${token}`
+		},
+		data:  {
+			username: username
+		}
+	})
+}
+
 function SimpleDialog(props: SimpleDialogProps) {
 	const currentUser = useSelector(selectCurrentUser)
+	const token = useSelector(selectCurrentToken)
 	const { onClose, open } = props;
 	const [username, setMessage] = React.useState(currentUser.username);
 	const { setAlert } = useAlert();
-	const [updateUser] = useUpdateUserMutation()
+    const [file, setFile] = React.useState<any>();
+	const dispatch = useDispatch()
 
-	const handleChange = (event: any) => {
+	const handleMessageChange = (event: any) => {
 	  setMessage(event.target.value);
 	};
 
-
 	const handleClose = () => {
-		onClose(username);
+		onClose(username)
 	};
 
-	const handleSubmit = (e: any) => {
+	const onFileChange = (file: React.ChangeEvent) => {
+        const { files } = file.target as HTMLInputElement;
+        if (files && files.length !== 0) {
+          setFile(files[0])
+        }
+    }
+
+	const handleSubmit = async (e: any) => {
 		e.preventDefault()
-		if (!username.length) {
-			setAlert("Username must be provided", "error")
-			return ;
+		let uploadReq, updateReq
+		let newUserData = {...currentUser}
+ 
+		if (file) {
+			uploadReq = await uploadFile(file, currentUser, token)
+			.then((req: any) => {
+				if (req.status === 200){
+					newUserData.avatar = `${req.data.avatar}?${Date.now()}`
+					dispatch(setCredentials({ user: newUserData, accessToken: token }))
+				}
+				return req
+			})
+			.catch(() => setAlert("Failed Upload File", "error"))
 		}
-		const input = {
-			id: currentUser.id,
-			newUserData: {
-				username: username,
-			}
+		if (username.length) {
+			updateReq = await updateUsername(username, currentUser, token)
+			.then((req: any) => {
+				let newUserDataUpload = {...newUserData}
+				if (req.status === 200) {
+					newUserDataUpload.username = req.data.username
+					dispatch(setCredentials({ user: newUserDataUpload, accessToken: token }))
+				}
+				return req
+			})
+			.catch((err) => {setAlert(`Failed updating username`, "error"); alert(err)})
 		}
-		updateUser(input)
-			.then(() => setAlert("Username has been updated", "success"))// verifier que le username n'existe pas deja
-			.catch(() => setAlert("Failed updating userdata", "error"))
 		handleClose()
 	}
 
-
 	return (
 		<Dialog onClose={handleClose} open={open}>
-		<DialogTitle sx={{width:'300px'}}>Settings</DialogTitle>
-		<List sx={{ pt: 0 }}>
-			<ListItem>
-				<ListItemAvatar>
-					<Avatar sx={{
-						width: 56,
-						height: 56,
-						bgcolor: blue[100],
-						color: blue[600]
-					}}>
-						<PersonIcon />
-					</Avatar>
-				</ListItemAvatar>
-			</ListItem>
-			<ListItem>
-				<TextField
-				type="text"
-				id="username"
-				name="username"
-				label="update username"
-				onChange={handleChange}
-				value={username}
-				/>
-			</ListItem>
-			<ListItem>
-				<Button onClick={handleSubmit} variant="contained" disableElevation>
-					update changes
-				</Button>
-			</ListItem>
-		</List>
+		<form onSubmit={e => e.preventDefault()}>
+			<DialogTitle sx={{width:'300px'}}>Settings</DialogTitle>
+			<List sx={{ pt: 0 }}>
+				<ListItem>
+					<ListItemAvatar>
+						<AvatarUpload onChange={onFileChange} avatarSrc={currentUser.avatar}/>
+					</ListItemAvatar>
+				</ListItem>
+				<br/>
+				<ListItem>
+					<TextField
+					type="text"
+					id="username"
+					name="username"
+					label="update username"
+					onChange={handleMessageChange}
+					value={username}
+					/>
+					<br/>
+				</ListItem>
+				<br/>
+				<ListItem>
+					<Button onClick={handleSubmit} variant="contained" disableElevation>
+						update changes
+					</Button>
+				</ListItem>
+			</List>
+		</form>
 		</Dialog>
 	);
 }

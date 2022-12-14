@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
 	AppBar,
+	Avatar,
 	Box,
 	Toolbar,
 	IconButton,
@@ -25,8 +26,6 @@ import { SearchIconWrapper, Search, StyledInputBase } from './topBarStyle';
 import { useLogoutMutation } from '../Api/Auth/authApiSlice'
 import { logOut } from '../Hooks/authSlice';
 
-
-
 function LogoutButton () {
 	const [logoutUser] = useLogoutMutation()
 	// const navigate = useNavigate()
@@ -47,7 +46,7 @@ function ProfileBox() {
 	const user = useSelector(selectCurrentUser)
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const isMenuOpen = Boolean(anchorEl);
-
+   
 	const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
 		setAnchorEl(event.currentTarget);
 	};
@@ -55,7 +54,6 @@ function ProfileBox() {
 	const handleMenuClose = () => {
 		setAnchorEl(null);
 	};
-
 
 	const menuId = 'primary-search-account-menu';
 	const renderMenu = (
@@ -100,21 +98,32 @@ function ProfileBox() {
 
 	return (
 		<div>
-			<Box sx={{ display: { xs: 'none', md: 'flex', flexDirection: 'row', alignItems: 'center', gap: 1.5,} }}>
+			<Box sx={{ display: { width: 150, xs: 'none', md: 'flex', flexDirection: 'row', alignItems: 'center', /* gap: 1.5 */} }}>
 				<Grid
-					container spacing={1}
+					// container spacing={0}
 					aria-label="account of current user"
 					aria-controls={menuId}
 					aria-haspopup="true"
 					onClick={handleProfileMenuOpen}
 					color="inherit"
-					sx={{cursor:'pointer'}}
+					sx={{
+						display: 'flex',
+						alignItems: 'center',
+						alignContent: 'center',
+						cursor:'pointer'
+					}}
 				>
-					<Grid item xs={4}>
-							<AccountCircle/>
+					<Grid item sx={{marginRight: 1}} xs={0}>
+						<Avatar src={user.avatar}/>
 					</Grid>
-					<Grid item xs={8}>
-						<Typography sx={{ fontWeight:'bold'}}>{user.username}</Typography>
+					<Grid item xs={0}>
+						<Typography sx={{
+							textOverflow: 'ellipsis',
+							overflow: 'hidden',
+							whiteSpace: 'nowrap',
+							fontWeight:'bold'}}>
+							{user.username}
+						</Typography>
 					</Grid>
 				</Grid>
 			</Box>
