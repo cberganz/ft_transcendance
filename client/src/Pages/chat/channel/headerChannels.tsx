@@ -58,7 +58,8 @@ function CreateChannelButton(props: any) {
         title:     title,
         ownerId:   props.props.state.actualUser.user.id,
       }
-      axios.post('http://localhost:3000/channel/newChan/', newChan)
+      axios.post('http://localhost:3000/channel/newChan/', newChan, 
+        {withCredentials: true, headers: {Authorization: `Bearer ${props.props.state.actualUser.token}`}})
         .then(response => {
           props.props.socket.emit("newChanFromClient", response.data);
           setAlert("Channel successfully created.", "success");

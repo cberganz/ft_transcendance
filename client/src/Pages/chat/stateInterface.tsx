@@ -10,7 +10,8 @@ export interface ChatState {
 
 export interface actualUser {
     user: User,
-    openedConvID: number
+    openedConvID: number,
+    token: any,
 }
 
 export interface ChatProps {

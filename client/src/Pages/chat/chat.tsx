@@ -11,6 +11,7 @@ import axios from "axios"
 import { getChan, userIsInChan, sortChannels } from './utils'
 import { InfoDialog } from "./channel/infoDialog"
 import { selectCurrentUser } from '../../Hooks/authSlice'
+import { selectCurrentToken } from '../../Hooks/authSlice'
 import { useSelector } from "react-redux"
 import SearchBar from "./channel/searchBar"
 import { usersStatusSocket } from "../../Router/Router";
@@ -20,16 +21,18 @@ import { useSearchParams } from 'react-router-dom';
 function ChatWithHook(component: any) {
   return function WrappedChat(props: any) {
     const user = useSelector(selectCurrentUser);
+    const token = useSelector(selectCurrentToken);
     const [ openConv ] = useSearchParams();
     let   openConvId: number | null = Number(openConv.get("openConv"));
 
-    return (<Chat user={user} openConv={openConvId} />)
+    return (<Chat user={user} openConv={openConvId} token={token} />)
   }
 }
 
 interface Props {
   user: any;
   openConv: number;
+  token: any;
 }
 class Chat extends React.Component<Props, ChatState> {
   constructor(props: any) {
@@ -43,8 +46,9 @@ class Chat extends React.Component<Props, ChatState> {
           id: -1,
           login: "",
           avatar: "",
-          username: ""
-        }
+          username: "",
+        },
+        token: this.props.token,
       },
       joinedChans: [],
       notJoinedChans: [],
@@ -72,8 +76,10 @@ class Chat extends React.Component<Props, ChatState> {
   }
   async getActualUser(): Promise<actualUser> {
     let actualUser = {
+      token: this.props.token,
       openedConvID: this.props.openConv !== 0 ? this.props.openConv : -1,
-      user: await axios.get("http://localhost:3000/user/" + this.props.user.id)
+      user: await axios.get("http://localhost:3000/user/" + this.props.user.id,
+        {withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
         .then(response => response.data)
         .catch(error => alert("getActualUser " + error.status + ": " + error.message))
     }
@@ -81,27 +87,31 @@ class Chat extends React.Component<Props, ChatState> {
     return (actualUser)
   }
   async getJoinedChans(): Promise<Channel[]> {
-    let joinedChans = await axios.get("http://localhost:3000/channel/joinedChannels/" + this.props.user.id)
+    let joinedChans = await axios.get("http://localhost:3000/channel/joinedChannels/" + this.props.user.id, 
+      {withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
       .then(response => response.data)
       .catch(error => alert("getJoinedChan " + error.status + ": " + error.message))
     sortChannels(joinedChans)
     return (joinedChans)
     }
   async getNotJoinedChans(): Promise<Channel[]> {
-    let notJoinedChans = await axios.get("http://localhost:3000/channel/notJoinedChannels/" + this.props.user.id)
+    let notJoinedChans = await axios.get("http://localhost:3000/channel/notJoinedChannels/" + this.props.user.id,
+      {withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
       .then(response => response.data)
       .catch(error => alert("getNotJoinedChans " + error.status + ": " + error.message))
     return (notJoinedChans)
   }
   async getUserList(): Promise<User[]> {
-    let userList = await axios.get('http://localhost:3000/user/list/' + this.props.user.id)
+    let userList = await axios.get('http://localhost:3000/user/list/' + this.props.user.id,
+      {withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
       .then(response => response.data)
       .catch(error => alert("getUserList " + error.status + ": " + error.message))
     return (userList)
   }
   async emitNewChan() {
     if (this.props.openConv !== 0) {
-      axios.get("http://localhost:3000/channel" + this.props.openConv)
+      axios.get("http://localhost:3000/channel" + this.props.openConv,
+        {withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
         .then(response => this.socket.emit("newChanFromClient", response.data))
         .catch()
     }
