@@ -72,7 +72,9 @@ export function sortChannels(chans: Channel[]) {
     },
   }));
 
-  export function getProfile(tab: userProfile[], id: number) {
+  export function getProfile(tab: userProfile[], id?: number) {
+    if (id === undefined)
+      return null;
     for (let profile of tab) {
       if (profile.id === id)
         return profile;

@@ -62,8 +62,6 @@ import {
     @SubscribeMessage('connection')
     handleInitTable(socket: Socket, data: userProfile) {
       this.usersSockets.set(socket, data.id);
-      if (this.getProfile(data.id) === undefined)
-        this.server.emit("newUserFromServer");
       this.setProfile(data);
       this.server.emit("updateStatusFromServer", this.usersProfiles);
     }

@@ -3,7 +3,7 @@ import { Tooltip } from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
-import { getChan, isBlocked } from '../../utils'
+import { getChan, isBlocked, getProfile } from '../../utils'
 import { Icon } from '@iconify/react';
 import { Channel, User } from '../../stateInterface'
 import ChatCommands from '../../chatCommands'
@@ -62,7 +62,7 @@ export default function ChatHeader(props:any) {
         gridAutoFlow: 'row',
         }}>
       <div style={{textAlign: 'left', marginLeft: '25px'}}>
-        {dmUser === undefined ? <span style={{marginRight: "10px"}}>{title}</span> : <span onClick={() => navigate(profileLink)} style={{cursor: 'pointer', marginRight: "10px"}}>{dmUser.username}</span>} 
+        {dmUser === undefined ? <span style={{marginRight: "10px"}}>{title}</span> : <span onClick={() => navigate(profileLink)} style={{cursor: 'pointer', marginRight: "10px"}}>{getProfile(props.state.userList, dmUser.id)?.username}</span>} 
         {dmUser !== undefined && isBlocked(props.state.actualUser.user, dmUser) ? <i style={{fontSize: '10px'}}>[blocked]</i> : null}
         {chan?.ownerId === props.state.actualUser.user.id ? <Tooltip title="Owner"><Icon icon="mdi:shield-crown" color="gray" inline={true} /></Tooltip> : null}
         {isAdmin(props.state.actualUser.user.id, chan) ? <Tooltip title="Group administrator"><Icon icon="dashicons:admin-users" color="gray" inline={true} /></Tooltip> : null}

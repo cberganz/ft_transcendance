@@ -53,7 +53,6 @@ class Chat extends React.Component<Props, ChatState> {
       joinedChans: [],
       notJoinedChans: [],
       userList: [],
-      usersProfiles: [],
     };
 
     this.socket = io("http://localhost:3000/chat"); 
@@ -66,7 +65,6 @@ class Chat extends React.Component<Props, ChatState> {
       actualUser: await this.getActualUser(),
       joinedChans: await this.getJoinedChans(),
       notJoinedChans: await this.getNotJoinedChans(),
-      userList: await this.getUserList(),
     }
     for (const chan of ChatData.joinedChans) 
     this.socket.emit('joinChatRoom', chan.id)
@@ -101,13 +99,6 @@ class Chat extends React.Component<Props, ChatState> {
       .then(response => response.data)
       .catch(error => alert("getNotJoinedChans " + error.status + ": " + error.message))
     return (notJoinedChans)
-  }
-  async getUserList(): Promise<User[]> {
-    let userList = await axios.get('http://localhost:3000/user/list/' + this.props.user.id,
-      {withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
-      .then(response => response.data)
-      .catch(error => alert("getUserList " + error.status + ": " + error.message))
-    return (userList)
   }
   async emitNewChan() {
     if (this.props.openConv !== 0) {
@@ -194,32 +185,13 @@ class Chat extends React.Component<Props, ChatState> {
     this.setState(ChatData);
   }
 
-  socketUpdateUserlist(userUpdate: User) {
-    let ChatData: ChatState = structuredClone(this.state);
-    
-    for (let i = 0; i < ChatData.userList.length; i++) {
-      if (ChatData.userList[i].id === userUpdate.id) {
-        ChatData.userList.splice(i, 1);
-        ChatData.userList.push(userUpdate);
-      }
-    }
-    this.setState(ChatData);
-  }
-
-  socketUpdateUsersStatus(usersProfiles: any) {
+  socketUpdateUsersStatus(userList: any) {
     let ChatData: ChatState = structuredClone(this.state);
 
-    console.log(usersProfiles);
-    ChatData.usersProfiles = usersProfiles;
+    ChatData.userList = userList;
     this.setState(ChatData);
   }
   
-  async socketNewUser() {
-    let ChatData: ChatState = structuredClone(this.state);
-
-    ChatData.userList = await this.getUserList();
-    this.setState(ChatData);
-  }
   /** CHAT COMMANDS **/
   
   render() {
@@ -227,9 +199,7 @@ class Chat extends React.Component<Props, ChatState> {
     this.socket.off('newChanFromServer').on('newChanFromServer', (chan) => this.socketNewChan(chan));
     this.socket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.socketNewMsg(msg));
     this.socket.off('updateUserFromServer').on('updateUserFromServer', (user) => this.socketUpdateUser(user));
-    this.socket.off('updateUserlistFromServer').on('updateUserlistFromServer', (user) => this.socketUpdateUserlist(user));
     usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (profilesList) => this.socketUpdateUsersStatus(profilesList));
-    usersStatusSocket.off('newUserFromServer').on('newUserFromServer', () => this.socketNewUser());
 
     return (
     <div className="chatContainer">

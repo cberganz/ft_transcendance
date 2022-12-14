@@ -3,9 +3,6 @@ import { User } from '../stateInterface'
 import axios from 'axios';
 import useAlert from "../../../Hooks/useAlert";
 
-async function postDMChan(chan: any, socket: any, opendConv: Function) {
-  }
-
 export default function SearchBar(props: any) {
     const [searchInput, setSearchInput] = useState("");
     const { setAlert } = useAlert();
