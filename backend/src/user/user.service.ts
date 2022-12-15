@@ -25,6 +25,7 @@ export class UserService {
 						creator: true,
 					},
 				},
+				friends: true
 			}
 		});
 	}

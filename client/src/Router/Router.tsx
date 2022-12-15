@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes, Outlet } from 'react-router-dom';
 import Login from '../Pages/Auth/Login'
 import ConnectedUsers from '../Pages/Dashboard/ConnectedUsers'
-import {Dashboard} from '../Pages/Dashboard/Dashboard'
+import Dashboard from '../Pages/Dashboard/Dashboard'
 import PrimarySearchAppBar from "../Components/TopBar"
 import Game from "../Pages/Game/Game";
 import Chat from "../Pages/chat/chat"

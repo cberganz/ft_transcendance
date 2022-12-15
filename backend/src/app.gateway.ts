@@ -27,6 +27,7 @@ import {
     constructor() {
       this.usersSockets = new Map<Socket, number>;
       this.usersProfiles = [];
+
     }
 
     @WebSocketServer() public server: Server;
@@ -70,6 +71,17 @@ import {
     @SubscribeMessage('updateStatus')
     handleUpdateStatus(socket: Socket, status: string) {
       this.setProfile({id: this.usersSockets.get(socket), status: status});
+      this.server.emit("updateStatusFromServer", this.usersProfiles);
+    }
+
+    @SubscribeMessage('updateUsername')
+    handleUpdateUsername(socket: Socket, username: string) {
+      this.setProfile({id: this.usersSockets.get(socket), username: username});
+      this.server.emit("updateStatusFromServer", this.usersProfiles);
+    }
+    @SubscribeMessage('updateAvatar')
+    handleUpdateAvatar(socket: Socket, avatar: string) {
+      this.setProfile({id: this.usersSockets.get(socket), avatar: avatar});
       this.server.emit("updateStatusFromServer", this.usersProfiles);
     }
     
