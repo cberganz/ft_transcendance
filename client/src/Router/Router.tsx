@@ -5,7 +5,7 @@ import {Dashboard} from './test'
 import PrimarySearchAppBar from "../Components/TopBar"
 import Game from "../Pages/Game/Game";
 import Chat from "../Pages/chat/chat"
-import UserStats from "../Pages/UserStats/UserStats"
+import Profile from "../Pages/Profile/Profile"
 import Signup from "../Pages/Auth/SignUp"
 import PersistLogin from '../Hooks/persistLogin';
 import { selectCurrentUser } from '../Hooks/authSlice'
@@ -48,7 +48,7 @@ export default function Router() {
 						<Route path="/connected-users" element={<ConnectedUsers />} />
 						<Route path="/game" element={<Game />} />
 						<Route path="/chat" element={<Chat />} />
-						<Route path="/userstats" element={<UserStats />} />
+						<Route path="/profile" element={<Profile />} />
 
 					</Route>
 				</Route>

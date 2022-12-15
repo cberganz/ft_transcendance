@@ -7,7 +7,7 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
-export default class PlayerInfos extends React.Component {
+export default class PlayerInfos extends React.Component<{ username: string, avatar: string }, {}> {
 	render() {
 		return (
 			<React.Fragment>
@@ -34,12 +34,12 @@ export default class PlayerInfos extends React.Component {
 						spacing={2}
 					>
 						<Box sx={{ minWidth: '100%', minHeight: '100%', width: '80%', height: '80%' }}>
-					  		<BadgeAvatar />
+					  		<BadgeAvatar username={this.props.username} avatar={this.props.avatar} />
 					  	</Box>
 						<Box sx={{ display: 'flex', alignItems: 'center' }}>
 		  					<Stack direction="column" spacing={1}>
 								<Typography variant="h4">
-									Cberganz
+									{this.props.username}
 								</Typography>
 								<Stack direction="row" spacing={1}>
 									<Box sx={{ minWidth: '105px', display: 'flex', alignItems: 'center' }}>
