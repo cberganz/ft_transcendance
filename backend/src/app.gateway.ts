@@ -17,7 +17,7 @@ import {
   @WebSocketGateway({
     namespace: '/app',
     cors: {
-      origin: '*',
+      origin: "*",
     },
   })
   export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect
@@ -27,7 +27,6 @@ import {
     constructor() {
       this.usersSockets = new Map<Socket, number>;
       this.usersProfiles = [];
-
     }
 
     @WebSocketServer() public server: Server;

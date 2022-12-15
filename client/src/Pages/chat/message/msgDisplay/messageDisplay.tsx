@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 
 function MessageItemReceiver(msg: Message, chan: Channel | undefined, actualUser: User, navigate: any, state: ChatState) {
-  if (chan === undefined || (isBlocked(actualUser, msg.author) && chan.type != 'dm'))
+  if (chan === undefined || (isBlocked(actualUser, msg.author) && chan.type !== 'dm'))
   return (<div></div>)
   let     date: Date = new Date(msg.date);
   let     msgDate: String = String(date.getDay()) + "/" + String(date.getMonth()) + "/" + String(date.getFullYear()) + " " + String(date.getHours()) + ":" + String(date.getMinutes()); 
