@@ -116,7 +116,7 @@ export default function HeaderChannels(props: ChatProps) {
   let avatar = getProfile(props.state.userList, props.state.actualUser.user.id)?.avatar;
   if (!avatar)
     avatar = "";
-  const   profileLink: string = "http://localhost/profile?userId=" + props.state.actualUser.user.id.toString();
+  const   profileLink: string = "/profile?userId=" + props.state.actualUser.user.id.toString();
   return (
     <div className='ChannelHeader'>
         <Tooltip title={getProfile(props.state.userList, props.state.actualUser.user.id)?.username}>

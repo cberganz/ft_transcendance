@@ -34,7 +34,6 @@ interface Props {
   openConv: number;
   token: any;
 }
-
 class Chat extends React.Component<Props, ChatState> {
   constructor(props: any) {
     super(props)

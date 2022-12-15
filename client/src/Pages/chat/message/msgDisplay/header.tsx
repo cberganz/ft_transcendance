@@ -47,7 +47,7 @@ export default function ChatHeader(props:any) {
       dmUser = getProfile(props.state.userList, chan.members[1].id);
     else
       dmUser = getProfile(props.state.userList, chan.members[0].id);
-    profileLink = "http://localhost/profile?userId=" + dmUser?.id.toString();
+    profileLink = "/profile?userId=" + dmUser?.id.toString();
     if (dmUser)
       title = dmUser.login.valueOf();
   }

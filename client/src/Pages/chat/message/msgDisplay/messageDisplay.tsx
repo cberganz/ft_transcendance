@@ -15,7 +15,7 @@ function MessageItemReceiver(msg: Message, chan: Channel | undefined, actualUser
   return (<div></div>)
   let     date: Date = new Date(msg.date);
   let     msgDate: String = String(date.getDay()) + "/" + String(date.getMonth()) + "/" + String(date.getFullYear()) + " " + String(date.getHours()) + ":" + String(date.getMinutes()); 
-  const   profileLink: string = "http://localhost/profile?userId=" + msg.author.id.toString();
+  const   profileLink: string = "/profile?userId=" + msg.author.id.toString();
   let     author = getProfile(state.userList, msg.author.id);
   if (author && (author.avatar === undefined || author.avatar === null))
     author.avatar = "";
@@ -40,7 +40,7 @@ function MessageItemReceiver(msg: Message, chan: Channel | undefined, actualUser
 function MessageItemSender(msg: Message, navigate: any, state: ChatState) {
   let date: Date = new Date(msg.date);
   let msgDate: String = String(date.getDay()) + "/" + String(date.getMonth()) + "/" + String(date.getFullYear()) + " " + String(date.getHours()) + ":" + String(date.getMinutes()); 
-  const   profileLink: string = "http://localhost/profile?userId=" + msg.author.id.toString();
+  const   profileLink: string = "/profile?userId=" + msg.author.id.toString();
   let     author = getProfile(state.userList, msg.author.id);
   if (author && (author.avatar === undefined || author.avatar === null))
     author.avatar = "";

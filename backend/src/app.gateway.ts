@@ -17,7 +17,7 @@ import {
   @WebSocketGateway({
     namespace: '/app',
     cors: {
-      origin: "*",
+      origin: "http://localhost:3001",
     },
   })
   export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect
