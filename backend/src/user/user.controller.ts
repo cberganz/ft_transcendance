@@ -38,26 +38,6 @@ class UserStats {
 	winRate: number;
 }
 
-//const data = {
-//	"id": 1,
-//	"avatar": "https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=400",
-//	"username": "cberganz",
-//	"games": [
-//		{ id: 1, date: '12/01/2022', playerScore: 2,  opponent: 'Robin',  opponentScore: 12, result: 'Eq'	  },
-//		{ id: 2, date: '12/01/2022', playerScore: 2,  opponent: 'Celine', opponentScore: 12, result: 'Loser'  },
-//		{ id: 3, date: '12/01/2022', playerScore: 2,  opponent: 'Ugo',    opponentScore: 12, result: 'Loser'  },
-//		{ id: 4, date: '12/01/2022', playerScore: 2,  opponent: 'Julien', opponentScore: 12, result: 'Loser'  },
-//		{ id: 5, date: '12/01/2022', playerScore: 12, opponent: 'Robin',  opponentScore: 2,  result: 'Winner' },
-//		{ id: 6, date: '12/01/2022', playerScore: 12, opponent: 'Celine', opponentScore: 2,  result: 'Winner' },
-//		{ id: 7, date: '12/01/2022', playerScore: 12, opponent: 'Ugo',    opponentScore: 2,  result: 'Winner' },
-//		{ id: 8, date: '12/01/2022', playerScore: 12, opponent: 'Julien', opponentScore: 2,  result: 'Winner' },
-//	],
-//	"playedGames": 42,
-//	"gamesWon": 21,
-//	"gamesLost": 21,
-//	"winRate": 50,
-//};
-
 @Controller('user')
 export class UserController {
 	constructor(private readonly userService: UserService) {}
@@ -79,8 +59,8 @@ export class UserController {
 	async getUserStats(@Param('id') id: string): Promise<UserStats> {
 		let user = await this.userService.user({ id: Number(id) }) as any
 		let games = [...user.p1_games, ...user.p2_games]
-		let gamesPlayed = games.filter(function(obj) { return obj.winner }).map((game) => {
-			let player = game.player1Id === user.id ? 1 : 2
+		let gamesPlayed = games.filter(function(obj) { return obj.player1_score }).map((game) => {
+			let player = (game.player1Id === user.id ? 1 : 2)
 			return {
 				  		id: game.id,
 				  		date: game.date,
@@ -100,6 +80,7 @@ export class UserController {
 										: ("Equality"))
 			};
 		});
+		let winrate = Math.round(gamesPlayed.filter(function(obj) { return obj.result === "Winner" }).length / gamesPlayed.length * 100)
 		const data = {
 			id: user.id,
 			avatar: user.avatar,
@@ -108,7 +89,7 @@ export class UserController {
 			playedGames: gamesPlayed.length,
 			gamesWon: gamesPlayed.filter(function(obj) { return obj.result === "Winner" }).length,
 			gamesLost: gamesPlayed.filter(function(obj) { return obj.result === "Loser" }).length,
-			winRate: (gamesPlayed.filter(function(obj) { return obj.result === "Winner" }).length / gamesPlayed.length * 100),
+			winRate: winrate ? winrate : -1,
 		}
 		return data;
 	}

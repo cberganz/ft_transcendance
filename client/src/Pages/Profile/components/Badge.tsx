@@ -3,10 +3,13 @@ import { styled } from '@mui/material/styles';
 import Badge from '@mui/material/Badge';
 import Avatar from '@mui/material/Avatar';
 
+const connected = 1
+const inGame = 0
+
 const StyledBadge = styled(Badge)(({ theme }) => ({
   '& .MuiBadge-badge': {
-    backgroundColor: '#44b700',
-    color: '#44b700',
+	backgroundColor: connected ? (inGame ? '#ffa500' : '#44b700') : '#f00020',
+    color: connected ? (inGame ? '#ffa500' : '#44b700') : '#f00020',
     boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
     '&::after': {
       position: 'absolute',
@@ -15,7 +18,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
       width: '100%',
       height: '100%',
       borderRadius: '50%',
-      animation: 'ripple 1.2s infinite ease-in-out',
+      animation: connected ? 'ripple 1.2s infinite ease-in-out' : '',
       border: '1px solid currentColor',
       content: '""',
     },
@@ -40,10 +43,10 @@ export default class BadgeAvatar extends React.Component<{
 	render() {
 		return (
 		    <StyledBadge
-		      overlap="circular"
-		      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-		      variant="dot"
-		  	sx={{ width: '100%', height: '100%' }}
+				overlap="circular"
+		    	anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+		    	variant="dot"
+				sx={{ width: '100%', height: '100%' }}
 		    >
 		      <Avatar
 		  		alt={this.props.username}

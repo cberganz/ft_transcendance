@@ -6,23 +6,6 @@ import StatCard from './components/StatCard';
 import PlayedGames from './components/PlayedGames'
 import axios from "axios"
 
-//const userData = {
-//	"id": 1,
-//	"avatar": "https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=400",
-//	"login": "cberganz",
-//	"username": "cberganz",
-//	"games": [
-//		{ id: 1, date: '12/01/2022', playerScore: 2,  opponent: 'Robin',  opponentScore: 12, result: 'Eq'	  },
-//		{ id: 2, date: '12/01/2022', playerScore: 2,  opponent: 'Celine', opponentScore: 12, result: 'Loser'  },
-//		{ id: 3, date: '12/01/2022', playerScore: 2,  opponent: 'Ugo',    opponentScore: 12, result: 'Loser'  },
-//		{ id: 4, date: '12/01/2022', playerScore: 2,  opponent: 'Julien', opponentScore: 12, result: 'Loser'  },
-//		{ id: 5, date: '12/01/2022', playerScore: 12, opponent: 'Robin',  opponentScore: 2,  result: 'Winner' },
-//		{ id: 6, date: '12/01/2022', playerScore: 12, opponent: 'Celine', opponentScore: 2,  result: 'Winner' },
-//		{ id: 7, date: '12/01/2022', playerScore: 12, opponent: 'Ugo',    opponentScore: 2,  result: 'Winner' },
-//		{ id: 8, date: '12/01/2022', playerScore: 12, opponent: 'Julien', opponentScore: 2,  result: 'Winner' },
-//	],
-//};
-
 interface Game {
 	id: number;
 	date: string;
@@ -43,36 +26,27 @@ interface Stats {
 	winRate: number;
 };
 
-type AxiosData = {
-	  data: Stats;
-};
-
-interface Props {
-  userId?: any;
-}
-
-const default_avatar = "https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=400"
-
-export default class UserStats extends React.Component {
+export default class Profile extends React.Component {
 
 	state = {
 		data: {
 			id: undefined,
-			avatar: default_avatar,
+			avatar: "",
 			username: "Unknown",
 			games: [],
 			playedGames: "N/A",
 			gamesWon: "N/A",
 			gamesLost: "N/A",
-			winRate: "N/A",
+			winRate: -1,
 		}
 	};
 
 	async componentDidMount() {
-		await axios.get("http://localhost:3000/user/stats/1")
+		const userId = new URLSearchParams(window.location.search).get("userId")
+		await axios.get("http://localhost:3000/user/stats/" + userId)
 			.then(response => response.data)
-			.then(UserStats => { this.setState({ data: UserStats }); })
-			.catch(error => alert("getUserStats " + error.status + ": " + error.message))
+			.then(Profile => { this.setState({ data: Profile }); })
+			.catch(error => alert("Profile " + error.status + ": " + error.message))
 	}
 	
 	render() {
@@ -109,7 +83,7 @@ export default class UserStats extends React.Component {
 							<Grid item xs={12} sm={6} md={3}>
 								<StatCard
 									title="Win rate"
-									data={String(this.state.data.winRate) + "%"}
+									data={this.state.data.winRate !== -1 ? String(this.state.data.winRate) + "%" : "N/A"}
 								/>
 							</Grid>
 							<Grid item xs={12} md={18} lg={18}>

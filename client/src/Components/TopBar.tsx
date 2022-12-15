@@ -145,11 +145,11 @@ function	SearchBar() {
 		}}>
 			<Search>
 				<SearchIconWrapper>
-				<SearchIcon />
+					<SearchIcon />
 				</SearchIconWrapper>
 				<StyledInputBase
-				placeholder="Search…"
-				inputProps={{ 'aria-label': 'search' }}
+					placeholder="Search…"
+					inputProps={{ 'aria-label': 'search' }}
 				/>
 			</Search>
 		</Box>
