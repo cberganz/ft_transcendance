@@ -8,6 +8,7 @@ import Chat from "../Pages/chat/chat"
 import UserStats from "../Pages/UserStats/UserStats"
 import Signup from "../Pages/Auth/SignUp"
 import TfaAuth from "../Pages/Auth/TfaAuth"
+import TfaSettings from "../Pages/Auth/TfaSettings"
 import PersistLogin from '../Hooks/persistLogin';
 import { selectCurrentUser } from '../Hooks/authSlice'
 import { selectCurrentToken } from '../Hooks/authSlice'
@@ -43,14 +44,15 @@ export default function Router() {
 				<Route path="/login" element={<Login />} />
 				<Route path="/signup" element={<Signup />} />
 				<Route path="/authenticator" element={<TfaAuth />} />
-				<Route element= /* {<OutletRoute/>} */ {<PersistLogin />}>
+				<Route element={<PersistLogin />}>
 
-					<Route path='/' element=/* {<OutletRoute/>} */{<PrivateRoutes />}>
+					<Route path='/' element={<PrivateRoutes />}>
 						<Route path="/" element={<Dashboard />} />
 						<Route path="/connected-users" element={<ConnectedUsers />} />
 						<Route path="/game" element={<Game />} />
 						<Route path="/chat" element={<Chat />} />
 						<Route path="/userstats" element={<UserStats />} />
+						<Route path="/tfa-settings" element={<TfaSettings />} />
 
 					</Route>
 				</Route>

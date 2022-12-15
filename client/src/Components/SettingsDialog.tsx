@@ -10,8 +10,6 @@ import {
 	MenuItem,
 	ListItemIcon,
 	Button,
-	Typography,
-	Switch
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { selectCurrentUser, selectCurrentToken, setCredentials } from '../Hooks/authSlice'
@@ -53,50 +51,6 @@ const updateUsername = (username: string, currentUser: any, token: string) => {
 			username: username
 		}
 	})
-}
-
-const TfaSwitchItem = (dispatch: any,
-					   token: string,
-					   currentUser: any,
-					   setAlert: any) => {
-	const handleSwitchChange = async (e: any) => {
-		e.preventDefault()
-		let newUserData = {
-			...currentUser,
-			isTFAEnabled: e.target.checked
-		}
-		axios({
-			withCredentials: true,
-			url: `http://localhost:3000/user/tfa/${currentUser.id}`,
-			method: "put",
-			headers:{
-				Authorization: `Bearer ${token}`
-			},
-			data:  {
-				enableTfa: e.target.checked
-			}
-		})
-		.then(() => {
-			dispatch(setCredentials({
-				user: newUserData,
-				accessToken: token
-			}))
-			setAlert(`TFA turned ${newUserData.isTFAEnabled}`, "success")
-		})
-		.catch(() => setAlert("Failed Update TFA", "error"))
-	}
-	return (
-		<>
-		<ListItem>
-			<Typography variant="subtitle2" gutterBottom >
-				Enable two factor authentication:
-			</Typography>
-		</ListItem>
-		<ListItem>
-			<Switch onChange={handleSwitchChange} checked={currentUser.isTFAEnabled} />
-		</ListItem>
-		</>
-	)
 }
 
 function SimpleDialog(props: SimpleDialogProps) {
@@ -187,8 +141,6 @@ function SimpleDialog(props: SimpleDialogProps) {
 						update changes
 					</Button>
 				</ListItem>
-				<br/>
-				{TfaSwitchItem(dispatch, token, currentUser, setAlert)}
 			</List>
 		</form>
 		</Dialog>

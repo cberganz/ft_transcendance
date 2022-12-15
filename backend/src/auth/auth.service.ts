@@ -1,12 +1,13 @@
-import { Injectable, Req } from '@nestjs/common';
+import { Injectable, Req, Headers } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { User as UserMode1 } from '@prisma/client';
-import { jwtRefreshConstants } from './constants';
+import { jwtRefreshConstants, jwt2faConstants } from './constants';
 import {authenticator} from 'otplib'
 import jwt from 'jsonwebtoken';
 import jwt_decode from "jwt-decode";
 import { toDataURL } from 'qrcode';
+
 
 @Injectable()
 export class AuthService {
@@ -39,39 +40,45 @@ export class AuthService {
 					expiresIn: '60m',
 				}
 			)
-
 		return {
 			refresh_token: refreshToken,
 			access_token: this.jwtService.sign(payload),
 		};
 	}
 
-	async generateTwoFactorAuthenticationSecret(user: UserMode1) {
-		const secret = authenticator.generateSecret();
-	
-		const otpauthUrl = authenticator.keyuri(user.email, 'AUTH_APP_NAME', secret);
-	
-		await this.userService.setTwoFactorAuthenticationSecret(secret, user.id);
-	
-		return {
-		  secret,
-		  otpauthUrl
-		}
-	}
-
 	async whoAmI(@Req() req) {
-		const jwtData: jwt.JwtPayload = jwt_decode(req?.cookies["jwt"]);
+		let jwtData: jwt.JwtPayload
+
+		if (req?.cookies["jwt"])
+			jwtData = jwt_decode(req?.cookies["jwt"])
+		else
+			jwtData = jwt_decode(req.headers.authorization?.substring(7, req.headers.authorization.length));
 		return await this.userService.user({ id: Number(jwtData.sub) });
 	}
 
-	async generateQrCodeDataURL(otpAuthUrl: string) {
-		return toDataURL(otpAuthUrl);
-	}
 
 	isTwoFactorAuthenticationCodeValid(TFACode: string, user: UserMode1) {
 		return authenticator.verify({
 		  token: TFACode,
 		  secret: user.TFASecret,
 		});
+	}
+
+	getTfaJwt(user: UserMode1) {
+		const payload = {
+			email: user.email,
+			sub: user.id
+		};
+
+		return {
+			email: payload.email,
+			access_token: this.jwtService.sign(
+				payload,
+				{
+					secret: jwt2faConstants.secret,
+					expiresIn: '5m',
+				}
+			),
+		};
 	}
 }

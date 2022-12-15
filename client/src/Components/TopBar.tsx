@@ -25,6 +25,8 @@ import { SearchIconWrapper, Search, StyledInputBase } from './topBarStyle';
 import { useCookies } from "react-cookie"
 import { useLogoutMutation } from '../Api/Auth/authApiSlice'
 import { logOut } from '../Hooks/authSlice';
+import KeyIcon from '@mui/icons-material/Key';
+import { useNavigate } from "react-router-dom"
 
 function LogoutButton () {
 	const [logoutUser] = useLogoutMutation()
@@ -44,6 +46,7 @@ function LogoutButton () {
 
 function ProfileBox() {
 	const user = useSelector(selectCurrentUser)
+	const navigate = useNavigate()
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const isMenuOpen = Boolean(anchorEl);
    
@@ -88,6 +91,12 @@ function ProfileBox() {
 				</ListItemIcon>
 				<ListItemText>Profile</ListItemText>
 			</MenuItem>
+			<MenuItem onClick={() => navigate("/tfa-settings")}>
+				<ListItemIcon>
+					<KeyIcon/>
+				</ListItemIcon>
+				<ListItemText>Google 2fa</ListItemText>
+			</MenuItem>
 			<Divider />
 			<MenuItem>
 				<LogoutButton />
@@ -98,7 +107,7 @@ function ProfileBox() {
 
 	return (
 		<div>
-			<Box sx={{ display: { width: 150, xs: 'none', md: 'flex', flexDirection: 'row', alignItems: 'center', /* gap: 1.5 */} }}>
+			<Box sx={{ display: { width: 150, xs: 'none', md: 'flex', flexDirection: 'row', alignItems: 'center'} }}>
 				<Grid
 					aria-label="account of current user"
 					aria-controls={menuId}

@@ -7,6 +7,7 @@ import {
 	Post,
 	Body,
 	UseGuards,
+	UnauthorizedException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -14,6 +15,7 @@ import { UserService } from '../user/user.service';
 import { LocalAuthGuard } from './local-auth.guard'
 import { JwtRefreshAuthGuard } from './jwt-refresh-auth.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { Jwt2faGuard } from './jwt-2fa.guard';
 import { User as UserMode1 } from '@prisma/client';
 import { FtOauthGuard } from './ftAuth.guard';
 
@@ -78,21 +80,35 @@ export class AuthController {
 	@Get('42/return')
 	@UseGuards(FtOauthGuard)
 	async ftAuthCallback(@Res({ passthrough: true }) response: Response, @Req() req) {
-		console.log(req.user)
 		if (req.user.isTFAEnabled) {
-			response.redirect("http://localhost:3001")
+			const jwt_token = this.authService.getTfaJwt(req.user).access_token
+			response.redirect(`http://localhost:3001/authenticator?jwt=${jwt_token}`)
 			return ;
 		}
 		req = await this.login(response, req)
 		response.redirect("http://localhost:3001")
 	}
 
+	@Get('/2fa/validate')
+	@UseGuards(Jwt2faGuard)
+	async tfaValidate() {
+	}
+
 	@Post('2fa/authenticate')
-	@UseGuards(JwtAuthGuard)
-	async authenticate(@Req() request, @Body() body) {
+	@UseGuards(Jwt2faGuard)
+	async authenticate(
+			@Res({ passthrough: true }) response: Response,
+			@Req() request,
+			@Body() body) {
+		const user = await this.authService.whoAmI(request)
 		const isCodeValid = this.authService.isTwoFactorAuthenticationCodeValid(
 			body.twoFactorAuthenticationCode,
-			request.user,
-		);
+			user,
+		)
+		if (!isCodeValid) {
+			throw new UnauthorizedException()
+		}
+		request.user = user
+		return this.login(response, request)
 	}
 }

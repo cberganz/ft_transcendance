@@ -114,6 +114,16 @@ export class UserController {
 			});
 	}
 
+	@Get('/tfa/:id')
+	@UseGuards(OwnGuard)
+	@UseGuards(JwtAuthGuard)
+	async getTfaQrCode(
+		@Param('id') id: string,) {
+		const otpauthUrl = (await this.userService.user({id: Number(id)})).otpauthUrl
+		console.log(otpauthUrl)
+		return this.userService.generateQrCodeDataURL(otpauthUrl)
+	}
+
 	@Put('/tfa/:id')
 	@UseGuards(OwnGuard)
 	@UseGuards(JwtAuthGuard)
@@ -131,4 +141,5 @@ export class UserController {
 			});
 		return ({isTFAEnabled: body.enableTfa})
 	}
+
 }
