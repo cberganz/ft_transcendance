@@ -172,7 +172,11 @@ function	SearchBar() {
         e.currentTarget.reset();
 	}
 	
-	usersStatusSocket.off("updateStatusFromServer").on("updateStatusFromServer", (userList) => setUserList(userList));
+	const setUserListSocket = (userListUpdate: any) => {
+		setUserList(userListUpdate);
+	}
+
+	usersStatusSocket.off("updateSearchBarUserList").on("updateSearchBarUserList", (userList: any[]) => setUserListSocket(userList));
 	return (
 		<Box sx={
 		{

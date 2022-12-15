@@ -5,6 +5,7 @@ import {
     OnGatewayConnection,
     OnGatewayDisconnect,
   } from '@nestjs/websockets';
+import { loggingMiddleware } from 'nestjs-prisma';
   import { Socket, Server } from 'socket.io';
   
   interface userProfile {
@@ -64,6 +65,8 @@ import {
       this.usersSockets.set(socket, data.id);
       this.setProfile(data);
       this.server.emit("updateStatusFromServer", this.usersProfiles);
+      this.server.emit("updateSearchBarUserList", this.usersProfiles); 
+      // so that socket signal received by search bar doesnt get mixed up as it is rendered everywhere 
     }
     
     // update to anything: online, offline, in game...
@@ -71,17 +74,20 @@ import {
     handleUpdateStatus(socket: Socket, status: string) {
       this.setProfile({id: this.usersSockets.get(socket), status: status});
       this.server.emit("updateStatusFromServer", this.usersProfiles);
+      this.server.emit("updateSearchBarUserList", this.usersProfiles);
     }
 
     @SubscribeMessage('updateUsername')
     handleUpdateUsername(socket: Socket, username: string) {
       this.setProfile({id: this.usersSockets.get(socket), username: username});
       this.server.emit("updateStatusFromServer", this.usersProfiles);
+      this.server.emit("updateSearchBarUserList", this.usersProfiles);
     }
     @SubscribeMessage('updateAvatar')
     handleUpdateAvatar(socket: Socket, avatar: string) {
       this.setProfile({id: this.usersSockets.get(socket), avatar: avatar});
       this.server.emit("updateStatusFromServer", this.usersProfiles);
+      this.server.emit("updateSearchBarUserList", this.usersProfiles);
     }
     
     handleDisconnect(socket: Socket) {
@@ -89,6 +95,7 @@ import {
       if (userId !== undefined)
         this.setProfile({id: userId, status: "offline"});
       this.server.emit("updateStatusFromServer", this.usersProfiles);
+      this.server.emit("updateSearchBarUserList", this.usersProfiles);
       this.usersSockets.delete(socket);
     }
   }
