@@ -75,4 +75,15 @@ export class UserService {
 			return user
 		return this.createUser(data)
 	}
+
+	async setTwoFactorAuthenticationSecret(secret: string, userId: number) {
+		this.updateUser({
+			where: {
+				id: Number(userId)
+			},
+			data: {
+				TFASecret: secret
+			}
+		})
+	}
 }

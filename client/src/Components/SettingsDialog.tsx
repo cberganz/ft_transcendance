@@ -10,7 +10,8 @@ import {
 	MenuItem,
 	ListItemIcon,
 	Button,
-	Grid
+	Typography,
+	Switch
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { selectCurrentUser, selectCurrentToken, setCredentials } from '../Hooks/authSlice'
@@ -54,8 +55,52 @@ const updateUsername = (username: string, currentUser: any, token: string) => {
 	})
 }
 
+const TfaSwitchItem = (dispatch: any,
+					   token: string,
+					   currentUser: any,
+					   setAlert: any) => {
+	const handleSwitchChange = async (e: any) => {
+		e.preventDefault()
+		let newUserData = {
+			...currentUser,
+			isTFAEnabled: e.target.checked
+		}
+		axios({
+			withCredentials: true,
+			url: `http://localhost:3000/user/tfa/${currentUser.id}`,
+			method: "put",
+			headers:{
+				Authorization: `Bearer ${token}`
+			},
+			data:  {
+				enableTfa: e.target.checked
+			}
+		})
+		.then(() => {
+			dispatch(setCredentials({
+				user: newUserData,
+				accessToken: token
+			}))
+			setAlert(`TFA turned ${newUserData.isTFAEnabled}`, "success")
+		})
+		.catch(() => setAlert("Failed Update TFA", "error"))
+	}
+	return (
+		<>
+		<ListItem>
+			<Typography variant="subtitle2" gutterBottom >
+				Enable two factor authentication:
+			</Typography>
+		</ListItem>
+		<ListItem>
+			<Switch onChange={handleSwitchChange} checked={currentUser.isTFAEnabled} />
+		</ListItem>
+		</>
+	)
+}
+
 function SimpleDialog(props: SimpleDialogProps) {
-	const currentUser = useSelector(selectCurrentUser)
+	let currentUser = useSelector(selectCurrentUser)
 	const token = useSelector(selectCurrentToken)
 	const { onClose, open } = props;
 	const [username, setMessage] = React.useState(currentUser.username);
@@ -80,31 +125,36 @@ function SimpleDialog(props: SimpleDialogProps) {
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault()
-		let uploadReq, updateReq
 		let newUserData = {...currentUser}
- 
+
 		if (file) {
-			uploadReq = await uploadFile(file, currentUser, token)
+			await uploadFile(file, currentUser, token)
 			.then((req: any) => {
 				if (req.status === 200){
 					newUserData.avatar = `${req.data.avatar}?${Date.now()}`
-					dispatch(setCredentials({ user: newUserData, accessToken: token }))
+					dispatch(setCredentials({
+						user: newUserData,
+						accessToken: token
+					}))
 				}
 				return req
 			})
 			.catch(() => setAlert("Failed Upload File", "error"))
 		}
 		if (username.length) {
-			updateReq = await updateUsername(username, currentUser, token)
+			await updateUsername(username, currentUser, token)
 			.then((req: any) => {
 				let newUserDataUpload = {...newUserData}
 				if (req.status === 200) {
 					newUserDataUpload.username = req.data.username
-					dispatch(setCredentials({ user: newUserDataUpload, accessToken: token }))
+					dispatch(setCredentials({
+						user: newUserDataUpload,
+						accessToken: token
+					}))
 				}
 				return req
 			})
-			.catch((err) => {setAlert(`Failed updating username`, "error"); alert(err)})
+			.catch((err) => setAlert(`Failed updating username`, "error"))
 		}
 		handleClose()
 	}
@@ -137,6 +187,8 @@ function SimpleDialog(props: SimpleDialogProps) {
 						update changes
 					</Button>
 				</ListItem>
+				<br/>
+				{TfaSwitchItem(dispatch, token, currentUser, setAlert)}
 			</List>
 		</form>
 		</Dialog>

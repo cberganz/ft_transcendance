@@ -8,20 +8,23 @@ datasource db {
 }
 
 model User {
-  id          Int          @id @default(autoincrement())
-  avatar      String
-  login       String       @unique
-  username    String       @unique
-  friends     Friendship[] @relation("friendship")
-  blacklisted Blacklist[]  @relation("blacklisted")
-  messages    Message[]
-  channels    Channel[]    @relation("channel::members")
-  admin_of    Channel[]    @relation("channel::admins")
-  owner_of    Channel[]
-  p1_games    Game[]       @relation("player1")
-  p2_games    Game[]       @relation("player2")
-  friendship  Friendship[]
-  blacklist   Blacklist[]
+  id           Int          @id @default(autoincrement())
+  avatar       String
+  login        String       @unique
+  username     String       @unique
+  email        String       @unique
+  TFASecret    String?
+  isTFAEnabled Boolean		@default(false)
+  friends      Friendship[] @relation("friendship")
+  blacklisted  Blacklist[]  @relation("blacklisted")
+  messages     Message[]
+  channels     Channel[]    @relation("channel::members")
+  admin_of     Channel[]    @relation("channel::admins")
+  owner_of     Channel[]
+  p1_games     Game[]       @relation("player1")
+  p2_games     Game[]       @relation("player2")
+  friendship   Friendship[]
+  blacklist    Blacklist[]
 }
 
 model Channel {

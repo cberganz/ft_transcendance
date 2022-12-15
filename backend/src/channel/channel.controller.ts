@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { Channel as ChannelMode1 } from '@prisma/client';
-import BackendException from '../utils/BackendException.filter'
 
 @Controller('channel')
 export class ChannelController {
@@ -72,7 +71,6 @@ export class ChannelController {
 	}
 
 	@Post('/addAdmin/')
-	@UseFilters(BackendException)
 	async PostAddAdmin(
 		@Body() data: { adminId: string; chanId: string; userId: string;}
 	) : Promise<ChannelMode1> {

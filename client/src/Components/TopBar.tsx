@@ -22,19 +22,19 @@ import SettingsDialog from './SettingsDialog';
 import { selectCurrentUser } from '../Hooks/authSlice'
 import { useSelector } from "react-redux"
 import { SearchIconWrapper, Search, StyledInputBase } from './topBarStyle';
-// import { useNavigate } from 'react-router-dom';
+import { useCookies } from "react-cookie"
 import { useLogoutMutation } from '../Api/Auth/authApiSlice'
 import { logOut } from '../Hooks/authSlice';
 
 function LogoutButton () {
 	const [logoutUser] = useLogoutMutation()
-	// const navigate = useNavigate()
-	
+	const[token, setCookie, removeCookie] = useCookies();
+
 	const handleLogout = (e: any) => {
+		removeCookie('jwt' ,{path:'/'});
 		logoutUser({})
 		logOut({})
-		window.location.replace('/login'); // pas utilise navigate car quand precedent revient sur l'app
-		// navigate('/login', { replace: true })
+		window.location.replace('/login');
 	}
 
 	return (
@@ -100,7 +100,6 @@ function ProfileBox() {
 		<div>
 			<Box sx={{ display: { width: 150, xs: 'none', md: 'flex', flexDirection: 'row', alignItems: 'center', /* gap: 1.5 */} }}>
 				<Grid
-					// container spacing={0}
 					aria-label="account of current user"
 					aria-controls={menuId}
 					aria-haspopup="true"
