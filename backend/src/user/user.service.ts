@@ -25,7 +25,19 @@ export class UserService {
 						creator: true,
 					},
 				},
-				friends: true
+				friends: true,
+				p1_games: {
+					include: {
+						player1: true,
+						player2: true,
+					},
+				},
+				p2_games: {
+					include: {
+						player1: true,
+						player2: true,
+					},
+				},
 			}
 		});
 	}
