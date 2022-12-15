@@ -6,11 +6,13 @@ function StartButton({
   setWin,
   startButton,
   win,
+  message,
 }: {
   setStartButton: (value: boolean) => void;
   setWin: (value: number) => void;
   startButton: boolean;
   win: number;
+  message: string;
 }) {
   const [start, setStart] = useState<boolean>(startButton);
 
@@ -28,9 +30,8 @@ function StartButton({
         loading={start}
         size="large"
         onClick={handleClick}
-        // className="btn"
       >
-        START
+        {message}
       </LoadingButton>
       {start && <p>Waiting for your opponent to start...</p>}
     </>

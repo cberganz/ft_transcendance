@@ -3,16 +3,17 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { jwtRefreshConstants } from './constants';
+import { ConfigService } from '@nestjs/config';
 import jwt from 'jsonwebtoken';
 
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy) {
-	constructor() {
+	constructor(private conf: ConfigService) {
 		super({
 			jwtFromRequest: ExtractJwt.fromExtractors([(request: Request) => request?.cookies["jwt"]]),
 			ignoreExpiration: false,
-			secretOrKey: jwtRefreshConstants.secret,
+			secretOrKey:  jwtRefreshConstants.secret,
 		});
 	}
 

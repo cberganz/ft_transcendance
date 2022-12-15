@@ -1,7 +1,11 @@
+import { ConfigService } from '@nestjs/config';
+
+const config = new ConfigService() 
+
 export const jwtConstants = {
-	secret: 'secretKey',// replace by env var
+	secret: config.get('JWT_SECRET')// replace by env var
 };
 
 export const jwtRefreshConstants = {
-	secret: 'secretKey2',// replace by env var
+	secret: config.get('JWT_REFRESH_SECRET'),// replace by env var
 };

@@ -1,4 +1,10 @@
-import { HttpStatus, Catch, ExceptionFilter, ArgumentsHost } from '@nestjs/common';
+import { 
+	HttpStatus,
+	Catch,
+	ExceptionFilter,
+	ArgumentsHost,
+} from '@nestjs/common';
+
 import { Prisma } from '@prisma/client'
 import HttpMessages from './HttpMessages'
 
@@ -7,6 +13,29 @@ import { Response } from 'express';
 @Catch(Error)
 export default class BackendException implements ExceptionFilter {
 	private static httpMessage: HttpMessages = new HttpMessages()
+	private static nestJsExceptions: Map<string, HttpStatus> = 
+		new Map([
+			["BadRequestException", HttpStatus.BAD_REQUEST],
+			["UnauthorizedException", HttpStatus.UNAUTHORIZED],
+			["NotFoundException", HttpStatus.NOT_FOUND],
+			["ForbiddenException", HttpStatus.FORBIDDEN],
+			["NotAcceptableException", HttpStatus.NOT_ACCEPTABLE],
+			["RequestTimeoutException", HttpStatus.REQUEST_TIMEOUT],
+			["ConflictException", HttpStatus.CONFLICT],
+			["GoneException", HttpStatus.GONE],
+			["HttpVersionNotSupportedException", HttpStatus.HTTP_VERSION_NOT_SUPPORTED],
+			["PayloadTooLargeException", HttpStatus.PAYLOAD_TOO_LARGE],
+			["UnsupportedMediaTypeException", HttpStatus.UNSUPPORTED_MEDIA_TYPE],
+			["UnprocessableEntityException", HttpStatus.UNPROCESSABLE_ENTITY],
+			["InternalServerErrorException", HttpStatus.INTERNAL_SERVER_ERROR],
+			["NotImplementedException", HttpStatus.NOT_IMPLEMENTED],
+			["ImATeapotException", HttpStatus.I_AM_A_TEAPOT],
+			["MethodNotAllowedException", HttpStatus.METHOD_NOT_ALLOWED],
+			["BadGatewayException", HttpStatus.BAD_GATEWAY],
+			["ServiceUnavailableException", HttpStatus.SERVICE_UNAVAILABLE],
+			["GatewayTimeoutException", HttpStatus.GATEWAY_TIMEOUT],
+			["PreconditionFailedException", HttpStatus.PRECONDITION_FAILED],
+		])
 	private static errors: Map<string, HttpStatus>	=
 		new Map([
 		// cf https://www.prisma.io/docs/reference/api-reference/error-reference
@@ -52,6 +81,7 @@ export default class BackendException implements ExceptionFilter {
 		const response = ctx.getResponse<Response>();
 		const status = this.getStatus(exception);
 
+		console.log(exception.name)
 		response
 			.status(status)
 			.json({
@@ -62,12 +92,14 @@ export default class BackendException implements ExceptionFilter {
 	}
 
   	private getStatus(exception: Error): number {
-		let status = HttpStatus.INTERNAL_SERVER_ERROR
+		let status = BackendException.nestJsExceptions.get(exception.name)
 
 		if (exception instanceof Prisma.PrismaClientKnownRequestError)
 			status = BackendException.errors.get(exception.code)
 		else if (exception instanceof Prisma.PrismaClientValidationError)
 			status	= HttpStatus.BAD_REQUEST
+		else if (status === undefined)
+			status = HttpStatus.INTERNAL_SERVER_ERROR
 		return status
 	}
 }

@@ -16,9 +16,11 @@ type Credentials = {
 }
 
 async function signUp(credentials: Credentials) {
-	axios.post('http://localhost:3000/user/signup', {
-			username: credentials.username,
-			login: credentials.login
+	axios.post('http://localhost:3000/user/signup', 
+		{
+			login: credentials.login,
+			username: credentials.username
+			// avatar: 'https://profile.intra.42.fr/assets/42_logo_black-684989d43d629b3c0ff6fd7e1157ee04db9bb7a73fba8ec4e01543d650a1c607.png',
 		})
 		.then((response: AxiosResponse) => {
 			if (response.status === 201) {

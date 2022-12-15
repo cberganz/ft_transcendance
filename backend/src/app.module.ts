@@ -12,10 +12,16 @@ import { MessageModule } from './message/message.module';
 import { GameGateway } from './game.gateway';
 import { AuthModule } from './auth/auth.module';
 import { ChatGateway } from './chat.gateway';
+import { MulterModule } from '@nestjs/platform-express';
+import { FileModule } from './file/file.module';
+import { getEnvPath } from './utils/env.helper';
+import { ConfigModule } from '@nestjs/config';
 import { AppGateway } from './app.gateway';
+const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
 
 @Module({
   imports: [
+		ConfigModule.forRoot({ envFilePath, isGlobal: true }),
 		PrismaModule,
 		UserModule,
 		ChannelModule,
@@ -23,7 +29,11 @@ import { AppGateway } from './app.gateway';
 		FriendshipModule,
 		GameModule,
 		MessageModule,
-		AuthModule
+		AuthModule,
+		MulterModule.register({
+			dest: '/app/src/uploaded_files',
+		}),
+		FileModule,
 	],
   controllers: [AppController],
   providers: [AppService, PrismaService, GameGateway, ChatGateway, AppGateway],
