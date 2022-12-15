@@ -173,6 +173,11 @@ function	SearchBar() {
 	}
 	
 	const setUserListSocket = (userListUpdate: any) => {
+		for (let user of userListUpdate) {
+			delete user.login;
+			delete user.status;
+			delete user.avatar;
+		}
 		setUserList(userListUpdate);
 	}
 
