@@ -109,7 +109,7 @@ class Chat extends React.Component<Props, ChatState> {
     }
   }
     
-    /** RENDERING FUNCTIONS */
+  /** RENDERING FUNCTION */
   openConvHandler(chanID: number) {
     let ChatData = structuredClone(this.state)
   
@@ -192,7 +192,6 @@ class Chat extends React.Component<Props, ChatState> {
     this.setState(ChatData);
   }
   
-  /** CHAT COMMANDS **/
   
   render() {
     this.socket.off('updateChanFromServer').on('updateChanFromServer', (chan) => this.socketUpdateChan(chan));

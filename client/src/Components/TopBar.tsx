@@ -25,6 +25,10 @@ import { SearchIconWrapper, Search, StyledInputBase } from './topBarStyle';
 // import { useNavigate } from 'react-router-dom';
 import { useLogoutMutation } from '../Api/Auth/authApiSlice'
 import { logOut } from '../Hooks/authSlice';
+import { usersStatusSocket } from '../Router/Router'
+import { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import useAlert from "../Hooks/useAlert";
 
 function LogoutButton () {
 	const [logoutUser] = useLogoutMutation()
@@ -145,6 +149,30 @@ function ProfileBox() {
 }
 
 function	SearchBar() {
+	const [ userList, setUserList ] = useState<any[]>([]);
+	const { setAlert } = useAlert();
+	const navigate = useNavigate();
+	useEffect(() => {
+		usersStatusSocket.emit("updateStatus", "online");
+	}, []);
+
+	const getProfile = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        const data = new FormData(e.currentTarget);
+		let found = false;
+
+		for (let user of userList) {
+			if (data.get('name') === user.username) {
+				navigate("/profile?userId=" + user.id);
+				found = true;
+			}
+		}
+		if (!found)
+			setAlert(data.get('name') + " can't be found.", "error");
+        e.currentTarget.reset();
+	}
+	
+	usersStatusSocket.off("updateStatusFromServer").on("updateStatusFromServer", (userList) => setUserList(userList));
 	return (
 		<Box sx={
 		{
@@ -152,15 +180,18 @@ function	SearchBar() {
 			display: 'flex',
 			justifyContent: 'center'
 		}}>
-			<Search>
-				<SearchIconWrapper>
-					<SearchIcon />
-				</SearchIconWrapper>
-				<StyledInputBase
-					placeholder="Search…"
-					inputProps={{ 'aria-label': 'search' }}
-				/>
-			</Search>
+			<form  onSubmit={(e) => {getProfile(e)}}>
+				<Search>
+					<SearchIconWrapper>
+						<SearchIcon />
+					</SearchIconWrapper>
+					<StyledInputBase
+						placeholder="Search…"
+						inputProps={{ 'aria-label': 'search' }}
+						name="name"
+					/>
+				</Search>
+			</form>
 		</Box>
 	)
 }
