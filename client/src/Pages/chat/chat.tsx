@@ -82,7 +82,7 @@ class Chat extends React.Component<Props, ChatState> {
         .then(response => response.data)
         .catch(error => alert("getActualUser " + error.status + ": " + error.message))
     }
-    this.socket.emit('initTable', actualUser.user.username)
+    this.socket.emit('initTable', actualUser.user.login)
     return (actualUser)
   }
   async getJoinedChans(): Promise<Channel[]> {

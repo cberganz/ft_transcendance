@@ -144,7 +144,7 @@ async function Block(inputs: string[], state: ChatState, socket: any, params: an
     }
     let blockedId = -1;
     for (let user of chan?.members) {
-        if (user.username === inputs[1]) {
+        if (user.username === inputs[1] || user.login === inputs[1]) {
             blockedId = user.id;
             break ;
         }
@@ -181,7 +181,7 @@ async function Unblock(inputs: string[], state: ChatState, socket: any, params: 
             inputs = [inputs[0], chan.members[0].username.valueOf()]
     }
     for (let user of chan?.members) {
-        if (user.username === inputs[1]) {
+        if (user.username === inputs[1] ||  user.login === inputs[1]) {
             blockedId = user.id;
             break ;
         }
@@ -216,7 +216,7 @@ async function Ban(inputs: string[], state: ChatState, socket: any, params: any)
     let blockedId = -1;
     let blockedLogin;
     for (let user of chan?.members) {
-        if (user.username === inputs[1]) {
+        if (user.username === inputs[1] ||  user.login === inputs[1]) {
             blockedId = user.id;
             blockedLogin = user.login;
             break ;
@@ -256,7 +256,7 @@ async function Mute(inputs: string[], state: ChatState, socket: any, params: any
         return "";
     let blockedId = -1;
     for (let user of chan?.members) {
-        if (user.username === inputs[1]) {
+        if (user.username === inputs[1] ||  user.login === inputs[1]) {
             blockedId = user.id;
             break ;
         }
