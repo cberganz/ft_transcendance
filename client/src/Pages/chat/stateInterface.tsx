@@ -4,13 +4,21 @@ export interface ChatState {
     actualUser: actualUser,
     joinedChans: Channel[],
     notJoinedChans: Channel[],
-    userList: User[],
-    statusList?: Map<number, string>,
+    userList: userProfile[],
 }
+
+export interface userProfile {
+    id: number,
+    login: string,
+    username: string,
+    status: string,
+    avatar: string,
+  }
 
 export interface actualUser {
     user: User,
-    openedConvID: number
+    openedConvID: number,
+    token: any,
 }
 
 export interface ChatProps {

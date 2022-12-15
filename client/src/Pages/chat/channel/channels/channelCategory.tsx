@@ -1,4 +1,5 @@
 import { ChannelItem, DialogChannelItem } from './channelItem';
+import { getProfile } from '../../utils';
 import '../../chat.css'
 
 export function DMChannels(props: any) {
@@ -7,8 +8,11 @@ export function DMChannels(props: any) {
     {
         props.state.joinedChans?.map((chan: any) => (
               <div key={chan.id}>
-              {chan.type === 'dm' && chan.members[0].id === props.state.actualUser.user.id ? ChannelItem(chan, chan.members[1].username, chan.members[1].avatar, props) : null}
-              {chan.type === 'dm' && chan.members[1].id === props.state.actualUser.user.id ? ChannelItem(chan, chan.members[0].username, chan.members[0].avatar, props) : null}
+              {chan.type === 'dm' && chan.members[0].id === props.state.actualUser.user.id ? 
+                ChannelItem(chan, String(getProfile(props.state.userList, chan.members[1].id)?.username), String(getProfile(props.state.userList, chan.members[1].id)?.avatar), props) 
+                : null}
+              {chan.type === 'dm' && chan.members[1].id === props.state.actualUser.user.id ? 
+                ChannelItem(chan, String(getProfile(props.state.userList, chan.members[0].id)?.username), String(getProfile(props.state.userList, chan.members[0].id)?.avatar), props) : null}
               </div>
       ))
     }

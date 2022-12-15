@@ -67,6 +67,11 @@ export class UserController {
 		return this.userService.user({ id: Number(id) });
 	}
 
+	@Get('/list/')
+	async getAllUsers(): Promise<UserMode1[]> {
+		return this.userService.users({orderBy: {username: 'asc'}});
+	}
+
 	@Get('/stats/:id')
 	@UseFilters(BackendException)
 	async getUserStats(@Param('id') id: string): Promise<UserStats> {
@@ -105,11 +110,6 @@ export class UserController {
 			winRate: winrate ? winrate : -1,
 		}
 		return data;
-	}
-
-	@Get('/list/:id')
-	async getAllUsers(@Param('id') id: string): Promise<UserMode1[]> {
-		return this.userService.users({where: {NOT: {id: Number(id)}}, orderBy: {username: 'asc'}});
 	}
 
 	@Post('signup')

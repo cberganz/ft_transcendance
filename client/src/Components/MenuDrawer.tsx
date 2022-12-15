@@ -44,7 +44,6 @@ function DrawerList() {
 			<DrawerItem href="/" text='Dashboard' icon={<DashboardIcon />} />
 			<DrawerItem href="/game" text='PLay Game' icon={<SportsEsportsIcon />} />
 			<DrawerItem href="/chat" text='Chat' icon={<TelegramIcon />} />
-			<DrawerItem href="/connected-users" text='Connected Users' icon={<Groups2Icon />} />
 			<DrawerItem href={"/profile?userId=" + "1"} text='Profile' icon={<PersonIcon />} />
 		</List>
 	)

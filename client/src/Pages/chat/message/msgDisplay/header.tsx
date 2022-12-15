@@ -3,7 +3,7 @@ import { Tooltip } from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
-import { getChan, isBlocked } from '../../utils'
+import { getChan, isBlocked, getProfile } from '../../utils'
 import { Icon } from '@iconify/react';
 import { Channel, User } from '../../stateInterface'
 import ChatCommands from '../../chatCommands'
@@ -44,10 +44,12 @@ export default function ChatHeader(props:any) {
 
   if (chan?.type === 'dm') {
     if (props.state.actualUser.user.id === chan.members[0].id)
-      dmUser = chan.members[1];
+      dmUser = getProfile(props.state.userList, chan.members[1].id);
     else
-      dmUser = chan.members[0];
-    profileLink = "http://localhost/profile?userId=" + dmUser.id.toString();
+      dmUser = getProfile(props.state.userList, chan.members[0].id);
+    profileLink = "http://localhost/profile?userId=" + dmUser?.id.toString();
+    if (dmUser)
+      title = dmUser.login.valueOf();
   }
   else
     title = chan?.title;
@@ -62,14 +64,14 @@ export default function ChatHeader(props:any) {
         gridAutoFlow: 'row',
         }}>
       <div style={{textAlign: 'left', marginLeft: '25px'}}>
-        {dmUser === undefined ? <span style={{marginRight: "10px"}}>{title}</span> : <span onClick={() => navigate(profileLink)} style={{cursor: 'pointer', marginRight: "10px"}}>{dmUser.username}</span>} 
-        {dmUser !== undefined && isBlocked(props.state.actualUser.user, dmUser) ? <i style={{fontSize: '10px'}}>[blocked]</i> : null}
+        {dmUser === undefined || dmUser === null ? <span style={{marginRight: "10px"}}>{title}</span> : <span onClick={() => navigate(profileLink)} style={{cursor: 'pointer', marginRight: "10px"}}>{getProfile(props.state.userList, dmUser.id)?.username}</span>} 
+        {dmUser !== undefined && dmUser !== null && isBlocked(props.state.actualUser.user, dmUser) ? <i style={{fontSize: '10px'}}>[blocked]</i> : null}
         {chan?.ownerId === props.state.actualUser.user.id ? <Tooltip title="Owner"><Icon icon="mdi:shield-crown" color="gray" inline={true} /></Tooltip> : null}
         {isAdmin(props.state.actualUser.user.id, chan) ? <Tooltip title="Group administrator"><Icon icon="dashicons:admin-users" color="gray" inline={true} /></Tooltip> : null}
       </div>
       <div>
-        {chan?.type === 'dm' && dmUser !== undefined && !isBlocked(props.state.actualUser.user, dmUser) ? <div><Tooltip title="Invite for a pong"><SportsEsportsIcon sx={{cursor: 'pointer', color: 'grey', marginRight: '20px'}} /></Tooltip><Tooltip title="Block user"><BlockIcon onClick={(event) => chatCmd("/block " + title.valueOf())} sx={{cursor: 'pointer', color: 'grey'}} /></Tooltip></div> : null}
-        {chan?.type === 'dm' && dmUser !== undefined && isBlocked(props.state.actualUser.user, dmUser) ? <Tooltip title="Unblock user"><LockOpenIcon onClick={(event) => chatCmd("/unblock " + title.valueOf())} sx={{cursor: 'pointer', color: 'grey', marginLeft: '45px'}} /></Tooltip> : null}
+        {chan?.type === 'dm' && dmUser !== undefined && dmUser !== null && !isBlocked(props.state.actualUser.user, dmUser) ? <div><Tooltip title="Invite for a pong"><SportsEsportsIcon sx={{cursor: 'pointer', color: 'grey', marginRight: '20px'}} /></Tooltip><Tooltip title="Block user"><BlockIcon onClick={(event) => chatCmd("/block " + title.valueOf())} sx={{cursor: 'pointer', color: 'grey'}} /></Tooltip></div> : null}
+        {chan?.type === 'dm' && dmUser !== undefined && dmUser !== null && isBlocked(props.state.actualUser.user, dmUser) ? <Tooltip title="Unblock user"><LockOpenIcon onClick={(event) => chatCmd("/unblock " + title.valueOf())} sx={{cursor: 'pointer', color: 'grey', marginLeft: '45px'}} /></Tooltip> : null}
         {chan?.type === 'public' || chan?.type === 'private' ? <Tooltip title="Leave channel" sx={{cursor: 'pointer', color: 'grey', marginLeft: '45px'}}><ExitToAppIcon onClick={(event) => chatCmd("/leave")} /></Tooltip> : null}
       </div>
     </div>

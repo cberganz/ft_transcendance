@@ -11,6 +11,7 @@ import axios from "axios"
 import { getChan, userIsInChan, sortChannels } from './utils'
 import { InfoDialog } from "./channel/infoDialog"
 import { selectCurrentUser } from '../../Hooks/authSlice'
+import { selectCurrentToken } from '../../Hooks/authSlice'
 import { useSelector } from "react-redux"
 import SearchBar from "./channel/searchBar"
 import { usersStatusSocket } from "../../Router/Router";
@@ -20,16 +21,18 @@ import { useSearchParams } from 'react-router-dom';
 function ChatWithHook(component: any) {
   return function WrappedChat(props: any) {
     const user = useSelector(selectCurrentUser);
+    const token = useSelector(selectCurrentToken);
     const [ openConv ] = useSearchParams();
     let   openConvId: number | null = Number(openConv.get("openConv"));
 
-    return (<Chat user={user} openConv={openConvId} />)
+    return (<Chat user={user} openConv={openConvId} token={token} />)
   }
 }
 
 interface Props {
   user: any;
   openConv: number;
+  token: any;
 }
 
 class Chat extends React.Component<Props, ChatState> {
@@ -44,65 +47,64 @@ class Chat extends React.Component<Props, ChatState> {
           id: -1,
           login: "",
           avatar: "",
-          username: ""
-        }
+          username: "",
+        },
+        token: this.props.token,
       },
       joinedChans: [],
       notJoinedChans: [],
       userList: [],
     };
-    
+
     this.socket = io("http://localhost:3000/chat"); 
-    this.getData();
-    this.emitNewChan();
-    usersStatusSocket.emit("updateStatus", "online");
   }
   private socket
-
+  
   /** INIT DATA **/
-  async getData() {
+  async componentDidMount() {
     let ChatData = {
       actualUser: await this.getActualUser(),
       joinedChans: await this.getJoinedChans(),
       notJoinedChans: await this.getNotJoinedChans(),
-      userList: await this.getUserList(),
     }
     for (const chan of ChatData.joinedChans) 
-      this.socket.emit('joinChatRoom', chan.id)
+    this.socket.emit('joinChatRoom', chan.id)
     this.setState(ChatData);
+    this.emitNewChan();
+    usersStatusSocket.emit("updateStatus", "online");
   }
+
   async getActualUser(): Promise<actualUser> {
     let actualUser = {
+      token: this.props.token,
       openedConvID: this.props.openConv !== 0 ? this.props.openConv : -1,
-      user: await axios.get("http://localhost:3000/user/" + this.props.user.id)
+      user: await axios.get("http://localhost:3000/user/" + this.props.user.id,
+        {withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
         .then(response => response.data)
         .catch(error => alert("getActualUser " + error.status + ": " + error.message))
     }
-    this.socket.emit('initTable', actualUser.user.username)
+    this.socket.emit('initTable', actualUser.user.login)
     return (actualUser)
   }
   async getJoinedChans(): Promise<Channel[]> {
-    let joinedChans = await axios.get("http://localhost:3000/channel/joinedChannels/" + this.props.user.id)
+    let joinedChans = await axios.get("http://localhost:3000/channel/joinedChannels/" + this.props.user.id, 
+      {withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
       .then(response => response.data)
       .catch(error => alert("getJoinedChan " + error.status + ": " + error.message))
     sortChannels(joinedChans)
     return (joinedChans)
     }
   async getNotJoinedChans(): Promise<Channel[]> {
-    let notJoinedChans = await axios.get("http://localhost:3000/channel/notJoinedChannels/" + this.props.user.id)
+    let notJoinedChans = await axios.get("http://localhost:3000/channel/notJoinedChannels/" + this.props.user.id,
+      {withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
       .then(response => response.data)
       .catch(error => alert("getNotJoinedChans " + error.status + ": " + error.message))
     return (notJoinedChans)
   }
-  async getUserList(): Promise<User[]> {
-    let userList = await axios.get('http://localhost:3000/user/list/' + this.props.user.id)
-      .then(response => response.data)
-      .catch(error => alert("getUserList " + error.status + ": " + error.message))
-    return (userList)
-  }
   async emitNewChan() {
     if (this.props.openConv !== 0) {
-      axios.get("http://localhost:3000/channel" + this.props.openConv)
+      axios.get("http://localhost:3000/channel" + this.props.openConv,
+        {withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
         .then(response => this.socket.emit("newChanFromClient", response.data))
         .catch()
     }
@@ -184,31 +186,13 @@ class Chat extends React.Component<Props, ChatState> {
     this.setState(ChatData);
   }
 
-  socketUpdateUserlist(userUpdate: User) {
-    let ChatData: ChatState = structuredClone(this.state);
-    
-    for (let i = 0; i < ChatData.userList.length; i++) {
-      if (ChatData.userList[i].id === userUpdate.id) {
-        ChatData.userList.splice(i, 1);
-        ChatData.userList.push(userUpdate);
-      }
-    }
-    this.setState(ChatData);
-  }
-
-  socketUpdateUsersStatus(usersStatusList: any) {
+  socketUpdateUsersStatus(userList: any) {
     let ChatData: ChatState = structuredClone(this.state);
 
-    ChatData.statusList = new Map(JSON.parse(usersStatusList));
+    ChatData.userList = userList;
     this.setState(ChatData);
   }
   
-  async socketNewUser() {
-    let ChatData: ChatState = structuredClone(this.state);
-
-    ChatData.userList = await this.getUserList();
-    this.setState(ChatData);
-  }
   /** CHAT COMMANDS **/
   
   render() {
@@ -216,9 +200,7 @@ class Chat extends React.Component<Props, ChatState> {
     this.socket.off('newChanFromServer').on('newChanFromServer', (chan) => this.socketNewChan(chan));
     this.socket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.socketNewMsg(msg));
     this.socket.off('updateUserFromServer').on('updateUserFromServer', (user) => this.socketUpdateUser(user));
-    this.socket.off('updateUserlistFromServer').on('updateUserlistFromServer', (user) => this.socketUpdateUserlist(user));
-    usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (statusList) => this.socketUpdateUsersStatus(statusList));
-    usersStatusSocket.off('newUserFromServer').on('newUserFromServer', () => this.socketNewUser());
+    usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (profilesList) => this.socketUpdateUsersStatus(profilesList));
 
     return (
     <div className="chatContainer">

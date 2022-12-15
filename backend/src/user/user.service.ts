@@ -25,6 +25,7 @@ export class UserService {
 						creator: true,
 					},
 				},
+				friends: true,
 				p1_games: {
 					include: {
 						player1: true,
