@@ -11,6 +11,7 @@ import TelegramIcon from '@mui/icons-material/Telegram';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Groups2Icon from '@mui/icons-material/Groups2';
+import PersonIcon from '@mui/icons-material/Person';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useNavigate } from "react-router-dom"
 
@@ -43,7 +44,7 @@ function DrawerList() {
 			<DrawerItem href="/" text='Dashboard' icon={<DashboardIcon />} />
 			<DrawerItem href="/game" text='PLay Game' icon={<SportsEsportsIcon />} />
 			<DrawerItem href="/chat" text='Chat' icon={<TelegramIcon />} />
-			<DrawerItem href="/connected-users" text='Connected Users' icon={<Groups2Icon />} />
+			<DrawerItem href={"/profile?userId=" + "1"} text='Profile' icon={<PersonIcon />} />
 		</List>
 	)
 }

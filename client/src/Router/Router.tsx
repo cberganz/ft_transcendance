@@ -1,11 +1,11 @@
 import { Navigate, Route, Routes, Outlet } from 'react-router-dom';
 import Login from '../Pages/Auth/Login'
-import ConnectedUsers from '../Pages/ConnectedUsers/ConnectedUsers'
-import {Dashboard} from './test'
+import ConnectedUsers from '../Pages/Dashboard/ConnectedUsers'
+import Dashboard from '../Pages/Dashboard/Dashboard'
 import PrimarySearchAppBar from "../Components/TopBar"
 import Game from "../Pages/Game/Game";
 import Chat from "../Pages/chat/chat"
-import UserStats from "../Pages/UserStats/UserStats"
+import Profile from "../Pages/Profile/Profile"
 import Signup from "../Pages/Auth/SignUp"
 import TfaAuth from "../Pages/Auth/TfaAuth"
 import TfaSettings from "../Pages/Auth/TfaSettings"
@@ -19,7 +19,15 @@ import io from "socket.io-client";
 export const usersStatusSocket = io("http://localhost:3000/app");
 
 function	OutletRoute() {
-	usersStatusSocket.emit("connection", useSelector(selectCurrentUser).id);
+	const user = useSelector(selectCurrentUser);
+	const userData = {
+		id: user.id,
+		login: user.login,
+		username: user.username,
+		status: "online",
+		avatar: user.avatar,
+	}
+	usersStatusSocket.emit("connection", userData);
 	return (
 		<div>
 			<PrimarySearchAppBar />
@@ -51,8 +59,8 @@ export default function Router() {
 						<Route path="/connected-users" element={<ConnectedUsers />} />
 						<Route path="/game" element={<Game />} />
 						<Route path="/chat" element={<Chat />} />
-						<Route path="/userstats" element={<UserStats />} />
 						<Route path="/tfa-settings" element={<TfaSettings />} />
+						<Route path="/profile" element={<Profile />} />
 
 					</Route>
 				</Route>

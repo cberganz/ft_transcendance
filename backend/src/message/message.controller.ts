@@ -4,21 +4,28 @@ import {
 	Param,
 	Post,
 	Body,
-	Put,
-	Delete
+	Delete,
+	UseFilters,
+	UseGuards,
 } from '@nestjs/common';
 import { MessageService } from './message.service';
 import {  Message as MessageMode1 } from '@prisma/client';
+import BackendException from '../utils/BackendException.filter'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('message')
 export class MessageController {
 	constructor(private readonly messageService: MessageService) {}
 
+	@UseGuards(JwtAuthGuard)
+	@UseFilters(BackendException)
 	@Get(':id')
 	async getMessageById(@Param('id') id: string): Promise<MessageMode1> {
 		return this.messageService.message({ id: Number(id) });
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@UseFilters(BackendException)
 	@Post()
 	async newMessage (
 		@Body() messageData: { channelId: string; authorId: string; content: string }
@@ -33,6 +40,8 @@ export class MessageController {
 		return this.messageService.message({ id: newMsg.id })
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@UseFilters(BackendException)
 	@Delete(':id')
 	async deleteMessage(@Param('id') id: string): Promise<MessageMode1> {
 		return this.messageService.deleteMessage({ id: Number(id) });

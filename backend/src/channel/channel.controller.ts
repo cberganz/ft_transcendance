@@ -4,38 +4,50 @@ import {
 	Param,
 	Post,
 	Body,
-	Put,
 	UseFilters,
+	UseGuards,
 	Delete,
 	ForbiddenException
 } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { Channel as ChannelMode1 } from '@prisma/client';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import BackendException from '../utils/BackendException.filter'
 
 @Controller('channel')
 export class ChannelController {
 	constructor(private readonly channelService: ChannelService) {}
 
+	@UseGuards(JwtAuthGuard)
+	@UseFilters(BackendException)
 	@Get(':id')
 	async getChannelById(@Param('id') id: string): Promise<ChannelMode1> {
 		return this.channelService.channel({ id: Number(id) });
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@UseFilters(BackendException)
 	@Get('/joinedChannels/:userId')
 	async getJoinedChannels(@Param('userId') userId: string): Promise<ChannelMode1[]> {
 		return this.channelService.joinedChannels(Number(userId));
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@UseFilters(BackendException)
 	@Get('/notJoinedChannels/:userId')
 	async getNotJoinedChannels(@Param('userId') userId: string): Promise<ChannelMode1[]> {
 		return this.channelService.notJoinedChannels(Number(userId));
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@UseFilters(BackendException)
 	@Get()
 	async getAllChannels(): Promise<ChannelMode1[]> {
 		return this.channelService.allChannels();
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@UseFilters(BackendException)
 	@Delete('/Member/')
 	async DeleteMember(
 		@Body() data: { channelId: string; memberId: string; }
@@ -43,6 +55,8 @@ export class ChannelController {
 		return this.channelService.deleteMember({channelId: Number(data.channelId), memberId: Number(data.memberId)})
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@UseFilters(BackendException)
 	@Post('/Member/')
 	async PostAddMember(
 		@Body() data: { channelId: string; memberId: string; pwd: string; }
@@ -57,6 +71,8 @@ export class ChannelController {
 		return this.channelService.addMember({channelId: Number(data.channelId), memberId: Number(data.memberId)})
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@UseFilters(BackendException)
 	@Post('/setPwd/')
 	async PostSetPwd(
 		@Body() data: { pwd: string; channelId: string; userId: string;}
@@ -70,6 +86,8 @@ export class ChannelController {
 		return this.channelService.setPwd({pwd: hash, channelId: Number(data.channelId), userId: Number(data.userId)})
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@UseFilters(BackendException)
 	@Post('/addAdmin/')
 	async PostAddAdmin(
 		@Body() data: { adminId: string; chanId: string; userId: string;}
@@ -77,6 +95,8 @@ export class ChannelController {
 		return this.channelService.addAdmin({adminId: Number(data.adminId), chanId: Number(data.chanId), userId: Number(data.userId)})
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@UseFilters(BackendException)
 	@Post('/newChan/')
 	async newChannel (
 		@Body() channelData: { type: string; password: string; title: string; ownerId: string }
@@ -98,6 +118,8 @@ export class ChannelController {
 		return this.channelService.channel({ id: Number(newChan.id) });
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@UseFilters(BackendException)
 	@Post('/newDM/')
 	async newDMChannel (
 		@Body() channelData: { user1: string, user2: string }
@@ -110,6 +132,8 @@ export class ChannelController {
 		return this.channelService.channel({ id: Number(newChan.id) });
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@UseFilters(BackendException)
 	@Delete(':id')
 	async deleteChannel(@Param('id') id: string): Promise<ChannelMode1> {
 		return this.channelService.deleteChannel({ id: Number(id) });

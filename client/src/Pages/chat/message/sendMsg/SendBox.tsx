@@ -22,7 +22,8 @@ export default function SendBox(props: any) {
         authorId:  props.state.actualUser.user.id,
         content:   value,
       }
-      axios.post("http://localhost:3000/message", newMsg)
+      axios.post("http://localhost:3000/message", newMsg, 
+        {withCredentials: true, headers: {Authorization: `Bearer ${props.state.actualUser.token}`}})
         .then(response => props.socket.emit("newMsgFromClient", {room: "chat" + chan.id, message: response.data}))
         .catch(error => setAlert("You've been blocked or mute.", "error")) 
   }

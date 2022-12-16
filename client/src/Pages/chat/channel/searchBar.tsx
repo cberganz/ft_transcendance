@@ -3,15 +3,6 @@ import { User } from '../stateInterface'
 import axios from 'axios';
 import useAlert from "../../../Hooks/useAlert";
 
-async function postDMChan(chan: any, socket: any, opendConv: Function) {
-    axios.post('http://localhost:3000/channel/newDM/', chan)
-      .then(response => {
-        socket.emit("newChanFromClient", response.data); 
-        opendConv(response.data.id);
-        })
-      .catch(error => alert("Error sending DM.")) 
-  }
-
 export default function SearchBar(props: any) {
     const [searchInput, setSearchInput] = useState("");
     const { setAlert } = useAlert();
@@ -19,7 +10,7 @@ export default function SearchBar(props: any) {
         e.preventDefault();
       };
     
-      const newDM = (e: React.FormEvent<HTMLFormElement>) => {
+      const newDM = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         const data = new FormData(e.currentTarget);
 
@@ -36,7 +27,13 @@ export default function SearchBar(props: any) {
           user1: props.state.actualUser.user.id,
           user2: otherUserId,
         }
-        postDMChan(newChan, props.socket, props.openConvHandler);
+        axios.post('http://localhost:3000/channel/newDM/', newChan, 
+          {withCredentials: true, headers: {Authorization: `Bearer ${props.state.actualUser.token}`}})
+          .then(response => {
+            props.socket.emit("newChanFromClient", response.data); 
+            props.openConvHandler(response.data.id);
+            })
+          .catch(error => alert("Error sending DM.")) 
         e.currentTarget.reset();
       }
   

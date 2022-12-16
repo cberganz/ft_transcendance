@@ -10,7 +10,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
 import { ChatProps, User, Channel } from '../stateInterface'
-import { StyledBadge } from '../utils'
+import { StyledBadge, getProfile } from '../utils'
 import Avatar from '@mui/material/Avatar';
 import { Icon } from '@iconify/react';
 import useAlert from "../../../Hooks/useAlert";
@@ -58,7 +58,8 @@ function CreateChannelButton(props: any) {
         title:     title,
         ownerId:   props.props.state.actualUser.user.id,
       }
-      axios.post('http://localhost:3000/channel/newChan/', newChan)
+      axios.post('http://localhost:3000/channel/newChan/', newChan, 
+        {withCredentials: true, headers: {Authorization: `Bearer ${props.props.state.actualUser.token}`}})
         .then(response => {
           props.props.socket.emit("newChanFromClient", response.data);
           setAlert("Channel successfully created.", "success");
@@ -112,11 +113,13 @@ function CreateChannelButton(props: any) {
 
 export default function HeaderChannels(props: ChatProps) {
   const navigate = useNavigate();
-  let avatar = props.state.actualUser.user.username;
+  let avatar = getProfile(props.state.userList, props.state.actualUser.user.id)?.avatar;
+  if (!avatar)
+    avatar = "";
   const   profileLink: string = "http://localhost/profile?userId=" + props.state.actualUser.user.id.toString();
   return (
     <div className='ChannelHeader'>
-        <Tooltip title={props.state.actualUser.user.username}>
+        <Tooltip title={getProfile(props.state.userList, props.state.actualUser.user.id)?.username}>
         <StyledBadge
           overlap="circular"
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}

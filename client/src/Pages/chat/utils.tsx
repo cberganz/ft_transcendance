@@ -1,4 +1,4 @@
-import { ChatState, Channel, User } from "./stateInterface"
+import { ChatState, Channel, User, userProfile } from "./stateInterface"
 import { styled } from '@mui/material/styles';
 import Badge from '@mui/material/Badge';
 
@@ -22,7 +22,7 @@ export function userIsInChan(chan: Channel, userId: number) {
 export function sortChannels(chans: Channel[]) {
     chans.sort(function(a: any, b: any) {
         var c, d;
-        if (b.Message?.length === 0)
+        if (b.Message && b.Message.length === 0)
             c = b.id
         else
             c = new Date(b.Message[b.Message.length - 1].date).getTime()
@@ -71,3 +71,13 @@ export function sortChannels(chans: Channel[]) {
       },
     },
   }));
+
+  export function getProfile(tab: userProfile[], id?: number) {
+    if (id === undefined)
+      return null;
+    for (let profile of tab) {
+      if (profile.id === id)
+        return profile;
+    }
+    return null;
+  }
