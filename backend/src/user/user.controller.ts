@@ -41,18 +41,17 @@ export class UserController {
 
 	@Get(':id')
 	@UseGuards(JwtAuthGuard)
-	@UseGuards(JwtAuthGuard)
 	async getUserById(@Param('id') id: string): Promise<UserMode1> {
 		return this.userService.user({ id: Number(id) });
 	}
 
 	@Get('/list/:id')
+	@UseGuards(JwtAuthGuard)
 	async getAllUsers(@Param('id') id: string): Promise<UserMode1[]> {
 		return this.userService.users({where: {NOT: {id: Number(id)}}, orderBy: {username: 'asc'}});
 	}
 
 	@Post('signup')
-	@UseGuards(JwtAuthGuard)
 	async signupUser (
 		@Body() userData: CreateUser
 	): Promise<UserMode1> {
