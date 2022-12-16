@@ -19,7 +19,7 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
 		passReqToCallback: true,
 		profileFields: {
 			'login': 	'login',
-			'username':	'displayname',
+			'username':	'login',
 			'avatar':	'image.link',
 			'email':	'email',
 		  }		

@@ -1,7 +1,6 @@
 import {
 	Controller,
 	Get,
-	Redirect,
 	Req,
 	Res,
 	Post,
@@ -11,36 +10,34 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
-import { UserService } from '../user/user.service';
 import { LocalAuthGuard } from './local-auth.guard'
 import { JwtRefreshAuthGuard } from './jwt-refresh-auth.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { Jwt2faGuard } from './jwt-2fa.guard';
-import { User as UserMode1 } from '@prisma/client';
 import { FtOauthGuard } from './ftAuth.guard';
 
 @Controller('auth')
 export class AuthController {
 	constructor(
-		private authService: AuthService,
-		private userService: UserService
-		) {}
+		private authService: AuthService
+	) { }
 
 	@UseGuards(LocalAuthGuard)
 	@Post('login')
 	async login(@Res({ passthrough: true }) response: Response, @Req() req) {
 		const jwt_tokens = await this.authService.login(req.user)
-		const userDataResp = { 
+		const userDataResp = {
 			username: req.user.username,
 			login: req.user.login,
 			avatar: req.user.avatar,
 			id: req.user.id,
+			friends: req.user.friends,
 		}
 		response.cookie(
-			'jwt', 
+			'jwt',
 			jwt_tokens.refresh_token,
-			{ 
-				maxAge: 3600000, 
+			{
+				maxAge: 3600000,
 				httpOnly: true,
 				sameSite: 'none',
 				secure: true
@@ -52,13 +49,14 @@ export class AuthController {
 	@UseGuards(JwtRefreshAuthGuard)
 	@Get('refresh')
 	async refresh(@Req() req) {
-		const user: UserMode1 = await this.authService.whoAmI(req)
-		const userDataResp = { 
+		const user = await this.authService.whoAmI(req) as any
+		const userDataResp = {
 			username: user.username,
 			login: user.login,
 			avatar: user.avatar,
 			id: user.id,
 			isTFAEnabled: user.isTFAEnabled,
+			friends: user.friends,
 		}
 		const jwt_tokens = await this.authService.refreshTokens(user)
 		return { user: userDataResp, jwt_token: jwt_tokens.access_token };
@@ -67,23 +65,23 @@ export class AuthController {
 	@UseGuards(JwtAuthGuard)
 	@Post('logout')
 	async logout(@Res({ passthrough: true }) response: Response) {
-		response.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true})
+		response.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true })
 		response.status(204)
 	}
 
 	@Get('42')
 	@UseGuards(FtOauthGuard)
 	ftAuth() {
-	  return;
+		return;
 	}
-  
+
 	@Get('42/return')
 	@UseGuards(FtOauthGuard)
 	async ftAuthCallback(@Res({ passthrough: true }) response: Response, @Req() req) {
 		if (req.user.isTFAEnabled) {
 			const jwt_token = this.authService.getTfaJwt(req.user).access_token
 			response.redirect(`http://localhost:3001/authenticator?jwt=${jwt_token}`)
-			return ;
+			return;
 		}
 		req = await this.login(response, req)
 		response.redirect("http://localhost:3001")
@@ -97,9 +95,9 @@ export class AuthController {
 	@Post('2fa/authenticate')
 	@UseGuards(Jwt2faGuard)
 	async authenticate(
-			@Res({ passthrough: true }) response: Response,
-			@Req() request,
-			@Body() body) {
+		@Res({ passthrough: true }) response: Response,
+		@Req() request,
+		@Body() body) {
 		const user = await this.authService.whoAmI(request)
 		const isCodeValid = this.authService.isTwoFactorAuthenticationCodeValid(
 			body.twoFactorAuthenticationCode,

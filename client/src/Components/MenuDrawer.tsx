@@ -10,10 +10,11 @@ import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import Groups2Icon from '@mui/icons-material/Groups2';
 import PersonIcon from '@mui/icons-material/Person';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useNavigate } from "react-router-dom"
+import { selectCurrentUser } from '../Hooks/authSlice'
+import { useSelector } from "react-redux"
 
 type Anchor = 'top' | 'left' | 'bottom' | 'right';
 
@@ -39,12 +40,14 @@ function DrawerItem(props: DrawerItemProp) {
 }
 
 function DrawerList() {
+	const user = useSelector(selectCurrentUser)
+
 	return (
 		<List>
 			<DrawerItem href="/" text='Dashboard' icon={<DashboardIcon />} />
 			<DrawerItem href="/game" text='PLay Game' icon={<SportsEsportsIcon />} />
 			<DrawerItem href="/chat" text='Chat' icon={<TelegramIcon />} />
-			<DrawerItem href={"/profile?userId=" + "1"} text='Profile' icon={<PersonIcon />} />
+			<DrawerItem href={"/profile?userId=" + user.id} text='Profile' icon={<PersonIcon />} />
 		</List>
 	)
 }

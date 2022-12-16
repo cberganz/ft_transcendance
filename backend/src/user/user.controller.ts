@@ -11,6 +11,9 @@ import {
 	UploadedFile,
 	UnprocessableEntityException,
 	UseGuards,
+	BadRequestException,
+	UsePipes,
+	ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User as UserMode1 } from '@prisma/client';
@@ -72,7 +75,6 @@ export class UserController {
 	}
 
 	@Get('/stats/:id')
-	@UseGuards(JwtAuthGuard)
 	async getUserStats(@Param('id') id: string): Promise<UserStats> {
 		let user = await this.userService.user({ id: Number(id) }) as any
 		let games = [...user.p1_games, ...user.p2_games]
@@ -151,12 +153,15 @@ export class UserController {
 	}
 
 	@Put(':id')
+	@UsePipes(new ValidationPipe({ forbidUnknownValues: true, whitelist: true }))
 	@UseGuards(OwnGuard)
 	@UseGuards(JwtAuthGuard)
 	async updateUserName(
 		@Param('id') id: string,
 		@Body() body: updateUserDto
 		): Promise<UserMode1> {
+			if (body.username.indexOf(' ') !== -1)
+				throw new BadRequestException()
 			const user = await this.userService.user({id: Number(id)})
 			const userWithSameUsername =
 				await this.userService.user({username: String(body.username)});
@@ -179,7 +184,6 @@ export class UserController {
 	async getTfaQrCode(
 		@Param('id') id: string,) {
 		const otpauthUrl = (await this.userService.user({id: Number(id)})).otpauthUrl
-		console.log(otpauthUrl)
 		return this.userService.generateQrCodeDataURL(otpauthUrl)
 	}
 
