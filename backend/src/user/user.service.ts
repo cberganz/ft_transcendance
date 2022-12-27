@@ -1,11 +1,15 @@
 import { Injectable  } from '@nestjs/common';
 import {PrismaService} from "../prisma/prisma.service"
 import { User, Prisma } from '@prisma/client';
+import { toDataURL } from 'qrcode';
+import {authenticator} from 'otplib'
 
 
 @Injectable()
 export class UserService {
-	constructor(private prisma: PrismaService) {}
+	constructor(
+		private prisma: PrismaService,
+	) {}
 
 	async user(
 		userWhereUniqueInput: Prisma.UserWhereUniqueInput
@@ -83,9 +87,39 @@ export class UserService {
 	}
 
 	async findOrCreate(data: Prisma.UserCreateInput): Promise<User> {
-		const user = await this.user({login: data.login});
+		let user = await this.user({login: data.login});
 		if (user)
 			return user
-		return this.createUser(data)
+		user = await this.createUser(data)
+		this.generateTwoFactorAuthenticationSecret(user)
+		return user
+	}
+
+	async setTwoFactorAuthenticationSecret(secret: string, otpauthUrl: string, userId: number) {
+		this.updateUser({
+			where: {
+				id: Number(userId)
+			},
+			data: {
+				TFASecret: secret,
+				otpauthUrl: otpauthUrl
+			}
+		})
+	}
+
+	generateQrCodeDataURL(otpAuthUrl: string) {
+		return toDataURL(otpAuthUrl);
+	}
+
+	async generateTwoFactorAuthenticationSecret(user: User) {
+		const secret = authenticator.generateSecret();
+	
+		const otpauthUrl = authenticator.keyuri(user.email, 'FT_TRANSCENDANCE', secret);
+		await this.setTwoFactorAuthenticationSecret(secret, otpauthUrl, user.id);
+	
+		return {
+		  secret,
+		  otpauthUrl
+		}
 	}
 }

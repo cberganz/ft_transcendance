@@ -18,9 +18,10 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
 		callbackURL: 'http://localhost:3000/auth/42/return',
 		passReqToCallback: true,
 		profileFields: {
-			'login': 'login',
-			'username': 'displayname',
-			'avatar': 'image.link',
+			'login': 	'login',
+			'username':	'login',
+			'avatar':	'image.link',
+			'email':	'email',
 		  }		
     });
   }
@@ -36,6 +37,7 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
 		login: profile.login,
 		username: profile.username,
 		avatar: profile.avatar,
+		email: profile.email,
 	}
 	const user = this.userService.findOrCreate(reqUser)
     return cb(null, user);

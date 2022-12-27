@@ -22,19 +22,25 @@ import SettingsDialog from './SettingsDialog';
 import { selectCurrentUser } from '../Hooks/authSlice'
 import { useSelector } from "react-redux"
 import { SearchIconWrapper, Search, StyledInputBase } from './topBarStyle';
-// import { useNavigate } from 'react-router-dom';
+import { useCookies } from "react-cookie"
 import { useLogoutMutation } from '../Api/Auth/authApiSlice'
 import { logOut } from '../Hooks/authSlice';
+import KeyIcon from '@mui/icons-material/Key';
+import { useNavigate } from "react-router-dom"
 
-function LogoutButton () {
+interface PropsUsername {
+	username: string,
+}
+
+function LogoutButton() {
 	const [logoutUser] = useLogoutMutation()
-	// const navigate = useNavigate()
-	
+	const [token, setCookie, removeCookie] = useCookies();
+
 	const handleLogout = (e: any) => {
+		removeCookie('jwt', { path: '/' });
 		logoutUser({})
 		logOut({})
-		window.location.replace('/login'); // pas utilise navigate car quand precedent revient sur l'app
-		// navigate('/login', { replace: true })
+		window.location.replace('/login');
 	}
 
 	return (
@@ -42,11 +48,20 @@ function LogoutButton () {
 	)
 }
 
+const UserNameTypographie = (propsUsername: PropsUsername) => {
+	return (
+		<Typography sx={{ fontWeight: 'bold' }}>
+			{`${propsUsername.username.substring(0, 11)}${(propsUsername.username.length <= 11) ? "" : "..."}`}
+		</Typography>
+	)
+}
+
 function ProfileBox() {
 	const user = useSelector(selectCurrentUser)
+	const navigate = useNavigate()
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const isMenuOpen = Boolean(anchorEl);
-   
+
 	const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
 		setAnchorEl(event.currentTarget);
 	};
@@ -58,35 +73,39 @@ function ProfileBox() {
 	const menuId = 'primary-search-account-menu';
 	const renderMenu = (
 		<Menu
-		anchorEl={anchorEl}
-		anchorOrigin={{
-			vertical: 'top',
-			horizontal: 'right',
-		}}
-		id={menuId}
-		keepMounted
-		transformOrigin={{
-			vertical: 'top',
-			horizontal: 'right',
-		}}
-		open={isMenuOpen}
-		onClose={handleMenuClose}
+			anchorEl={anchorEl}
+			anchorOrigin={{
+				vertical: 'top',
+				horizontal: 'right',
+			}}
+			id={menuId}
+			keepMounted
+			transformOrigin={{
+				vertical: 'top',
+				horizontal: 'right',
+			}}
+			open={isMenuOpen}
+			onClose={handleMenuClose}
 		>
 			<MenuItem>
 				<Stack >
-					<Typography fontWeight='bold'>
-						{user.username}
-					</Typography>
+					<UserNameTypographie username={user.username}/>
 					<ListItemText>{user.login}</ListItemText>
 				</Stack>
 			</MenuItem>
 			<Divider />
-			<SettingsDialog/>
-			<MenuItem>
+			<SettingsDialog />
+			<MenuItem onClick={() => navigate(`/profile?userId=${user.id}`)}>
 				<ListItemIcon>
-					<AccountCircle/>
+					<AccountCircle />
 				</ListItemIcon>
 				<ListItemText>Profile</ListItemText>
+			</MenuItem>
+			<MenuItem onClick={() => navigate("/tfa-settings")}>
+				<ListItemIcon>
+					<KeyIcon />
+				</ListItemIcon>
+				<ListItemText>Google 2fa</ListItemText>
 			</MenuItem>
 			<Divider />
 			<MenuItem>
@@ -98,9 +117,8 @@ function ProfileBox() {
 
 	return (
 		<div>
-			<Box sx={{ display: { width: 150, xs: 'none', md: 'flex', flexDirection: 'row', alignItems: 'center', /* gap: 1.5 */} }}>
+			<Box sx={{ display: { width: 150, xs: 'none', md: 'flex', flexDirection: 'row', alignItems: 'center' } }}>
 				<Grid
-					// container spacing={0}
 					aria-label="account of current user"
 					aria-controls={menuId}
 					aria-haspopup="true"
@@ -110,31 +128,25 @@ function ProfileBox() {
 						display: 'flex',
 						alignItems: 'center',
 						alignContent: 'center',
-						cursor:'pointer'
+						cursor: 'pointer'
 					}}
 				>
-					<Grid item sx={{marginRight: 1}} xs={0}>
-						<Avatar src={user.avatar}/>
+					<Grid item sx={{ marginRight: 1 }} xs={0}>
+						<Avatar src={user.avatar} />
 					</Grid>
 					<Grid item xs={0}>
-						<Typography sx={{
-							textOverflow: 'ellipsis',
-							overflow: 'hidden',
-							whiteSpace: 'nowrap',
-							fontWeight:'bold'}}>
-							{user.username}
-						</Typography>
+						<UserNameTypographie username={user.username}/>
 					</Grid>
 				</Grid>
 			</Box>
 			<Box sx={{ display: { xs: 'flex', md: 'none' } }}>
 				<IconButton
-				size="large"
-				aria-label="show more"
-				aria-controls={menuId}
-				aria-haspopup="true"
-				onClick={handleProfileMenuOpen}
-				color="inherit"
+					size="large"
+					aria-label="show more"
+					aria-controls={menuId}
+					aria-haspopup="true"
+					onClick={handleProfileMenuOpen}
+					color="inherit"
 				>
 					<MoreIcon />
 				</IconButton>
@@ -144,14 +156,14 @@ function ProfileBox() {
 	)
 }
 
-function	SearchBar() {
+function SearchBar() {
 	return (
 		<Box sx={
-		{
-			width:"100%",
-			display: 'flex',
-			justifyContent: 'center'
-		}}>
+			{
+				width: "100%",
+				display: 'flex',
+				justifyContent: 'center'
+			}}>
 			<Search>
 				<SearchIconWrapper>
 					<SearchIcon />
@@ -169,13 +181,13 @@ export default function PrimarySearchAppBar() {
 
 	return (
 		<Box sx={{ flexGrow: 1 }}>
-		<AppBar position="static" color="default" sx={{ boxShadow: 0 }}>
-			<Toolbar>
-			<SwipeableTemporaryDrawer/>
-			<SearchBar/>
-			<ProfileBox/>
-			</Toolbar>
-		</AppBar>
+			<AppBar position="static" color="default" sx={{ boxShadow: 0 }}>
+				<Toolbar>
+					<SwipeableTemporaryDrawer />
+					<SearchBar />
+					<ProfileBox />
+				</Toolbar>
+			</AppBar>
 		</Box>
 	);
 }

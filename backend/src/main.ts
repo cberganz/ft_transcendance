@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { ValidatorOptions, ValidationError } from 'class-validator';
+import BackendException from './utils/BackendException.filter'
 var passport = require('passport');
 
 export interface ValidationPipeOptions extends ValidatorOptions {
@@ -17,6 +18,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser())
   app.use(passport.initialize());
+  app.useGlobalFilters(new BackendException())
 //   app.useGlobalPipes(new ValidationPipe({forbidUnknownValues: true, whitelist: true,  })); 
 //	pose pb pour signup mais devrait etre mis voir si pb quand on remet
 
