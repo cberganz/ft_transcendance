@@ -7,7 +7,7 @@ import {
   } from '@nestjs/websockets';
 import { loggingMiddleware } from 'nestjs-prisma';
   import { Socket, Server } from 'socket.io';
-  
+   
   interface userProfile {
     id: number,
     login?: string,

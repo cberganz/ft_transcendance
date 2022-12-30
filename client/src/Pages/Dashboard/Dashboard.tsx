@@ -99,15 +99,18 @@ export default function Dashboard() {
     usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (userStatusList: userProfile[]) => socketUpdateUsersStatus(userStatusList));
 	return (
 		<div>
+			<div className="homeHeader">TRANSCENDENCE</div>
 			<div className="dashboard">
 				<div className="userCol">
 					<div className="userProfile">
 						<Avatar 
 						src={currentUser.avatar}
-						sx={{ width: 160, height: 160, marginLeft: '45px', marginTop: '30px' }}
+						sx={{ width: 160, height: 160, marginTop: '30px' }}
+						className="dashboardAvatar"
 						/>
 						<br />
 						<h3>{currentUser.username}</h3>
+						<br />
 					</div>
 					<div className="friendList">
 						<TableContainer component={Paper}>
@@ -139,11 +142,11 @@ export default function Dashboard() {
 								</TableBody>
 							</Table>
 						</TableContainer>
+						<br />
 					</div>
 				</div>
 
 				<div className="contentCol">
-					<div className="homeHeader">TRANSCENDENCE</div>
 					<div className="connectedUsers"><ConnectedUsers allUsersTab={allUsersTab} navigate={navigate} /></div>
 				</div>
 			</div>

@@ -41,7 +41,7 @@ function Channel(name: String, panel: String, type: String, props: any) {
           aria-controls={panel + "bh-content"}
           id={panel + "bh-header"}
         >
-          <Typography sx={{ width: '100%', flexShrink: 0 }} component="span">
+          <Typography sx={{ width: '100%', flexShrink: 0, fontSize: '14px' }} component="span">
             <b>{name}</b>
           </Typography>
         </AccordionSummary>

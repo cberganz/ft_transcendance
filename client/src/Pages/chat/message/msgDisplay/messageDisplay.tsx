@@ -73,7 +73,7 @@ export default function MessageDisplay(props: any) {
         loop={true}
         controls={true}
         src="https://assets9.lottiefiles.com/packages/lf20_fa1iw49j.json"
-        style={{ height: '400px', width: '400px' }}
+        style={{ height: '50vh', width: '50vw'}}
       ></Player>
     </div>
     )

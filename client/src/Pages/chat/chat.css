@@ -1,16 +1,10 @@
-.chatContainer {  display: grid;
-    grid-template-columns: 240px auto;
-    grid-template-areas:
-      "ChannelMenu ChatDisplay"
-      "ChannelMenu ChatDisplay"
-      "ChannelMenu ChatDisplay";
-      width: 100vw;
-      height: 95vh;
-  }
+.chatContainer {  
+  display:flex;
+  height: 100vh;
+}
   
  
   .ChannelMenu { 
-    grid-area: ChannelMenu; 
     background: #f0f7fa;
     width: 240px;
     overflow-y: scroll;
@@ -31,39 +25,36 @@
   }
 
   .ChatDisplay {
-    grid-area: ChatDisplay;
-    grid-template-areas:
-      "ChatHeader"
-      "MessageDisplay"
-      "SendMessage";
+    display:grid;
+    grid-template-rows: auto auto 70px;
+    width: 100%;
     position: relative;
     overflow: hidden;
   }
   .ChatHeader { 
-    grid-area: ChatHeader;
     background: #e3edf1;
     font-weight: bold;
     padding: 8px;
     padding-top: 15px;
+    height: 50px;
   }
   
   .MessageDisplay { 
-    grid-area: MessageDisplay; 
     padding-top: 10px;
     padding-left: 10px;
     padding-right: 25px;
     overflow-y: scroll;
-    height: 86vh;
+    display: flex;
+    flex-direction: column-reverse;
   }
   
   .SendMessage { 
-    grid-area: SendMessage;
-    margin-left: 0.5vw;
+    margin-left: 1vw;
     margin-top: 5px;
     margin-bottom: 5px;
     position: absolute;
     bottom: 0;
-    width: 99%;
+    width: 97.5%;
   }
   
 
@@ -81,6 +72,7 @@
     margin-right: 20px;
     text-align: left;
   }
+
   
   .rightChatAvatar { 
     grid-area: 1 / 2 / 2 / 3;
