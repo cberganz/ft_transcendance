@@ -17,6 +17,7 @@ import SearchBar from "./channel/searchBar"
 import { usersStatusSocket } from "../../Router/Router";
 import { useSearchParams } from 'react-router-dom';
 
+export let mobile: boolean = false;
 
 function ChatWithHook(component: any) {
   return function WrappedChat(props: any) {
@@ -200,21 +201,28 @@ class Chat extends React.Component<Props, ChatState> {
     this.socket.off('updateUserFromServer').on('updateUserFromServer', (user) => this.socketUpdateUser(user));
     usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (profilesList) => this.socketUpdateUsersStatus(profilesList));
 
+    if (window.innerWidth < 500)
+      mobile = true;
+    else
+      mobile = false;
     return (
     <div className="chatContainer">
       
+      {!mobile || (mobile && this.state.actualUser.openedConvID === -1) ?
         <div className="ChannelMenu">
             <HeaderChannels state={this.state} socket={this.socket} />
             <SearchBar state={this.state} socket={this.socket} openConvHandler={this.openConvHandler}  />
             <ChannelDisplay state={this.state} socket={this.socket} 
                   openConvHandler={this.openConvHandler} />
             <InfoDialog />
-        </div>
+        </div> : null}
+
+        {!mobile || (mobile && this.state.actualUser.openedConvID !== -1) ?
         <div className="ChatDisplay">
             {this.state.actualUser.openedConvID === -1 ? null : <ChatHeader state={this.state} socket={this.socket} openConvHandler={this.openConvHandler} /> }
             <div className="MessageDisplay"><MessageDisplay state={this.state} socket={this.socket} /></div>
             {this.state.actualUser.openedConvID === -1 ? null : <div className="SendMessage"><SendBox state={this.state} socket={this.socket} openConvHandler={this.openConvHandler} /></div>}
-        </div>
+        </div>: null}
 
     </div>
     )

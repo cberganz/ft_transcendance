@@ -9,6 +9,7 @@ import { Channel, User } from '../../stateInterface'
 import ChatCommands from '../../chatCommands'
 import useAlert from "../../../../Hooks/useAlert";
 import { useNavigate } from "react-router-dom";
+import {mobile }from '../../chat';
 
 
 function isAdmin(userId: number, chan?: Channel) : boolean {
@@ -63,8 +64,11 @@ export default function ChatHeader(props:any) {
         gap: '0px 0px',
         gridAutoFlow: 'row',
         }}>
-      <div style={{textAlign: 'left', marginLeft: '25px'}}>
-        {dmUser === undefined || dmUser === null ? <span style={{marginRight: "10px"}}>{title}</span> : <span onClick={() => navigate(profileLink)} style={{cursor: 'pointer', marginRight: "10px"}}>{getProfile(props.state.userList, dmUser.id)?.username}</span>} 
+      <div style={{textAlign: 'left', marginLeft: '5px', display: 'flex'}}>
+        {mobile ? 
+          <div style={{cursor: 'pointer'}}><Icon onClick={() => props.openConvHandler(-1)} icon="material-symbols:arrow-back-ios-rounded" width="30" height="20" /></div>
+          : null }
+          <div style={{marginLeft: '10px'}}>{dmUser === undefined || dmUser === null ? <span style={{marginRight: "10px"}}>{title}</span> : <span onClick={() => navigate(profileLink)} style={{cursor: 'pointer', marginRight: "10px"}}>{getProfile(props.state.userList, dmUser.id)?.username}</span>} </div>
         {dmUser !== undefined && dmUser !== null && isBlocked(props.state.actualUser.user, dmUser) ? <i style={{fontSize: '10px'}}>[blocked]</i> : null}
         {chan?.ownerId === props.state.actualUser.user.id ? <Tooltip title="Owner"><Icon icon="mdi:shield-crown" color="gray" inline={true} /></Tooltip> : null}
         {isAdmin(props.state.actualUser.user.id, chan) ? <Tooltip title="Group administrator"><Icon icon="dashicons:admin-users" color="gray" inline={true} /></Tooltip> : null}

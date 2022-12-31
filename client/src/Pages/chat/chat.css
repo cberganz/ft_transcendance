@@ -2,12 +2,15 @@
   display:flex;
   height: 100vh;
 }
-  
  
   .ChannelMenu { 
     background: #f0f7fa;
-    width: 240px;
+    width: 400px;
     overflow-y: scroll;
+  }
+  .channelsDisplay {
+    min-height: 70vh;
+    background-color: white;
   }
   .ChannelHeader {  
     display: grid;
@@ -19,7 +22,7 @@
     height: 48px;
   }
   .ChannelItem {
-    border-top: solid;
+    border-bottom: solid;
     border-color: #e0e0e0;
     border-width: thin;
   }
@@ -130,3 +133,39 @@
   #searchQuerySubmit:hover {
     cursor: pointer;
   }
+
+
+@media screen and (max-device-width: 500px) {
+  .chatContainer {  
+    display:table;
+    height: 100vh;
+  }
+  .ChannelMenu { 
+    background: #f0f7fa;
+    height: 100vh;
+    width: 100vw;
+    overflow-y: scroll;
+  }
+
+  #searchQueryInput {
+    width: 99vw;
+    height: 2rem;
+    background: white;
+    outline: none;
+    border: none;
+    border-radius: 1.625rem;
+    padding: 0 3.5rem 0 1.5rem;
+    font-size: 1rem;
+    margin-left: 0.2rem;
+  }
+  
+  .ChatDisplay {
+    display:grid;
+    grid-template-rows: auto auto 70px;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+}
+  

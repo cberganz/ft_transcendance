@@ -3,7 +3,7 @@
     display: flex;
     }
 
-@media screen and (max-device-width: 800px) {
+@media screen and (max-device-width: 500px) {
     .dashboard {
         font-family: calibri;
         display: table;
@@ -29,7 +29,7 @@
         padding-top: 10px;
         padding-bottom: 10px;
         font-family: calibri;
-        background-color: rgb(219, 219, 232);
+        background-color: #f0f7fa;
     }
 
     .dashboardAvatar {

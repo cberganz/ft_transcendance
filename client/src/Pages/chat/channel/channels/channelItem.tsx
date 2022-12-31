@@ -50,7 +50,7 @@ export function DialogChannelItem(props: any) {
   const lastMsg = props.chan?.Message?.slice(-1);
   return (
   <div>
-        <ListItem onClick={handleClickOpen} alignItems="flex-start" className="ChannelItem" sx={{cursor: 'pointer'}}>
+        <ListItem onClick={handleClickOpen} alignItems="flex-start" className="ChannelItem" sx={{backgroundColor: 'white', cursor: 'pointer'}}>
 
             <ListItemAvatar>
               {props.chan.type === 'dm' ? <Avatar alt={props.chanName} src={""} /> : <Avatar alt={props.chanName} src="-" />}
@@ -142,7 +142,7 @@ export function ChannelItem(chan: Channel, chanName: String, avatar: String, pro
   else
     bckgColor = 'white'
   return (
-    <div>
+    <span>
       <ListItem onClick={event => {props.openConvHandler(chan.id)}} alignItems="flex-start" className="ChannelItem" sx={{backgroundColor: bckgColor, cursor: 'pointer'}}>
 
           <ListItemAvatar>
@@ -185,6 +185,6 @@ export function ChannelItem(chan: Channel, chanName: String, avatar: String, pro
             />
           {chan.type === 'private' ? <span> <LockIcon sx={{ padding: '5%', marginTop:'10px'}} /></span> : null}
       </ListItem>
-    </div>
+    </span>
   )
 }
