@@ -5,6 +5,7 @@ export interface ChatState {
     joinedChans: Channel[],
     notJoinedChans: Channel[],
     userList: userProfile[],
+    mobile: boolean,
 }
 
 export interface userProfile {

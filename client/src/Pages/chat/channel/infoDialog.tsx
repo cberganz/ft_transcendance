@@ -63,12 +63,12 @@ export function InfoDialog() {
     };
 
     return (
-        <div>
+        <div className="infoDialog">
             <Tooltip title="Chat commands">
                 <InfoIcon
                     onClick={handleClickOpen}
                     fontSize='large'
-                    sx={{cursor: 'pointer', marginTop: '30px', color: '#bdbdbd'}}
+                    sx={{cursor: 'pointer', marginTop: '20px', color: '#bdbdbd'}}
                 />
             </Tooltip>
             <Dialog open={open} onClose={handleClose}>

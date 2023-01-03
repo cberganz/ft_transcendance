@@ -15,6 +15,12 @@ export const authApiSlice = apiSlice.injectEndpoints({
 				method: 'GET'
 			})
 		}),
+		generatetfa: builder.mutation({
+			query: () => ({
+				url: '/auth/2fa/generate',
+				method: 'GET'
+			})
+		}),
 		logout: builder.mutation({
 			query: () => ({
 				url: '/auth/logout',
@@ -27,6 +33,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
 export const {
 	useLoginMutation,
 	useRefreshMutation,
+	useGeneratetfaMutation,
 	useLogoutMutation,
 } = authApiSlice
 

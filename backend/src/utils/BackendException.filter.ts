@@ -81,7 +81,6 @@ export default class BackendException implements ExceptionFilter {
 		const response = ctx.getResponse<Response>();
 		const status = this.getStatus(exception);
 
-		console.log(exception.name)
 		response
 			.status(status)
 			.json({

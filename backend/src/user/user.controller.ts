@@ -11,10 +11,12 @@ import {
 	UploadedFile,
 	UnprocessableEntityException,
 	UseGuards,
+	BadRequestException,
+	UsePipes,
+	ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User as UserMode1, Prisma } from '@prisma/client';
-import BackendException from '../utils/BackendException.filter'
+import { User as UserMode1 } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { fileInterceptorOptions } from '../file/fileInterceptorOptions';
 import { DeleteFileOnErrorFilter } from '../file/fileUpload.filter'
@@ -55,25 +57,24 @@ export class UserController {
 	) {}
 
 	@Get()
-	@UseFilters(BackendException)
+	@UseGuards(JwtAuthGuard)
 	async getUsers(): Promise<UserMode1[]> {
 		return this.userService.users({});
 	}
 
 	@Get(':id')
 	@UseGuards(JwtAuthGuard)
-	@UseFilters(BackendException)
 	async getUserById(@Param('id') id: string): Promise<UserMode1> {
 		return this.userService.user({ id: Number(id) });
 	}
 
 	@Get('/list/')
+	@UseGuards(JwtAuthGuard)
 	async getAllUsers(): Promise<UserMode1[]> {
 		return this.userService.users({orderBy: {username: 'asc'}});
 	}
 
 	@Get('/stats/:id')
-	@UseFilters(BackendException)
 	async getUserStats(@Param('id') id: string): Promise<UserStats> {
 		let user = await this.userService.user({ id: Number(id) }) as any
 		let games = [...user.p1_games, ...user.p2_games]
@@ -113,19 +114,19 @@ export class UserController {
 	}
 
 	@Post('signup')
-	@UseFilters(BackendException)
 	async signupUser (
 		@Body() userData: CreateUser
 	): Promise<UserMode1> {
 		let newUser = {
 			...userData,
-			avatar: "https://profile.intra.42.fr/assets/42_logo_black-684989d43d629b3c0ff6fd7e1157ee04db9bb7a73fba8ec4e01543d650a1c607.png"
+			avatar: "https://profile.intra.42.fr/assets/42_logo_black-684989d43d629b3c0ff6fd7e1157ee04db9bb7a73fba8ec4e01543d650a1c607.png",
+			email: "robin@gmail.com"
 		}
 		return this.userService.createUser(newUser);
 	}
 
 	@Delete(':id')
-	@UseFilters(BackendException)
+	@UseGuards(JwtAuthGuard)
 	async deleteUser(@Param('id') id: string): Promise<UserMode1> {
 		return this.userService.deleteUser({ id: Number(id) });
 	}
@@ -134,6 +135,7 @@ export class UserController {
 	@UseGuards(OwnGuard)
 	@UseInterceptors(FileInterceptor('file', fileInterceptorOptions))
 	@UseFilters(DeleteFileOnErrorFilter)
+	@UseGuards(JwtAuthGuard)
 	async uploadAvatar(
 		@UploadedFile(fileValidator) file: Express.Multer.File,
 		@Param('id') id: string,
@@ -150,13 +152,16 @@ export class UserController {
 			});
 	}
 
-
 	@Put(':id')
+	@UsePipes(new ValidationPipe({ forbidUnknownValues: true, whitelist: true }))
 	@UseGuards(OwnGuard)
+	@UseGuards(JwtAuthGuard)
 	async updateUserName(
 		@Param('id') id: string,
 		@Body() body: updateUserDto
 		): Promise<UserMode1> {
+			if (body.username.indexOf(' ') !== -1)
+				throw new BadRequestException()
 			const user = await this.userService.user({id: Number(id)})
 			const userWithSameUsername =
 				await this.userService.user({username: String(body.username)});
@@ -172,4 +177,32 @@ export class UserController {
 				}
 			});
 	}
+
+	@Get('/tfa/:id')
+	@UseGuards(OwnGuard)
+	@UseGuards(JwtAuthGuard)
+	async getTfaQrCode(
+		@Param('id') id: string,) {
+		const otpauthUrl = (await this.userService.user({id: Number(id)})).otpauthUrl
+		return this.userService.generateQrCodeDataURL(otpauthUrl)
+	}
+
+	@Put('/tfa/:id')
+	@UseGuards(OwnGuard)
+	@UseGuards(JwtAuthGuard)
+	async updateTfa(
+		@Param('id') id: string,
+		@Body() body: any// peut etre mettre dto
+		) {
+			this.userService.updateUser({
+				where: {
+					id: Number(id)
+				},
+				data: {
+					isTFAEnabled: body.enableTfa,
+				}
+			});
+		return ({isTFAEnabled: body.enableTfa})
+	}
+
 }

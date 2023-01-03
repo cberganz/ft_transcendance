@@ -1,4 +1,4 @@
-import { apiSlice } from "../apiSlice";
+ import { apiSlice } from "../apiSlice";
 
 export const authApiSlice = apiSlice.injectEndpoints({
 	endpoints: builder => ({
@@ -21,6 +21,13 @@ export const authApiSlice = apiSlice.injectEndpoints({
 				newUserData
 			})
 		}),
+		updateTfa: builder.mutation({
+			query: ({id, tfa}) => ({
+				url: `/user/tfa/${id}`,
+				method: 'PUT',
+				tfa
+			})
+		}),
 	})
 })
 
@@ -29,5 +36,6 @@ export const {
 	useGetUsersMutation,
 	useDeleteUserMutation,
 	useUpdateUserMutation,
+	useUpdateTfaMutation,
 } = authApiSlice
 

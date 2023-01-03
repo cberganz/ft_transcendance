@@ -9,7 +9,6 @@ import { Channel, User } from '../../stateInterface'
 import ChatCommands from '../../chatCommands'
 import useAlert from "../../../../Hooks/useAlert";
 import { useNavigate } from "react-router-dom";
-import {mobile }from '../../chat';
 
 
 function isAdmin(userId: number, chan?: Channel) : boolean {
@@ -65,7 +64,7 @@ export default function ChatHeader(props:any) {
         gridAutoFlow: 'row',
         }}>
       <div style={{textAlign: 'left', marginLeft: '5px', display: 'flex'}}>
-        {mobile ? 
+        {props.state.mobile ? 
           <div style={{cursor: 'pointer'}}><Icon onClick={() => props.openConvHandler(-1)} icon="material-symbols:arrow-back-ios-rounded" width="30" height="20" /></div>
           : null }
           <div style={{marginLeft: '10px'}}>{dmUser === undefined || dmUser === null ? <span style={{marginRight: "10px"}}>{title}</span> : <span onClick={() => navigate(profileLink)} style={{cursor: 'pointer', marginRight: "10px"}}>{getProfile(props.state.userList, dmUser.id)?.username}</span>} </div>

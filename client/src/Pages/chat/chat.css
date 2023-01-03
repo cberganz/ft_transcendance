@@ -1,30 +1,37 @@
 .chatContainer {  
   display:flex;
-  height: 100vh;
+  position: absolute;
+  top: 64px;
+  bottom: 0px;
+  width: 100%;
 }
  
-  .ChannelMenu { 
+  .ChannelMenu {
     background: #f0f7fa;
     width: 400px;
-    overflow-y: scroll;
   }
   .channelsDisplay {
-    min-height: 70vh;
+    height: calc(100vh - 244px - 2rem);
     background-color: white;
+    overflow-y: scroll;
   }
   .ChannelHeader {  
     display: grid;
+    height: 48px;
     grid-template-columns: 1fr 3fr;
     grid-template-rows: 1fr;
     grid-auto-rows: 1fr;
     gap: 0px 0px;
     grid-auto-flow: row;
-    height: 48px;
   }
   .ChannelItem {
     border-bottom: solid;
     border-color: #e0e0e0;
     border-width: thin;
+  }
+
+  .infoDialog {
+    bottom: 0;
   }
 
   .ChatDisplay {
@@ -135,18 +142,22 @@
   }
 
 
-@media screen and (max-device-width: 500px) {
+@media screen and (max-width: 600px) {
   .chatContainer {  
     display:table;
-    height: 100vh;
+    position: absolute;
+    top: 56px;
+    bottom: 0px;
+    width: 100vw;
+    overflow: hidden;
   }
   .ChannelMenu { 
-    background: #f0f7fa;
-    height: 100vh;
     width: 100vw;
-    overflow-y: scroll;
   }
 
+  .infoDialog {
+    height: 80px;
+  }
   #searchQueryInput {
     width: 99vw;
     height: 2rem;
@@ -163,7 +174,7 @@
     display:grid;
     grid-template-rows: auto auto 70px;
     width: 100vw;
-    height: 100vh;
+    height: calc(100vh - 56px);
     position: relative;
     overflow: hidden;
   }

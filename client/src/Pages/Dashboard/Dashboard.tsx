@@ -77,6 +77,8 @@ export default function Dashboard() {
 		setAllUsersTab(allUsers);
 	}
 	const isFriend = (id: number) => {
+		if (!currentUser.friends)
+			return false
 		for (let friend of currentUser.friends) {
 			if (id === friend.id)
 				return true;
