@@ -47,6 +47,7 @@ export default function Dashboard() {
 	const [allUsersTab, setAllUsersTab ] = useState<allUsers[]>([]);
 
 	useEffect(() => {
+		usersStatusSocket.emit("updateStatus", "online");
 		(async () => {
 			const user = await axios.get("http://localhost:3000/user/" + currentUser.id,
 				{withCredentials: true, headers: {Authorization: `Bearer ${token}`}})
@@ -100,15 +101,18 @@ export default function Dashboard() {
     usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (userStatusList: userProfile[]) => socketUpdateUsersStatus(userStatusList));
 	return (
 		<div>
+			<div className="homeHeader">TRANSCENDENCE</div>
 			<div className="dashboard">
 				<div className="userCol">
 					<div className="userProfile">
 						<Avatar 
 						src={currentUser.avatar}
-						sx={{ width: 160, height: 160, marginLeft: '45px', marginTop: '30px' }}
+						sx={{ width: 160, height: 160, marginTop: '30px' }}
+						className="dashboardAvatar"
 						/>
 						<br />
 						<h3>{currentUser.username}</h3>
+						<br />
 					</div>
 					<div className="friendList">
 						<TableContainer component={Paper}>
@@ -128,7 +132,7 @@ export default function Dashboard() {
 									sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
 									>
 										<TableCell component="th" scope="row">
-											<b onClick={() => navigate("http://localhost/profile?userId=" + user.id)} style={{cursor: 'pointer'}}>{user.username}</b>
+											<b onClick={() => navigate("/profile?userId=" + user.id)} style={{cursor: 'pointer'}}>{user.username}</b>
 										</TableCell>
 										<TableCell>
 											{user.status === "offline" ? 
@@ -140,11 +144,11 @@ export default function Dashboard() {
 								</TableBody>
 							</Table>
 						</TableContainer>
+						<br />
 					</div>
 				</div>
 
 				<div className="contentCol">
-					<div className="homeHeader">TRANSCENDENCE</div>
 					<div className="connectedUsers"><ConnectedUsers allUsersTab={allUsersTab} navigate={navigate} /></div>
 				</div>
 			</div>

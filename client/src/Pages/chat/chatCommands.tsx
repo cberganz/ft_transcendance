@@ -15,7 +15,16 @@ const commands = new Map([
     ["/block", Block],
     ["/unblock", Unblock],
 ]);
-    
+
+function getId(userList: any[], username: string): number {
+    for (let user of userList) {
+        if (user.username === username)
+            return user.id;
+    }
+    return (-1);
+}
+
+// handler
 export default async function ChatCommands(input: string, state: ChatState, socket: any, params: any)
     : Promise<string | undefined> 
 {
@@ -31,7 +40,9 @@ export default async function ChatCommands(input: string, state: ChatState, sock
     }
     return undefined;
 }
-    
+
+/** CHAT COMMANDS */
+
 async function JoinChan(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
     socket.emit('joinChatRoom', params.chanId);
     const chan = getChan(params.chanId, state);
@@ -112,15 +123,15 @@ async function AddAdmin(inputs: string[], state: ChatState, socket: any, params:
     if (chan?.type === 'dm' || inputs.length === 1 || chan === undefined)
         return "";
 
-    let adminId = -1;
+    let adminId = getId(state.userList, inputs[1]);
     for (let user of chan?.members) {
-        if (user.username === inputs[1]) {
+        if (user.id === adminId) {
             adminId = user.id;
             break ;
         }
     }
     if (adminId === -1)
-        return "";
+        return "Error: " + inputs[1] + " is not part of the channel.";
 
     let ret = await axios.post("http://localhost:3000/channel/addAdmin/", 
         {adminId: adminId, chanId: params.chanId, userId: state.actualUser.user.id}, 
@@ -142,9 +153,9 @@ async function Block(inputs: string[], state: ChatState, socket: any, params: an
         else
            inputs = [inputs[0], chan.members[0].username.valueOf()]
     }
-    let blockedId = -1;
+    let blockedId = getId(state.userList, inputs[1]);
     for (let user of chan?.members) {
-        if (user.username === inputs[1] || user.login === inputs[1]) {
+        if (user.id === blockedId) {
             blockedId = user.id;
             break ;
         }
@@ -169,19 +180,20 @@ async function Block(inputs: string[], state: ChatState, socket: any, params: an
 
 async function Unblock(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
     const   chan = getChan(params.chanId, state);
-    let     blockedId = -1;
     let     blacklistId = -1;
-
+    
     if (chan === undefined || state.actualUser.user.blacklist === undefined)
-        return "";
+    return "";
     if (inputs.length === 1 && chan.type === 'dm') {
         if (chan.members[0].id === state.actualUser.user.id)
-            inputs = [inputs[0], chan.members[1].username.valueOf()]
+        inputs = [inputs[0], chan.members[1].username.valueOf()]
         else
-            inputs = [inputs[0], chan.members[0].username.valueOf()]
+        inputs = [inputs[0], chan.members[0].username.valueOf()]
     }
+
+    let     blockedId = getId(state.userList, inputs[1]);
     for (let user of chan?.members) {
-        if (user.username === inputs[1] ||  user.login === inputs[1]) {
+        if (user.id === blockedId) {
             blockedId = user.id;
             break ;
         }
@@ -213,10 +225,10 @@ async function Ban(inputs: string[], state: ChatState, socket: any, params: any)
         inputs = [inputs[0], inputs[1], "0"];
     if (inputs.length < 3 || chan === undefined || isNaN(Number(inputs[2])))
         return "";
-    let blockedId = -1;
+    let blockedId = getId(state.userList, inputs[1]);;
     let blockedLogin;
     for (let user of chan?.members) {
-        if (user.username === inputs[1] ||  user.login === inputs[1]) {
+        if (user.id === blockedId) {
             blockedId = user.id;
             blockedLogin = user.login;
             break ;
@@ -254,9 +266,9 @@ async function Mute(inputs: string[], state: ChatState, socket: any, params: any
     const chan = getChan(params.chanId, state);
     if (inputs.length < 3 || chan === undefined || isNaN(Number(inputs[2])))
         return "";
-    let blockedId = -1;
+    let blockedId = getId(state.userList, inputs[1]);
     for (let user of chan?.members) {
-        if (user.username === inputs[1] ||  user.login === inputs[1]) {
+        if (user.id === blockedId) {
             blockedId = user.id;
             break ;
         }

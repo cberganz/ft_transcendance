@@ -17,7 +17,6 @@ import SearchBar from "./channel/searchBar"
 import { usersStatusSocket } from "../../Router/Router";
 import { useSearchParams } from 'react-router-dom';
 
-
 function ChatWithHook(component: any) {
   return function WrappedChat(props: any) {
     const user = useSelector(selectCurrentUser);
@@ -34,7 +33,6 @@ interface Props {
   openConv: number;
   token: any;
 }
-
 class Chat extends React.Component<Props, ChatState> {
   constructor(props: any) {
     super(props)
@@ -54,6 +52,7 @@ class Chat extends React.Component<Props, ChatState> {
       joinedChans: [],
       notJoinedChans: [],
       userList: [],
+      mobile: window.innerWidth < 600 ? true : false,
     };
 
     this.socket = io("http://localhost:3000/chat"); 
@@ -66,6 +65,7 @@ class Chat extends React.Component<Props, ChatState> {
       actualUser: await this.getActualUser(),
       joinedChans: await this.getJoinedChans(),
       notJoinedChans: await this.getNotJoinedChans(),
+      mobile: window.innerWidth < 600 ? true : false,
     }
     for (const chan of ChatData.joinedChans) 
     this.socket.emit('joinChatRoom', chan.id)
@@ -110,7 +110,7 @@ class Chat extends React.Component<Props, ChatState> {
     }
   }
     
-    /** RENDERING FUNCTIONS */
+  /** RENDERING FUNCTION */
   openConvHandler(chanID: number) {
     let ChatData = structuredClone(this.state)
   
@@ -192,8 +192,22 @@ class Chat extends React.Component<Props, ChatState> {
     ChatData.userList = userList;
     this.setState(ChatData);
   }
+
+  setMobile(state: ChatState) {
+    let change: boolean = false;
   
-  /** CHAT COMMANDS **/
+    if (window.innerWidth < 600 && state.mobile === false) {
+      state.mobile = true;
+      change = true;
+    }
+    else if (window.innerWidth >= 600 && state.mobile === true) {
+      state.mobile = false;
+      change = true;
+    }
+    if (change)
+      this.setState(state);
+  }
+  
   
   render() {
     this.socket.off('updateChanFromServer').on('updateChanFromServer', (chan) => this.socketUpdateChan(chan));
@@ -202,21 +216,26 @@ class Chat extends React.Component<Props, ChatState> {
     this.socket.off('updateUserFromServer').on('updateUserFromServer', (user) => this.socketUpdateUser(user));
     usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (profilesList) => this.socketUpdateUsersStatus(profilesList));
 
+    window.addEventListener('resize', () => this.setMobile(this.state));
+
     return (
     <div className="chatContainer">
       
+      {!this.state.mobile || (this.state.mobile && this.state.actualUser.openedConvID === -1) ?
         <div className="ChannelMenu">
             <HeaderChannels state={this.state} socket={this.socket} />
             <SearchBar state={this.state} socket={this.socket} openConvHandler={this.openConvHandler}  />
             <ChannelDisplay state={this.state} socket={this.socket} 
                   openConvHandler={this.openConvHandler} />
             <InfoDialog />
-        </div>
+        </div> : null}
+
+        {!this.state.mobile || (this.state.mobile && this.state.actualUser.openedConvID !== -1) ?
         <div className="ChatDisplay">
             {this.state.actualUser.openedConvID === -1 ? null : <ChatHeader state={this.state} socket={this.socket} openConvHandler={this.openConvHandler} /> }
             <div className="MessageDisplay"><MessageDisplay state={this.state} socket={this.socket} /></div>
             {this.state.actualUser.openedConvID === -1 ? null : <div className="SendMessage"><SendBox state={this.state} socket={this.socket} openConvHandler={this.openConvHandler} /></div>}
-        </div>
+        </div>: null}
 
     </div>
     )

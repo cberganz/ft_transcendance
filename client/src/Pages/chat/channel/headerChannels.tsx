@@ -116,22 +116,15 @@ export default function HeaderChannels(props: ChatProps) {
   let avatar = getProfile(props.state.userList, props.state.actualUser.user.id)?.avatar;
   if (!avatar)
     avatar = "";
-  const   profileLink: string = "http://localhost/profile?userId=" + props.state.actualUser.user.id.toString();
+  const   profileLink: string = "/profile?userId=" + props.state.actualUser.user.id.toString();
   return (
     <div className='ChannelHeader'>
         <Tooltip title={getProfile(props.state.userList, props.state.actualUser.user.id)?.username}>
-        <StyledBadge
-          overlap="circular"
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-          variant="dot"
-          sx={{ marginRight: '10px', marginBottom: '10px' }}
-        >
-          <Avatar 
+                 <Avatar 
           alt={avatar.toString()} 
           src={avatar.toString()}
-          sx={{ width: 30, height: 30, marginTop: '10px', marginLeft: '15px', cursor: 'pointer' }}
+          sx={{ width: 30, height: 30, marginTop: '10px', marginLeft: '25%', cursor: 'pointer' }}
           onClick={() => navigate(profileLink)} />
-        </StyledBadge>
         </Tooltip>
         <CreateChannelButton props={props} />
     </div>

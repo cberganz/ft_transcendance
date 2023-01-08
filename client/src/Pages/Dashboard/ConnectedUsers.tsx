@@ -27,7 +27,7 @@ export default function ConnectedUsers(props: any) {
 			align: 'center',
 			headerAlign: 'center',
 			renderCell: (params) => {
-				return <b onClick={() => props.navigate("http://localhost/profile?userId=" + getId(params.value))} style={{cursor: 'pointer'}}>{params.value}</b>;
+				return <b onClick={() => props.navigate("/profile?userId=" + getId(params.value))} style={{cursor: 'pointer'}}>{params.value}</b>;
 			}
 		},
 		{

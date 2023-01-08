@@ -1,69 +1,70 @@
-.chatContainer {  display: grid;
-    grid-template-columns: 240px auto;
-    grid-template-areas:
-      "ChannelMenu ChatDisplay"
-      "ChannelMenu ChatDisplay"
-      "ChannelMenu ChatDisplay";
-      width: 100vw;
-      height: 95vh;
-  }
-  
+.chatContainer {  
+  display:flex;
+  position: absolute;
+  top: 64px;
+  bottom: 0px;
+  width: 100%;
+}
  
-  .ChannelMenu { 
-    grid-area: ChannelMenu; 
+  .ChannelMenu {
     background: #f0f7fa;
-    width: 240px;
+    width: 400px;
+  }
+  .channelsDisplay {
+    height: calc(100vh - 244px - 2rem);
+    background-color: white;
     overflow-y: scroll;
   }
   .ChannelHeader {  
     display: grid;
+    height: 48px;
     grid-template-columns: 1fr 3fr;
     grid-template-rows: 1fr;
     grid-auto-rows: 1fr;
     gap: 0px 0px;
     grid-auto-flow: row;
-    height: 48px;
   }
   .ChannelItem {
-    border-top: solid;
+    border-bottom: solid;
     border-color: #e0e0e0;
     border-width: thin;
   }
 
+  .infoDialog {
+    bottom: 0;
+  }
+
   .ChatDisplay {
-    grid-area: ChatDisplay;
-    grid-template-areas:
-      "ChatHeader"
-      "MessageDisplay"
-      "SendMessage";
+    display:grid;
+    grid-template-rows: auto auto 70px;
+    width: 100%;
     position: relative;
     overflow: hidden;
   }
   .ChatHeader { 
-    grid-area: ChatHeader;
     background: #e3edf1;
     font-weight: bold;
     padding: 8px;
     padding-top: 15px;
+    height: 50px;
   }
   
   .MessageDisplay { 
-    grid-area: MessageDisplay; 
     padding-top: 10px;
     padding-left: 10px;
     padding-right: 25px;
     overflow-y: scroll;
-    height: 86vh;
+    display: flex;
+    flex-direction: column-reverse;
   }
   
   .SendMessage { 
-    grid-area: SendMessage;
-    margin-left: 0.5vw;
+    margin-left: 1vw;
     margin-top: 5px;
     margin-bottom: 5px;
     position: absolute;
     bottom: 0;
-    width: 99%;
+    width: 97.5%;
   }
   
 
@@ -81,6 +82,7 @@
     margin-right: 20px;
     text-align: left;
   }
+
   
   .rightChatAvatar { 
     grid-area: 1 / 2 / 2 / 3;
@@ -138,3 +140,43 @@
   #searchQuerySubmit:hover {
     cursor: pointer;
   }
+
+
+@media screen and (max-width: 600px) {
+  .chatContainer {  
+    display:table;
+    position: absolute;
+    top: 56px;
+    bottom: 0px;
+    width: 100vw;
+    overflow: hidden;
+  }
+  .ChannelMenu { 
+    width: 100vw;
+  }
+
+  .infoDialog {
+    height: 80px;
+  }
+  #searchQueryInput {
+    width: 99vw;
+    height: 2rem;
+    background: white;
+    outline: none;
+    border: none;
+    border-radius: 1.625rem;
+    padding: 0 3.5rem 0 1.5rem;
+    font-size: 1rem;
+    margin-left: 0.2rem;
+  }
+  
+  .ChatDisplay {
+    display:grid;
+    grid-template-rows: auto auto 70px;
+    width: 100vw;
+    height: calc(100vh - 56px);
+    position: relative;
+    overflow: hidden;
+  }
+}
+  
