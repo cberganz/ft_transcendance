@@ -101,7 +101,6 @@ export default function Dashboard() {
     usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (userStatusList: userProfile[]) => socketUpdateUsersStatus(userStatusList));
 	return (
 		<div>
-			<div className="homeHeader">TRANSCENDENCE</div>
 			<div className="dashboard">
 				<div className="userCol">
 					<div className="userProfile">
