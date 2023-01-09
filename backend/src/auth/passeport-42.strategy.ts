@@ -14,7 +14,7 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
 	) {
     super({
 		clientID: "u-s4t2ud-babd89035961565c02cce8ca8292efbdb072d51144435629670938c336b6c57a",
-		clientSecret: "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",
+        clientSecret: "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",
 		callbackURL: 'http://localhost:3000/auth/42/return',
 		passReqToCallback: true,
 		profileFields: {
