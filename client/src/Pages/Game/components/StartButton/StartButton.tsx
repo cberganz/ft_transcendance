@@ -1,5 +1,6 @@
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useState } from "react";
+import "../../game.css";
 
 function StartButton({
   setStartButton,
@@ -25,14 +26,16 @@ function StartButton({
   return (
     <>
       {win ? <p className="win-message mb-30">Player {win} wins!</p> : ""}
-      <LoadingButton
-        variant="contained"
-        loading={start}
-        size="large"
-        onClick={handleClick}
-      >
-        {message}
-      </LoadingButton>
+      <div className="button">
+        <LoadingButton
+          variant="contained"
+          loading={start}
+          size="large"
+          onClick={handleClick}
+        >
+          {message}
+        </LoadingButton>
+      </div>
       {start && <p>Waiting for your opponent to start...</p>}
     </>
   );

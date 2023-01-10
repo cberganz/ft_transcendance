@@ -1,6 +1,7 @@
 import { Socket } from "socket.io-client";
 import { useEffect } from "react";
 import Button from "@mui/material/Button";
+import "../../game.css";
 
 function LeaveButton({
   setEnterQueue,
@@ -41,7 +42,7 @@ function LeaveButton({
   }
 
   return (
-    <div className="starting-screen flex-fill d-flex flex-column justify-content-center align-items-center">
+    <div className="button">
       <Button
         variant="contained"
         size="large"
