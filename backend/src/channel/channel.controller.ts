@@ -1,6 +1,7 @@
 import {
 	Controller,
 	Get,
+	Req,
 	Param,
 	Post,
 	Body,
@@ -13,10 +14,14 @@ import { ChannelService } from './channel.service';
 import { Channel as ChannelMode1 } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import BackendException from '../utils/BackendException.filter'
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('channel')
 export class ChannelController {
-	constructor(private readonly channelService: ChannelService) {}
+	constructor(
+		private readonly channelService: ChannelService,
+		private readonly authService: AuthService
+		) {}
 
 	@UseGuards(JwtAuthGuard)
 	@UseFilters(BackendException)
@@ -28,14 +33,18 @@ export class ChannelController {
 	@UseGuards(JwtAuthGuard)
 	@UseFilters(BackendException)
 	@Get('/joinedChannels/:userId')
-	async getJoinedChannels(@Param('userId') userId: string): Promise<ChannelMode1[]> {
+	async getJoinedChannels(@Req() req, @Param('userId') userId: string): Promise<ChannelMode1[]> {
+		if ((await this.authService.whoAmI(req)).id !== Number(userId))
+			throw new ForbiddenException();
 		return this.channelService.joinedChannels(Number(userId));
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@UseFilters(BackendException)
 	@Get('/notJoinedChannels/:userId')
-	async getNotJoinedChannels(@Param('userId') userId: string): Promise<ChannelMode1[]> {
+	async getNotJoinedChannels(@Req() req, @Param('userId') userId: string): Promise<ChannelMode1[]> {
+		if ((await this.authService.whoAmI(req)).id !== Number(userId))
+			throw new ForbiddenException();
 		return this.channelService.notJoinedChannels(Number(userId));
 	}
 
@@ -50,9 +59,12 @@ export class ChannelController {
 	@UseFilters(BackendException)
 	@Delete('/Member/')
 	async DeleteMember(
-		@Body() data: { channelId: string; memberId: string; }
+		@Req() req,
+		@Body() data: { channelId: string; memberId: string; authorId: string }
 	) : Promise<ChannelMode1> {
-		return this.channelService.deleteMember({channelId: Number(data.channelId), memberId: Number(data.memberId)})
+		if ((await this.authService.whoAmI(req)).id !== Number(data.authorId))
+			throw new ForbiddenException();
+		return this.channelService.deleteMember({channelId: Number(data.channelId), memberId: Number(data.memberId), authorId: Number(data.authorId)})
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -75,8 +87,11 @@ export class ChannelController {
 	@UseFilters(BackendException)
 	@Post('/setPwd/')
 	async PostSetPwd(
+		@Req() req,
 		@Body() data: { pwd: string; channelId: string; userId: string;}
 	) : Promise<ChannelMode1> {
+		if ((await this.authService.whoAmI(req)).id !== Number(data.userId))
+			throw new ForbiddenException();
 		const bcrypt = require ('bcrypt');
 
 		const salt = bcrypt.genSaltSync(10);
@@ -90,8 +105,11 @@ export class ChannelController {
 	@UseFilters(BackendException)
 	@Post('/addAdmin/')
 	async PostAddAdmin(
+		@Req() req,
 		@Body() data: { adminId: string; chanId: string; userId: string;}
 	) : Promise<ChannelMode1> {
+		if ((await this.authService.whoAmI(req)).id !== Number(data.userId))
+			throw new ForbiddenException();
 		return this.channelService.addAdmin({adminId: Number(data.adminId), chanId: Number(data.chanId), userId: Number(data.userId)})
 	}
 
@@ -130,12 +148,5 @@ export class ChannelController {
 		});
 		console.log(newChan)
 		return this.channelService.channel({ id: Number(newChan.id) });
-	}
-
-	@UseGuards(JwtAuthGuard)
-	@UseFilters(BackendException)
-	@Delete(':id')
-	async deleteChannel(@Param('id') id: string): Promise<ChannelMode1> {
-		return this.channelService.deleteChannel({ id: Number(id) });
 	}
 }

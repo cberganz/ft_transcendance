@@ -4,13 +4,9 @@ import Stack from '@mui/material/Stack';
 import './ConnectedUsers.css'
 import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
-import { PanoramaSharp, Paragliding } from '@mui/icons-material';
-
 
 export default function ConnectedUsers(props: any) {
 	const getId = (username: string) => {
-		console.log(props.allUsersTab)
-		console.log(username)
 		for (let user of props.allUsersTab) {
 			if (user.User === username)
 				return user.id;
@@ -74,6 +70,7 @@ export default function ConnectedUsers(props: any) {
 						columns={columns}
 						disableSelectionOnClick
 						experimentalFeatures={{ newEditingApi: true }}
+						getRowId={(row: any) =>  row.id}
 					/>
 				</Box>
 			</Stack>

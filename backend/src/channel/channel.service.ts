@@ -252,12 +252,26 @@ export class ChannelService {
 
 
 	}
-	async deleteMember(data: {channelId: number, memberId: number}): Promise<Channel> {
+	async deleteMember(data: {channelId: number, memberId: number, authorId: number}): Promise<Channel> {
 		const chan = await this.prisma.channel.findUnique( {
 			where: {
 				id: data.channelId,
+			},
+			include: {
+				admin: true,
 			}
 		})
+
+
+		let userIsAdmin = false ;
+		for (let admin of chan.admin) {
+			if (admin.id === data.authorId) {
+				userIsAdmin = true ;
+				break ;
+			}
+		}
+		if (data.memberId != data.authorId && !userIsAdmin)
+			throw new ForbiddenException();
 		
 		let ret_chan = await this.prisma.channel.update({
 			where: {

@@ -1,7 +1,6 @@
 import { Avatar } from "@mui/material";
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
-import AlertTitle from '@mui/material/AlertTitle';
 import { Player } from '@lottiefiles/react-lottie-player';
 import '../../chat.css'
 import { Message, User, Channel, ChatState } from '../../stateInterface'

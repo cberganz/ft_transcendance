@@ -1,14 +1,10 @@
-import React, {useState} from 'react';
+import React from 'react';
 import { User } from '../stateInterface'
 import axios from 'axios';
 import useAlert from "../../../Hooks/useAlert";
 
 export default function SearchBar(props: any) {
-    const [searchInput, setSearchInput] = useState("");
     const { setAlert } = useAlert();
-    const handleChange = (e: any) => {
-        e.preventDefault();
-      };
     
       const newDM = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
