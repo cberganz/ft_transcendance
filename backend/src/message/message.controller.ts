@@ -39,11 +39,4 @@ export class MessageController {
 			return (null);
 		return this.messageService.message({ id: newMsg.id })
 	}
-
-	@UseGuards(JwtAuthGuard)
-	@UseFilters(BackendException)
-	@Delete(':id')
-	async deleteMessage(@Param('id') id: string): Promise<MessageMode1> {
-		return this.messageService.deleteMessage({ id: Number(id) });
-	}
 }

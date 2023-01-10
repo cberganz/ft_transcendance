@@ -15,6 +15,7 @@ import { loggingMiddleware } from 'nestjs-prisma';
     status?: string,
     avatar?: string,
   }
+  
   @WebSocketGateway({
     namespace: '/app',
     cors: {

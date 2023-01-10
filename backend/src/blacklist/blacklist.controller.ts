@@ -5,18 +5,24 @@ import {
 	Post,
 	Body,
 	Put,
+	Req,
 	Delete,
 	UseFilters,
 	UseGuards,
+	ForbiddenException
 } from '@nestjs/common';
 import { BlacklistService } from './blacklist.service';
 import { Blacklist as BlacklistMode1 } from '@prisma/client';
 import BackendException from '../utils/BackendException.filter'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('blacklist')
 export class BlacklistController {
-	constructor(private readonly blacklistService: BlacklistService) {}
+	constructor(
+		private readonly blacklistService: BlacklistService,
+		private readonly authService: AuthService
+		) {}
 
 	@UseGuards(JwtAuthGuard)
 	@UseFilters(BackendException)
@@ -29,8 +35,11 @@ export class BlacklistController {
 	@UseFilters(BackendException)
 	@Post()
 	async newBlacklist (
+		@Req() req,
 		@Body() blacklistData: { target_id: string; type: string; delay?: string; channelId?: string; creatorId: string }
 	): Promise<BlacklistMode1> {
+		if ((await this.authService.whoAmI(req)).id !== Number(blacklistData.creatorId))
+			throw new ForbiddenException();
 		if (!blacklistData.channelId)
 			return this.blacklistService.createBlacklist({
 				type: blacklistData.type,

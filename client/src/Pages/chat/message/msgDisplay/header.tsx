@@ -5,7 +5,7 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import { getChan, isBlocked, getProfile } from '../../utils'
 import { Icon } from '@iconify/react';
-import { Channel, User } from '../../stateInterface'
+import { Channel } from '../../stateInterface'
 import ChatCommands from '../../chatCommands'
 import useAlert from "../../../../Hooks/useAlert";
 import { useNavigate } from "react-router-dom";

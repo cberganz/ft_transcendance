@@ -9,8 +9,8 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
-import { ChatProps, User, Channel } from '../stateInterface'
-import { StyledBadge, getProfile } from '../utils'
+import { ChatProps, Channel } from '../stateInterface'
+import { getProfile } from '../utils'
 import Avatar from '@mui/material/Avatar';
 import { Icon } from '@iconify/react';
 import useAlert from "../../../Hooks/useAlert";

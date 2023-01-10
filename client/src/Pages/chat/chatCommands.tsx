@@ -73,7 +73,8 @@ async function LeaveChan(inputs: string[], state: ChatState, socket: any, params
         {
             data: {
                 channelId: params.chanId,
-                memberId: state.actualUser.user.id
+                memberId: state.actualUser.user.id,
+                authorId: state.actualUser.user.id
             },
             withCredentials: true, 
             headers: {
@@ -249,7 +250,8 @@ async function Ban(inputs: string[], state: ChatState, socket: any, params: any)
     axios.delete("http://localhost:3000/channel/Member/", {
             data: {
                 channelId: params.chanId, 
-                memberId: blockedId
+                memberId: blockedId,
+                authorId: state.actualUser.user.id
             },
             withCredentials: true, 
             headers: {
