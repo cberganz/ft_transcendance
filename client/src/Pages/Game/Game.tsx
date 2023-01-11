@@ -5,19 +5,14 @@ import StartButton from "./components/StartButton/StartButton";
 import io, { Socket } from "socket.io-client";
 import EnterQueue from "./components/EnterQueue/EnterQueue";
 import "./game.css";
-import { selectCurrentUser } from "../../Hooks/authSlice";
+import { selectCurrentUser, selectCurrentToken } from "../../Hooks/authSlice";
 import { useSelector } from "react-redux";
 import LeaveButton from "./components/LeaveButton/LeaveButton";
 import { FormControlLabel, FormGroup } from "@mui/material";
 import Switch from "@mui/material/Switch";
+import axios from "axios";
 
 function Game() {
-  const socket: Socket = io("http://localhost:3000/game", {
-    query: {
-      id: useSelector(selectCurrentUser).id,
-    },
-  });
-
   const [enterQueue, setEnterQueue] = useState<boolean>(false);
   const [queueStatus, setQueueStatus] = useState<boolean>(false);
   const [startButton, setStartButton] = useState<boolean>(false);
@@ -59,21 +54,27 @@ function Game() {
   const p2 = p2Ref.current;
   const ball = ballRef.current;
 
+  const colors = ["red", "green", "blue"];
+  const customColor = colors[Math.floor(Math.random() * colors.length)];
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
 
-  const colors = ["red", "green", "blue"];
-  const customColor = colors[Math.floor(Math.random() * colors.length)];
+  const socket: Socket = io("http://localhost:3000/game", {
+    auth: {
+      id: useSelector(selectCurrentUser).id,
+    },
+  });
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
         case "w": {
-          socket.emit("msgToServer", "u");
+          socket.emit("updateDirectionServer", "u");
           break;
         }
         case "s": {
-          socket.emit("msgToServer", "d");
+          socket.emit("updateDirectionServer", "d");
           break;
         }
       }
@@ -84,17 +85,17 @@ function Game() {
         e.key === "w" &&
         (p1.getDirection() === "u" || p2.getDirection() === "u")
       ) {
-        socket.emit("msgToServer", "n");
+        socket.emit("updateDirectionServer", "n");
       } else if (
         e.key === "s" &&
         (p1.getDirection() === "d" || p2.getDirection() === "d")
       ) {
-        socket.emit("msgToServer", "n");
+        socket.emit("updateDirectionServer", "n");
       }
     };
 
     const handleBlur = () => {
-      socket.emit("msgToServer", "n");
+      socket.emit("updateDirectionServer", "n");
     };
 
     const updatePlayerDirection = (val: string) => {
@@ -191,10 +192,14 @@ function Game() {
       startRef.current = true;
     };
 
+    const reconnectCustom = (custom: boolean) => {
+      setCustomGame(custom);
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
     window.addEventListener("blur", handleBlur);
-    socket.on("msgToClient", updatePlayerDirection);
+    socket.on("updateDirectionClient", updatePlayerDirection);
     socket.on("updateBallDirClient", updateBallDir);
     socket.on("updatePlayerPosClient", updatePlayerPos);
     socket.on("updateBallPosClient", updateBallPos);
@@ -204,12 +209,13 @@ function Game() {
     socket.on("reconnectStartClient", reconnectStart);
     socket.on("reconnectReadyClient", reconnectReady);
     socket.on("updateAlreadyStarted", updateAlreadyStarted);
+    socket.on("reconnectCustomClient", reconnectCustom);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", handleBlur);
-      socket.off("msgToClient", updatePlayerDirection);
+      socket.off("updateDirectionClient", updatePlayerDirection);
       socket.off("updateBallDirClient", updateBallDir);
       socket.off("updatePlayerPosClient", updatePlayerPos);
       socket.off("updateBallPosClient", updateBallPos);
@@ -219,6 +225,7 @@ function Game() {
       socket.off("reconnectStartClient", reconnectStart);
       socket.off("reconnectReadyClient", reconnectReady);
       socket.off("updateAlreadyStarted", updateAlreadyStarted);
+      socket.off("reconnectCustomClient", reconnectCustom);
       socket.disconnect();
     };
   });
@@ -267,6 +274,7 @@ function Game() {
       if (p1.getScore() < 10 && p2.getScore() < 10) {
         animationFrameId = requestAnimationFrame(loopGame);
       } else {
+        // postGame();
         resetGame();
       }
     };
@@ -540,6 +548,25 @@ function Game() {
     socket.emit("updateReadyServer", ready);
   }
 
+  //   const token = useSelector(selectCurrentToken);
+
+  //   async function postGame() {
+  //     const gameData = {
+  //       player1Id: "1",
+  //       player2Id: "2",
+  //     };
+
+  //     axios
+  //       .post("http://localhost:3000/game/", gameData, {
+  //         withCredentials: true,
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       })
+  //       .then((response) => console.log(response))
+  //       .catch((error) => console.log(error));
+  //   }
+
+  //   postGame();
+
   return (
     <div className={"gameContainer"}>
       <div className={"gameWidth"}>
@@ -572,19 +599,22 @@ function Game() {
               win={win}
               message="START GAME"
             />
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={customGame}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                      setCustomGame(event.target.checked);
-                    }}
-                  />
-                }
-                label="Custom Game"
-              />
-            </FormGroup>
+            <div className="customButton">
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={customGame}
+                      onChange={() => {
+                        socket.emit("updateCustomServer", !customGame);
+                        setCustomGame(!customGame);
+                      }}
+                    />
+                  }
+                  label="Custom Game"
+                />
+              </FormGroup>
+            </div>
             <LeaveButton
               setEnterQueue={setEnterQueue}
               setQueueStatus={setQueueStatus}

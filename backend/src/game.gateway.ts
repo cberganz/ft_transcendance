@@ -20,6 +20,7 @@ interface Room {
   ballPosition: number[];
   ballDirection: number[];
   score: number[];
+  custom: boolean[];
 }
 
 @WebSocketGateway({
@@ -41,7 +42,7 @@ export class GameGateway
 
   handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(
-      `Client connected: ID ${client.handshake.query.id.toString()}`
+      `Client connected: ID ${client.handshake.auth.id.toString()}`
     );
     this.reconnectRoom(client);
     if (this.findCurrentRoom(client) === -1) {
@@ -57,7 +58,7 @@ export class GameGateway
 
   handleDisconnect(client: Socket) {
     this.logger.log(
-      `Client disconnected: ID ${client.handshake.query.id.toString()}`
+      `Client disconnected: ID ${client.handshake.auth.id.toString()}`
     );
     if (this.findCurrentRoom(client) === -1) {
       return;
@@ -76,13 +77,13 @@ export class GameGateway
     if (this.rooms.length === 0 || this.findAvailableRoom() === -1) {
       this.createRoom(client);
       this.rooms[this.rooms.length - 1].players[0] =
-        client.handshake.query.id.toString();
+        client.handshake.auth.id.toString();
     } else if (this.rooms[this.findAvailableRoom()].players[0] === "") {
       this.rooms[this.findAvailableRoom()].players[0] =
-        client.handshake.query.id.toString();
+        client.handshake.auth.id.toString();
     } else if (this.rooms[this.findAvailableRoom()].players[1] === "") {
       this.rooms[this.findAvailableRoom()].players[1] =
-        client.handshake.query.id.toString();
+        client.handshake.auth.id.toString();
     }
     client.join(this.roomId(client));
     this.logRoom();
@@ -102,6 +103,9 @@ export class GameGateway
         } else {
           this.server.to(client.id).emit("reconnectNotStartClient");
         }
+        this.server
+          .to(client.id)
+          .emit("reconnectCustomClient", this.roomCustom(client)[0]);
       } else {
         if (this.roomReady(client)[0] && this.roomReady(client)[1]) {
           this.server.to(client.id).emit("reconnectReadyClient");
@@ -110,6 +114,9 @@ export class GameGateway
         } else {
           this.server.to(client.id).emit("reconnectNotStartClient");
         }
+        this.server
+          .to(client.id)
+          .emit("reconnectCustomClient", this.roomCustom(client)[1]);
       }
       return true;
     }
@@ -160,8 +167,8 @@ export class GameGateway
     client.leave(this.roomId(client));
     for (const room of this.rooms) {
       if (
-        room.players[0] === client.handshake.query.id.toString() ||
-        room.players[1] === client.handshake.query.id.toString()
+        room.players[0] === client.handshake.auth.id.toString() ||
+        room.players[1] === client.handshake.auth.id.toString()
       ) {
         this.rooms.splice(this.rooms.indexOf(room), 1);
       }
@@ -169,7 +176,7 @@ export class GameGateway
     this.logRoom();
   }
 
-  @SubscribeMessage("msgToServer")
+  @SubscribeMessage("updateDirectionServer")
   handleMessage(client: Socket, message: string): void {
     if (this.findCurrentRoom(client) === -1) {
       return;
@@ -179,34 +186,46 @@ export class GameGateway
     }
     if (
       this.rooms[this.findCurrentRoom(client)].players[0] ===
-      client.handshake.query.id.toString()
+      client.handshake.auth.id.toString()
     ) {
       switch (message) {
         case "u": {
-          this.server.to(this.roomId(client)).emit("msgToClient", "u1");
+          this.server
+            .to(this.roomId(client))
+            .emit("updateDirectionClient", "u1");
           break;
         }
         case "d": {
-          this.server.to(this.roomId(client)).emit("msgToClient", "d1");
+          this.server
+            .to(this.roomId(client))
+            .emit("updateDirectionClient", "d1");
           break;
         }
         case "n": {
-          this.server.to(this.roomId(client)).emit("msgToClient", "n1");
+          this.server
+            .to(this.roomId(client))
+            .emit("updateDirectionClient", "n1");
           break;
         }
       }
     } else {
       switch (message) {
         case "u": {
-          this.server.to(this.roomId(client)).emit("msgToClient", "u2");
+          this.server
+            .to(this.roomId(client))
+            .emit("updateDirectionClient", "u2");
           break;
         }
         case "d": {
-          this.server.to(this.roomId(client)).emit("msgToClient", "d2");
+          this.server
+            .to(this.roomId(client))
+            .emit("updateDirectionClient", "d2");
           break;
         }
         case "n": {
-          this.server.to(this.roomId(client)).emit("msgToClient", "n2");
+          this.server
+            .to(this.roomId(client))
+            .emit("updateDirectionClient", "n2");
           break;
         }
       }
@@ -321,6 +340,15 @@ export class GameGateway
     }
   }
 
+  @SubscribeMessage("updateCustomServer")
+  handleUpdateCustom(client: Socket, customStatus: boolean): void {
+    if (this.isPlayerOne(client)) {
+      this.rooms[this.findCurrentRoom(client)].custom[0] = customStatus;
+    } else {
+      this.rooms[this.findCurrentRoom(client)].custom[1] = customStatus;
+    }
+  }
+
   findAvailableRoom(): number {
     for (const room of this.rooms) {
       if (room.players[0] === "" || room.players[1] === "") {
@@ -333,8 +361,8 @@ export class GameGateway
   findCurrentRoom(client: Socket): number {
     for (const room of this.rooms) {
       if (
-        room.players[0] === client.handshake.query.id.toString() ||
-        room.players[1] === client.handshake.query.id.toString()
+        room.players[0] === client.handshake.auth.id.toString() ||
+        room.players[1] === client.handshake.auth.id.toString()
       ) {
         return this.rooms.indexOf(room);
       }
@@ -353,6 +381,7 @@ export class GameGateway
       ballPosition: [],
       ballDirection: [],
       score: [0, 0],
+      custom: [false, false],
     };
     this.rooms.push(newRoom);
     this.logger.log(newRoom.ballPosition);
@@ -372,7 +401,7 @@ export class GameGateway
   isPlayerOne(client: Socket): boolean {
     if (
       this.rooms[this.findCurrentRoom(client)].players[0] ===
-      client.handshake.query.id.toString()
+      client.handshake.auth.id.toString()
     ) {
       return true;
     }
@@ -421,5 +450,9 @@ export class GameGateway
 
   roomScore(client: Socket): Array<number> {
     return this.rooms[this.findCurrentRoom(client)].score;
+  }
+
+  roomCustom(client: Socket): Array<boolean> {
+    return this.rooms[this.findCurrentRoom(client)].custom;
   }
 }

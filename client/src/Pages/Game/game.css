@@ -11,6 +11,13 @@
   width: 60%;
 }
 
-.btn {
-  padding: 1rem;
+.button {
+  padding: 1.2rem;
+}
+
+.customButton {
+  padding: 1.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
