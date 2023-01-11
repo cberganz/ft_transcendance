@@ -11,6 +11,15 @@ import LeaveButton from "./components/LeaveButton/LeaveButton";
 import { FormControlLabel, FormGroup } from "@mui/material";
 import Switch from "@mui/material/Switch";
 import axios from "axios";
+import { usersStatusSocket } from "../../Router/Router";
+
+interface gameInfo {
+  player1Id?: number;
+  player2Id?: number;
+  player1_score?: number | null;
+  player2_score?: number | null;
+  winner?: number | null;
+}
 
 function Game() {
   const [enterQueue, setEnterQueue] = useState<boolean>(false);
@@ -19,6 +28,7 @@ function Game() {
   const [win, setWin] = useState<number>(0);
   const [ready, setReady] = useState<boolean>(false);
   const [customGame, setCustomGame] = useState<boolean>(false);
+  const [spectator, setSpectator] = useState<boolean>(false);
   const factor: number = 1.32;
   const heightRef = useRef(window.innerHeight / factor);
   const widthRef = useRef(window.innerWidth / factor);
@@ -27,6 +37,7 @@ function Game() {
   const ballSizeRef = useRef(heightRef.current / 50);
   let startRef = useRef(false);
   let timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const gameInfo: gameInfo = {};
 
   const p1Ref = useRef(
     new Player(
@@ -156,6 +167,7 @@ function Game() {
     const updateReadyListener = (value: boolean) => {
       if (value === true && ready === false) {
         setReady(true);
+        usersStatusSocket.emit("updateStatus", "in game");
       } else if (value === false && ready === true) {
         resetGame();
       }
@@ -196,9 +208,69 @@ function Game() {
       setCustomGame(custom);
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-    window.addEventListener("blur", handleBlur);
+    const handleEndGame = (param: {
+      p1Id: number;
+      p2Id: number;
+      isp1: boolean;
+    }) => {
+      if (!param.isp1) {
+        return;
+      }
+      gameInfo.player1Id = param.p1Id;
+      gameInfo.player2Id = param.p2Id;
+      gameInfo.player1_score = p1.getScore();
+      gameInfo.player2_score = p2.getScore();
+      if (gameInfo.player1_score === 10) {
+        gameInfo.winner = gameInfo.player1Id;
+      } else {
+        gameInfo.winner = gameInfo.player2Id;
+      }
+      p1.setScore(0);
+      p2.setScore(0);
+
+      axios
+        .post("http://localhost:3000/game/", gameInfo, {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => console.log(response))
+        .catch((error) => console.log(error));
+
+      socket.emit("updateScoreServer", {
+        playerNumber: 1,
+        score: 0,
+      });
+      socket.emit("updateScoreServer", {
+        playerNumber: 2,
+        score: 0,
+      });
+    };
+
+    const handleInvitationGame = (id: string) => {
+      setEnterQueue(false);
+      setQueueStatus(false);
+      setStartButton(false);
+      setReady(false);
+      setWin(0);
+      resetGame();
+      socket.emit("invitationGameServer", id);
+      usersStatusSocket.emit("deleteInvitation");
+    };
+
+    const handleSpectateGame = (id: string) => {
+      setEnterQueue(true);
+      setQueueStatus(true);
+      setStartButton(true);
+      setReady(true);
+      setSpectator(true);
+      socket.emit("spectateGameServer", id);
+    };
+
+    if (!spectator) {
+      window.addEventListener("keydown", handleKeyDown);
+      window.addEventListener("keyup", handleKeyUp);
+      window.addEventListener("blur", handleBlur);
+    }
     socket.on("updateDirectionClient", updatePlayerDirection);
     socket.on("updateBallDirClient", updateBallDir);
     socket.on("updatePlayerPosClient", updatePlayerPos);
@@ -210,11 +282,16 @@ function Game() {
     socket.on("reconnectReadyClient", reconnectReady);
     socket.on("updateAlreadyStarted", updateAlreadyStarted);
     socket.on("reconnectCustomClient", reconnectCustom);
+    socket.on("endGameClient", handleEndGame);
+    usersStatusSocket.on("invitationGameClient", handleInvitationGame);
+    usersStatusSocket.on("spectateGameClient", handleSpectateGame);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-      window.removeEventListener("blur", handleBlur);
+      if (!spectator) {
+        window.removeEventListener("keydown", handleKeyDown);
+        window.removeEventListener("keyup", handleKeyUp);
+        window.removeEventListener("blur", handleBlur);
+      }
       socket.off("updateDirectionClient", updatePlayerDirection);
       socket.off("updateBallDirClient", updateBallDir);
       socket.off("updatePlayerPosClient", updatePlayerPos);
@@ -226,6 +303,9 @@ function Game() {
       socket.off("reconnectReadyClient", reconnectReady);
       socket.off("updateAlreadyStarted", updateAlreadyStarted);
       socket.off("reconnectCustomClient", reconnectCustom);
+      socket.off("endGameClient", handleEndGame);
+      usersStatusSocket.off("invitationGameClient", handleInvitationGame);
+      usersStatusSocket.off("spectateGameClient", handleSpectateGame);
       socket.disconnect();
     };
   });
@@ -499,26 +579,29 @@ function Game() {
   }
 
   function resetGame(): void {
+    usersStatusSocket.emit("updateStatus", "online");
     updateReady(false);
     setReady(false);
     setStartButton(false);
     if (p1.getScore() === 10) {
       setWin(1);
+      postGame();
     } else if (p2.getScore() === 10) {
       setWin(2);
+      postGame();
     }
     startRef.current = false;
     timerRef.current && clearTimeout(timerRef.current);
-    p1.setScore(0);
-    p2.setScore(0);
-    socket.emit("updateScoreServer", {
-      playerNumber: 1,
-      score: 0,
-    });
-    socket.emit("updateScoreServer", {
-      playerNumber: 2,
-      score: 0,
-    });
+    // p1.setScore(0);
+    // p2.setScore(0);
+    // socket.emit("updateScoreServer", {
+    //   playerNumber: 1,
+    //   score: 0,
+    // });
+    // socket.emit("updateScoreServer", {
+    //   playerNumber: 2,
+    //   score: 0,
+    // });
     p1.resetPosition();
     p2.resetPosition();
   }
@@ -548,24 +631,11 @@ function Game() {
     socket.emit("updateReadyServer", ready);
   }
 
-  //   const token = useSelector(selectCurrentToken);
+  const token = useSelector(selectCurrentToken);
 
-  //   async function postGame() {
-  //     const gameData = {
-  //       player1Id: "1",
-  //       player2Id: "2",
-  //     };
-
-  //     axios
-  //       .post("http://localhost:3000/game/", gameData, {
-  //         withCredentials: true,
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       })
-  //       .then((response) => console.log(response))
-  //       .catch((error) => console.log(error));
-  //   }
-
-  //   postGame();
+  async function postGame() {
+    socket.emit("endGameServer");
+  }
 
   return (
     <div className={"gameContainer"}>
@@ -578,7 +648,7 @@ function Game() {
               queueStatus={queueStatus}
               setQueueStatus={setQueueStatus}
             />
-            {queueStatus && (
+            {queueStatus && !spectator && (
               <LeaveButton
                 setEnterQueue={setEnterQueue}
                 setQueueStatus={setQueueStatus}
@@ -615,22 +685,24 @@ function Game() {
                 />
               </FormGroup>
             </div>
-            <LeaveButton
-              setEnterQueue={setEnterQueue}
-              setQueueStatus={setQueueStatus}
-              setStartButton={setStartButton}
-              setReady={setReady}
-              setWin={setWin}
-              socket={socket}
-              resetGame={resetGame}
-            />
+            {!spectator && (
+              <LeaveButton
+                setEnterQueue={setEnterQueue}
+                setQueueStatus={setQueueStatus}
+                setStartButton={setStartButton}
+                setReady={setReady}
+                setWin={setWin}
+                socket={socket}
+                resetGame={resetGame}
+              />
+            )}
           </>
         ) : null}
         <canvas
           className={`${!ready && "display-none"}`}
           ref={canvasRef}
         ></canvas>
-        {startButton && ready && (
+        {startButton && ready && !spectator && (
           <LeaveButton
             setEnterQueue={setEnterQueue}
             setQueueStatus={setQueueStatus}
