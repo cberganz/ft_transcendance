@@ -165,6 +165,22 @@ export class UserController {
     });
   }
 
+  @Put('/addFriend/:user1/:user2')
+  async userAddFriend(
+  	@Param('user1') user1: string,
+  	@Param('user2') user2: string
+  ): Promise<UserMode1> {
+  	return await this.userService.addFriendship({ id: Number(user1) }, { id: Number(user2) });
+  }
+  
+  @Put('/removeFriend/:user1/:user2')
+  async userRemoveFriend(
+  	@Param('user1') user1: string,
+  	@Param('user2') user2: string
+  ): Promise<UserMode1> {
+  	return await this.userService.removeFriendship({ id: Number(user1) }, { id: Number(user2) });
+  }
+
   @Put(":id")
   @UsePipes(new ValidationPipe({ forbidUnknownValues: true, whitelist: true }))
   @UseGuards(OwnGuard)

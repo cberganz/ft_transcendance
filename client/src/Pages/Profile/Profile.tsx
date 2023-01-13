@@ -6,26 +6,6 @@ import StatCard from './components/StatCard';
 import PlayedGames from './components/PlayedGames'
 import axios from "axios"
 
-interface Game {
-	id: number;
-	date: string;
-	playerScore: number;
-	opponent: string;
-	opponentScore: number;
-	result: string;
-};
-
-interface Stats {
-	id: number;
-	avatar: string;
-	username: string;
-	games: Game[];
-	playedGames: number;
-	gamesWon: number;
-	gamesLost: number;
-	winRate: number;
-};
-
 export default class Profile extends React.Component {
 
 	state = {
