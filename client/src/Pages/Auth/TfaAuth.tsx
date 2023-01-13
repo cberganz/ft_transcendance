@@ -21,18 +21,17 @@ function useQuery() {
 const ValidateJwtTfa = (qrCodeProps: Props) => {
 	const [qrCodeContent, setContent] = React.useState(<></>)
 
-	const getData = async () => axios({
-		withCredentials: true,
-		url: "http://localhost:3000/auth/2fa/validate",
-		method: "GET",
-		headers:{
-			Authorization: `Bearer ${qrCodeProps.token}`
-		}
-	})
-	.catch(() => setContent(<Navigate to={"/login"} replace={true}></Navigate>))
 	React.useEffect(() => {
-		getData();
-	  }, []);
+		axios({
+			withCredentials: true,
+			url: "http://localhost:3000/auth/2fa/validate",
+			method: "GET",
+			headers:{
+				Authorization: `Bearer ${qrCodeProps.token}`
+			}
+		})
+		.catch(() => setContent(<Navigate to={"/login"} replace={true}></Navigate>))
+	  }, [qrCodeProps]);
 
 	return qrCodeContent
 }
@@ -46,7 +45,7 @@ const TfaInputField = (qrCodeProps: Props) => {
 	}
 
 	const keyPress = (e: any) => {
-		if(e.keyCode == 13){
+		if(e.keyCode === 13){
 			axios({
 				withCredentials: true,
 				url: "http://localhost:3000/auth/2fa/authenticate",

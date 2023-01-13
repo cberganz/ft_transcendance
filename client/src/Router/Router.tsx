@@ -13,7 +13,6 @@ import PersistLogin from '../Hooks/persistLogin';
 import { selectCurrentUser } from '../Hooks/authSlice'
 import { selectCurrentToken } from '../Hooks/authSlice'
 import { useSelector } from "react-redux"
-import AlertPopup from '../Components/AlertPopup';
 import io from "socket.io-client";
 
 export const usersStatusSocket = io("http://localhost:3000/app");
@@ -32,7 +31,7 @@ function	OutletRoute() {
 		<div>
 			<PrimarySearchAppBar />
 			<Outlet/>
-			<AlertPopup/>
+			{/* <AlertPopup/> */}
 		</div>
 	)
 }

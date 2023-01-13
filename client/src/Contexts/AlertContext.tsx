@@ -1,5 +1,4 @@
-import { type } from '@testing-library/user-event/dist/type';
-import { createContext, ReactElement, useState } from 'react';
+import { createContext, useState } from 'react';
 
 const ALERT_TIME = 3000;
 

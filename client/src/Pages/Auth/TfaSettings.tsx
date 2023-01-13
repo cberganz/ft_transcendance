@@ -1,6 +1,5 @@
 import * as React from "react"
 import axios from "axios"
-import { Navigate } from "react-router-dom";
 import { selectCurrentUser, selectCurrentToken, setCredentials } from '../../Hooks/authSlice'
 import { useSelector, useDispatch } from "react-redux"
 import useAlert from "../../Hooks/useAlert";
@@ -8,7 +7,6 @@ import {
 	Box,
 	Stack,
 	Typography,
-	ListItem,
 	Switch,
 } from '@mui/material';
 
@@ -21,26 +19,23 @@ interface Props {
 const TfaQrCode = (Props: Props) => {
 	const [qrCodeContent, setContent] = React.useState(<></>)
 
-	const getData = async () => axios({
-		withCredentials: true,
-		url: `http://localhost:3000/user/tfa/${Props.currentUser.id}`,
-		method: "GET",
-		headers:{
-			Authorization: `Bearer ${Props.token}`
-		}
-	})
-	.then((response: any) => {
-		console.log(response.data)
-		let img = response.data
-		setContent(
-			<img src={img}/>
-		)
-	})
-	.catch(() => Props.setAlert("Failed fetch QRcode", "error"))
-
 	React.useEffect(() => {
-		getData();
-	  }, []);
+		axios({
+			withCredentials: true,
+			url: `http://localhost:3000/user/tfa/${Props.currentUser.id}`,
+			method: "GET",
+			headers:{
+				Authorization: `Bearer ${Props.token}`
+			}
+		})
+		.then((response: any) => {
+			let img = response.data
+			setContent(
+				<img src={img} alt="two factor authentication qr code"/>
+			)
+		})
+		.catch(() => Props.setAlert("Failed fetch QRcode", "error"))	
+	  }, [Props]);
 
 	return qrCodeContent
 }
