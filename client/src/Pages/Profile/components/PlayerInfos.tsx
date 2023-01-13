@@ -6,9 +6,48 @@ import BadgeAvatar from './Badge'
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import { selectCurrentUser, selectCurrentToken } from '../../../Hooks/authSlice'
+import { useSelector } from "react-redux"
+import { useNavigate } from 'react-router-dom'
+import axios from "axios"
 
-export default class PlayerInfos extends React.Component<{ username: string, avatar: string }, {}> {
+function PlayerInfosHook(component: any) {
+	return function WrappedPlayerInfos(props: any) {
+		const user = useSelector(selectCurrentUser);
+		const token = useSelector(selectCurrentToken);
+		const navigate = useNavigate()
+		return (<PlayerInfos token={token} navigate={navigate} currentUser={user} username={props.username} avatar={props.avatar} />)
+	}
+}
+
+const IsFriend = (currentUser: any, id: number) => {
+	if (!currentUser.friends)
+		return false
+	for (let friend of currentUser.friends) {
+		if (id === friend.id)
+			return true;
+	}
+	return false;
+}
+
+async function addFriend(user1: string, user2: string | null, navigate: any) {
+	await axios.put("http://localhost:3000/user/addFriend/" + user1 + "/" + user2)
+		.then(response => response.data)
+		.catch(error => alert("Profile " + error.status + ": " + error.message))
+	navigate(0)
+}
+
+async function removeFriend(user1: string, user2: string | null, navigate: any) {
+	await axios.put("http://localhost:3000/user/removeFriend/" + user1 + "/" + user2)
+		.then(response => response.data)
+		.catch(error => alert("Profile " + error.status + ": " + error.message))
+	navigate(0)
+}
+
+class PlayerInfos extends React.Component<{ token: string, navigate: any, currentUser: any, username: string, avatar: string }, {}> {
+
 	render() {
+		const userId = new URLSearchParams(window.location.search).get("userId")
 		return (
 			<React.Fragment>
 				<CssBaseline />
@@ -41,14 +80,37 @@ export default class PlayerInfos extends React.Component<{ username: string, ava
 								<Typography variant="h4">
 									{this.props.username}
 								</Typography>
-								<Stack direction="row" spacing={1}>
-									<Box sx={{ minWidth: '105px', display: 'flex', alignItems: 'center' }}>
-										<Button variant="contained" size="small">Add friend</Button>
-									</Box>
-									<Box sx={{ minWidth: '130px', display: 'flex', alignItems: 'center' }}>
-										<Button variant="contained" size="small">Send message</Button>
-									</Box>
-		  						</Stack>
+								{	this.props.currentUser.id === Number(userId)
+									?	(<Stack direction="row" spacing={1} />)
+									:	!IsFriend(this.props.currentUser, Number(userId))
+									?	(<Stack direction="row" spacing={1}>
+											<Box sx={{ minWidth: '105px', display: 'flex', alignItems: 'center' }}>
+									 			<Button
+													variant="contained"
+													size="small"
+													onClick={() => {
+														addFriend(this.props.currentUser.id, userId, this.props.navigate)
+													}}
+												>
+													Add friend
+												</Button>
+									 		</Box>
+		  							 	</Stack>)
+									:	(<Stack direction="row" spacing={1}>
+											<Box sx={{ minWidth: '135px', display: 'flex', alignItems: 'center' }}>
+									 			<Button
+													variant="contained"
+													size="small"
+													color="error"
+													onClick={() => {
+														removeFriend(this.props.currentUser.id, userId, this.props.navigate)
+													}}
+												>
+													Remove friend
+												</Button>
+									 		</Box>
+		  							 	</Stack>)
+								}
 		  					</Stack>
 		  				</Box>
 		  			</Stack>
@@ -57,3 +119,5 @@ export default class PlayerInfos extends React.Component<{ username: string, ava
 		);
 	}
 }
+
+export default PlayerInfosHook(PlayerInfos);
