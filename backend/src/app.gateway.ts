@@ -6,8 +6,8 @@ import {
   OnGatewayDisconnect,
 } from "@nestjs/websockets";
 import { randomUUID } from "crypto";
-import { loggingMiddleware } from "nestjs-prisma";
 import { Socket, Server } from "socket.io";
+import { UserService } from "./user/user.service";
 
 interface userProfile {
   id: number;
@@ -22,11 +22,6 @@ interface userPair {
   id2: number;
 }
 
-// interface readyPair {
-// 	ready1: boolean,
-// 	ready2: boolean
-// }
-
 @WebSocketGateway({
   namespace: "/app",
   cors: {
@@ -37,12 +32,29 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private usersProfiles: userProfile[];
   private usersSockets: Map<Socket, number>;
   private usersInvited: Map<string, userPair>;
-  constructor() {
+  constructor(private readonly userService: UserService) {
     this.usersSockets = new Map<Socket, number>();
     this.usersProfiles = [];
     this.usersInvited = new Map<string, userPair>();
+    this.initUsersProfiles();
   }
 
+  async initUsersProfiles() {
+    let list = await this.userService.users({});
+    let profile: userProfile;
+    
+    for (let user of list) {
+      profile = {
+        id: user.id,
+        login: user.login,
+        username: user.username,
+        avatar: user.avatar,
+        status: "offline",
+      }
+      this.usersProfiles.push(profile);
+    }
+  }
+  
   @WebSocketServer() public server: Server;
 
   handleConnection(socket: Socket) {}
@@ -52,6 +64,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (profile.id === id) return profile;
     }
   }
+
 
   setProfile(data: {
     id: number;
