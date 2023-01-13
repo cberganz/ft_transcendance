@@ -165,12 +165,22 @@ export class GameGateway
       return;
     }
     client.leave(this.roomId(client));
-    for (const room of this.rooms) {
-      if (
-        room.players[0] === client.handshake.auth.id.toString() ||
-        room.players[1] === client.handshake.auth.id.toString()
-      ) {
-        this.rooms.splice(this.rooms.indexOf(room), 1);
+    if (this.isSpectator(client)) {
+      for (const room of this.rooms) {
+        if (room.spectators.includes(client.handshake.auth.id.toString())) {
+          room.spectators.splice(
+            room.spectators.indexOf(client.handshake.auth.id.toString(), 1)
+          );
+        }
+      }
+    } else {
+      for (const room of this.rooms) {
+        if (
+          room.players[0] === client.handshake.auth.id.toString() ||
+          room.players[1] === client.handshake.auth.id.toString()
+        ) {
+          this.rooms.splice(this.rooms.indexOf(room), 1);
+        }
       }
     }
     this.logRoom();
@@ -395,7 +405,7 @@ export class GameGateway
   }
 
   @SubscribeMessage("spectateGameServer")
-  handleSpectateGame(client: Socket, id: string): void {
+  handleSpectateGamee(client: Socket, id: string): void {
     let roomToSpectate = "";
 
     for (const room of this.rooms) {
@@ -407,6 +417,21 @@ export class GameGateway
       client.handshake.auth.id.toString()
     );
     client.join(roomToSpectate);
+    this.logRoom();
+  }
+
+  @SubscribeMessage("updateSpectatorServer")
+  handleUpdateSpectator(client: Socket, status: boolean): void {
+    if (status === true) {
+      return;
+      this.joinRoom(client);
+      if (this.roomIsFull(client)) {
+        this.server.to(this.roomId(client)).emit("updateQueueClient");
+      }
+    } else {
+      this.server.to(client.id).emit("updateSpectatorClient");
+      this.leaveRoom(client);
+    }
   }
 
   findRoomById(id: string): number {
