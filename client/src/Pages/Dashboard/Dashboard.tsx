@@ -1,5 +1,4 @@
 import * as React from "react"
-import { useUpdateUserMutation } from "../../Api/User/userApiSlice"
 import { selectCurrentUser } from '../../Hooks/authSlice'
 import ConnectedUsers from './ConnectedUsers';
 import { Avatar } from "@mui/material";

@@ -34,7 +34,6 @@ import { useNavigate } from "react-router-dom";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
 
 interface PropsUsername {
@@ -45,6 +44,8 @@ function LogoutButton() {
   const [logoutUser] = useLogoutMutation();
   const [token, setCookie, removeCookie] = useCookies();
 
+  void token
+  void setCookie
   const handleLogout = (e: any) => {
     removeCookie("jwt", { path: "/" });
     logoutUser({});
