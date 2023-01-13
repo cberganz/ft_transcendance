@@ -80,6 +80,26 @@ export class UserService {
 		});
 	}
 
+	async addFriendship(
+		user1: Prisma.UserWhereUniqueInput,
+		user2: Prisma.UserWhereUniqueInput
+	): Promise<User> {
+		return await this.prisma.user.update({
+			where: user1,
+			data: {friends: {connect: [user2]}},
+		});
+	}
+
+	async removeFriendship(
+		user1: Prisma.UserWhereUniqueInput,
+		user2: Prisma.UserWhereUniqueInput
+	): Promise<User> {
+		return await this.prisma.user.update({
+			where: user1,
+			data: {friends: {disconnect: [user2]}},
+		});
+	}
+
 	async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
 		return this.prisma.user.delete({
 			where,

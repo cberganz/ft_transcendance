@@ -39,15 +39,16 @@ function EnterQueue({
 
   return (
     <>
-      <LoadingButton
-        variant="contained"
-        loading={queueStatus}
-        size="large"
-        onClick={handleClick}
-        // className="btn"
-      >
-        FIND MATCH
-      </LoadingButton>
+      <div className="button">
+        <LoadingButton
+          variant="contained"
+          loading={queueStatus}
+          size="large"
+          onClick={handleClick}
+        >
+          FIND MATCH
+        </LoadingButton>
+      </div>
       {queueStatus && <p>Waiting for another player...</p>}
     </>
   );

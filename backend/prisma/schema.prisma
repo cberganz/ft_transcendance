@@ -16,7 +16,6 @@ model User {
   TFASecret    String?
   otpauthUrl   String?
   isTFAEnabled Boolean		@default(false)
-  friends      Friendship[] @relation("friendship")
   blacklisted  Blacklist[]  @relation("blacklisted")
   messages     Message[]
   channels     Channel[]    @relation("channel::members")
@@ -24,7 +23,8 @@ model User {
   owner_of     Channel[]
   p1_games     Game[]       @relation("player1")
   p2_games     Game[]       @relation("player2")
-  friendship   Friendship[]
+  friends     User[]       @relation("Friendship")
+  friendsRel  User[]       @relation("Friendship")
   blacklist    Blacklist[]
 }
 
@@ -61,16 +61,6 @@ model Message {
   authorId  Int
   date      DateTime @default(now())
   content   String
-}
-
-model Friendship {
-  id       Int      @id @default(autoincrement())
-  user1    User     @relation("friendship", fields: [user1_id], references: [id])
-  user1_id Int
-  user2    User     @relation(fields: [user2_id], references: [id])
-  user2_id Int
-  date     DateTime @default(now())
-  approved Boolean  @default(false)
 }
 
 model Blacklist {
