@@ -35,15 +35,36 @@ export class GameGateway
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger("GameGateway");
   private rooms: Array<Room> = [];
+  private clientList: Map<string, Socket> = new Map<string, Socket>();
+  private players: Array<string> = [];
 
   afterInit(server: Server) {
     this.logger.log("Init");
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
+  handleClient(client: Socket) {
+    console.log(this.clientList.get(client.handshake.auth.id.toString()));
+    if (this.clientList.get(client.handshake.auth.id.toString())) {
+      this.server
+        .to(this.clientList.get(client.handshake.auth.id.toString()).id)
+        .disconnectSockets();
+      this.clientList.delete(client.handshake.auth.id.toString());
+    }
+    this.clientList.set(client.handshake.auth.id.toString(), client);
+    console.log(this.clientList.keys());
+  }
+
+  async handleConnection(client: Socket, ...args: any[]) {
+    // console.log(this.server);
     this.logger.log(
       `Client connected: ID ${client.handshake.auth.id.toString()}`
     );
+    if (!this.players.includes(client.handshake.auth.id.toString())) {
+      this.players.push(client.handshake.auth.id.toString());
+    }
+    const sockets = await this.server.fetchSockets();
+    console.log(sockets.length);
+    // this.handleClient(client);
     this.reconnectRoom(client);
     if (this.findCurrentRoom(client) === -1) {
       return;
@@ -432,6 +453,11 @@ export class GameGateway
       this.server.to(client.id).emit("updateSpectatorClient");
       this.leaveRoom(client);
     }
+  }
+
+  @SubscribeMessage("testServer")
+  handleTest(client: Socket) {
+    this.server.to(client.id).emit("testClient");
   }
 
   findRoomById(id: string): number {

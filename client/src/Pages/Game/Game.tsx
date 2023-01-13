@@ -12,6 +12,8 @@ import { FormControlLabel, FormGroup } from "@mui/material";
 import Switch from "@mui/material/Switch";
 import axios from "axios";
 import { usersStatusSocket } from "../../Router/Router";
+import socket from "./gameSocket";
+import useSocket from "./gameSocket";
 
 interface gameInfo {
   player1Id?: number;
@@ -71,246 +73,242 @@ function Game() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
 
-  const socket: Socket = io("http://localhost:3000/game", {
-    auth: {
-      id: useSelector(selectCurrentUser).id,
-    },
+  //   const userId = useSelector(selectCurrentUser).id;
+  const token = useSelector(selectCurrentToken);
+  const socket = useSocket();
+  //   const socket: Socket = io("http://localhost:3000/game", {
+  //     auth: {
+  //       id: userId,
+  //     },
+  //   });
+
+  //   console.log(socket);
+  //   socket.emit("testServer");
+  socket.on("testClient", () => {
+    console.log("CONNECT");
   });
 
-  console.log(socket);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case "w": {
-          socket.emit("updateDirectionServer", "u");
-          break;
-        }
-        case "s": {
-          socket.emit("updateDirectionServer", "d");
-          break;
-        }
+  const handleKeyDown = (e: KeyboardEvent) => {
+    switch (e.key) {
+      case "w": {
+        socket.emit("updateDirectionServer", "u");
+        break;
       }
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (
-        e.key === "w" &&
-        (p1.getDirection() === "u" || p2.getDirection() === "u")
-      ) {
-        socket.emit("updateDirectionServer", "n");
-      } else if (
-        e.key === "s" &&
-        (p1.getDirection() === "d" || p2.getDirection() === "d")
-      ) {
-        socket.emit("updateDirectionServer", "n");
+      case "s": {
+        socket.emit("updateDirectionServer", "d");
+        break;
       }
-    };
-
-    const handleBlur = () => {
-      socket.emit("updateDirectionServer", "n");
-    };
-
-    const updatePlayerDirection = (val: string) => {
-      switch (val) {
-        case "u1": {
-          p1.setDirection("u");
-          break;
-        }
-        case "d1": {
-          p1.setDirection("d");
-          break;
-        }
-        case "n1": {
-          p1.setDirection("n");
-          break;
-        }
-        case "u2": {
-          p2.setDirection("u");
-          break;
-        }
-        case "d2": {
-          p2.setDirection("d");
-          break;
-        }
-        case "n2": {
-          p2.setDirection("n");
-          break;
-        }
-      }
-    };
-
-    const updateBallDir = (arr: Array<number>) => {
-      ball.setDirectionX(arr[0]);
-      ball.setDirectionY(arr[1]);
-    };
-
-    const updatePlayerPos = (param: { pos: number; id: number }) => {
-      if (param.id === 1) {
-        p1.setY(param.pos * heightRef.current);
-      } else {
-        p2.setY(param.pos * heightRef.current);
-      }
-    };
-
-    const updateBallPos = (param: { posX: number; posY: number }) => {
-      ball.setX(param.posX * widthRef.current);
-      ball.setY(param.posY * heightRef.current);
-    };
-
-    const updateScore = (param: { playerNumber: number; score: number }) => {
-      if (param.playerNumber === 1) {
-        p1.setScore(param.score);
-      } else {
-        p2.setScore(param.score);
-      }
-    };
-
-    const updateReadyListener = (value: boolean) => {
-      if (value === true && ready === false) {
-        setReady(true);
-        usersStatusSocket.emit("updateStatus", "in game");
-      } else if (value === false && ready === true) {
-        resetGame();
-      }
-    };
-
-    const reconnectNotStart = () => {
-      if (!enterQueue) {
-        setEnterQueue(true);
-      }
-    };
-
-    const reconnectStart = () => {
-      if (!enterQueue) {
-        setEnterQueue(true);
-      }
-      if (!startButton) {
-        setStartButton(true);
-      }
-    };
-
-    const reconnectReady = () => {
-      if (!enterQueue) {
-        setEnterQueue(true);
-      }
-      if (!startButton) {
-        setStartButton(true);
-      }
-      if (!ready) {
-        setReady(true);
-      }
-    };
-
-    const updateAlreadyStarted = () => {
-      startRef.current = true;
-    };
-
-    const reconnectCustom = (custom: boolean) => {
-      setCustomGame(custom);
-    };
-
-    const handleEndGame = (param: {
-      p1Id: number;
-      p2Id: number;
-      isp1: boolean;
-    }) => {
-      if (!param.isp1) {
-        return;
-      }
-      gameInfo.player1Id = param.p1Id;
-      gameInfo.player2Id = param.p2Id;
-      gameInfo.player1_score = p1.getScore();
-      gameInfo.player2_score = p2.getScore();
-      if (gameInfo.player1_score === 10) {
-        gameInfo.winner = gameInfo.player1Id;
-      } else {
-        gameInfo.winner = gameInfo.player2Id;
-      }
-      p1.setScore(0);
-      p2.setScore(0);
-
-      axios
-        .post("http://localhost:3000/game/", gameInfo, {
-          withCredentials: true,
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => console.log(response))
-        .catch((error) => console.log(error));
-
-      socket.emit("updateScoreServer", {
-        playerNumber: 1,
-        score: 0,
-      });
-      socket.emit("updateScoreServer", {
-        playerNumber: 2,
-        score: 0,
-      });
-    };
-
-    const handleInvitationGame = (id: string) => {
-      setEnterQueue(false);
-      setQueueStatus(false);
-      setStartButton(false);
-      setReady(false);
-      setWin(0);
-      resetGame();
-      socket.emit("invitationGameServer", id);
-      usersStatusSocket.emit("deleteInvitation");
-    };
-
-    const handleSpectateGame = (id: string) => {
-      setEnterQueue(true);
-      setQueueStatus(true);
-      setStartButton(true);
-      setReady(true);
-      setSpectator(true);
-      socket.emit("spectateGameServer", id);
-    };
-
-    if (!spectator) {
-      window.addEventListener("keydown", handleKeyDown);
-      window.addEventListener("keyup", handleKeyUp);
-      window.addEventListener("blur", handleBlur);
     }
-    socket.on("updateDirectionClient", updatePlayerDirection);
-    socket.on("updateBallDirClient", updateBallDir);
-    socket.on("updatePlayerPosClient", updatePlayerPos);
-    socket.on("updateBallPosClient", updateBallPos);
-    socket.on("updateScoreClient", updateScore);
-    socket.on("updateReadyClient", updateReadyListener);
-    socket.on("reconnectNotStartClient", reconnectNotStart);
-    socket.on("reconnectStartClient", reconnectStart);
-    socket.on("reconnectReadyClient", reconnectReady);
-    socket.on("updateAlreadyStarted", updateAlreadyStarted);
-    socket.on("reconnectCustomClient", reconnectCustom);
-    socket.on("endGameClient", handleEndGame);
-    usersStatusSocket.on("invitationGameClient", handleInvitationGame);
-    usersStatusSocket.on("spectateGameClient", handleSpectateGame);
+  };
 
-    return () => {
-      if (!spectator) {
-        window.removeEventListener("keydown", handleKeyDown);
-        window.removeEventListener("keyup", handleKeyUp);
-        window.removeEventListener("blur", handleBlur);
+  const handleKeyUp = (e: KeyboardEvent) => {
+    if (
+      e.key === "w" &&
+      (p1.getDirection() === "u" || p2.getDirection() === "u")
+    ) {
+      socket.emit("updateDirectionServer", "n");
+    } else if (
+      e.key === "s" &&
+      (p1.getDirection() === "d" || p2.getDirection() === "d")
+    ) {
+      socket.emit("updateDirectionServer", "n");
+    }
+  };
+
+  const handleBlur = () => {
+    socket.emit("updateDirectionServer", "n");
+  };
+
+  const updatePlayerDirection = (val: string) => {
+    switch (val) {
+      case "u1": {
+        p1.setDirection("u");
+        break;
       }
-      socket.off("updateDirectionClient", updatePlayerDirection);
-      socket.off("updateBallDirClient", updateBallDir);
-      socket.off("updatePlayerPosClient", updatePlayerPos);
-      socket.off("updateBallPosClient", updateBallPos);
-      socket.off("updateScoreClient", updateScore);
-      socket.off("updateReadyClient", updateReadyListener);
-      socket.off("reconnectNotStartClient", reconnectNotStart);
-      socket.off("reconnectStartClient", reconnectStart);
-      socket.off("reconnectReadyClient", reconnectReady);
-      socket.off("updateAlreadyStarted", updateAlreadyStarted);
-      socket.off("reconnectCustomClient", reconnectCustom);
-      socket.off("endGameClient", handleEndGame);
-      usersStatusSocket.off("invitationGameClient", handleInvitationGame);
-      usersStatusSocket.off("spectateGameClient", handleSpectateGame);
-      socket.disconnect();
-    };
-  });
+      case "d1": {
+        p1.setDirection("d");
+        break;
+      }
+      case "n1": {
+        p1.setDirection("n");
+        break;
+      }
+      case "u2": {
+        p2.setDirection("u");
+        break;
+      }
+      case "d2": {
+        p2.setDirection("d");
+        break;
+      }
+      case "n2": {
+        p2.setDirection("n");
+        break;
+      }
+    }
+  };
+
+  const updateBallDir = (arr: Array<number>) => {
+    ball.setDirectionX(arr[0]);
+    ball.setDirectionY(arr[1]);
+  };
+
+  const updatePlayerPos = (param: { pos: number; id: number }) => {
+    if (param.id === 1) {
+      p1.setY(param.pos * heightRef.current);
+    } else {
+      p2.setY(param.pos * heightRef.current);
+    }
+  };
+
+  const updateBallPos = (param: { posX: number; posY: number }) => {
+    ball.setX(param.posX * widthRef.current);
+    ball.setY(param.posY * heightRef.current);
+  };
+
+  const updateScore = (param: { playerNumber: number; score: number }) => {
+    if (param.playerNumber === 1) {
+      p1.setScore(param.score);
+    } else {
+      p2.setScore(param.score);
+    }
+  };
+
+  const updateReadyListener = (value: boolean) => {
+    if (value === true && ready === false) {
+      setReady(true);
+      usersStatusSocket.emit("updateStatus", "in game");
+    } else if (value === false && ready === true) {
+      resetGame();
+    }
+  };
+
+  const reconnectNotStart = () => {
+    if (!enterQueue) {
+      setEnterQueue(true);
+    }
+  };
+
+  const reconnectStart = () => {
+    if (!enterQueue) {
+      setEnterQueue(true);
+    }
+    if (!startButton) {
+      setStartButton(true);
+    }
+  };
+
+  const reconnectReady = () => {
+    if (!enterQueue) {
+      setEnterQueue(true);
+    }
+    if (!startButton) {
+      setStartButton(true);
+    }
+    if (!ready) {
+      setReady(true);
+    }
+  };
+
+  const updateAlreadyStarted = () => {
+    startRef.current = true;
+  };
+
+  const reconnectCustom = (custom: boolean) => {
+    setCustomGame(custom);
+  };
+
+  const handleEndGame = (param: {
+    p1Id: number;
+    p2Id: number;
+    isp1: boolean;
+  }) => {
+    if (!param.isp1) {
+      return;
+    }
+    gameInfo.player1Id = param.p1Id;
+    gameInfo.player2Id = param.p2Id;
+    gameInfo.player1_score = p1.getScore();
+    gameInfo.player2_score = p2.getScore();
+    if (gameInfo.player1_score === 10) {
+      gameInfo.winner = gameInfo.player1Id;
+    } else {
+      gameInfo.winner = gameInfo.player2Id;
+    }
+    p1.setScore(0);
+    p2.setScore(0);
+
+    axios
+      .post("http://localhost:3000/game/", gameInfo, {
+        withCredentials: true,
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => console.log(response))
+      .catch((error) => console.log(error));
+
+    socket.emit("updateScoreServer", {
+      playerNumber: 1,
+      score: 0,
+    });
+    socket.emit("updateScoreServer", {
+      playerNumber: 2,
+      score: 0,
+    });
+  };
+
+  const handleInvitationGame = (id: string) => {
+    setEnterQueue(false);
+    setQueueStatus(false);
+    setStartButton(false);
+    setReady(false);
+    setWin(0);
+    resetGame();
+    socket.emit("invitationGameServer", id);
+    usersStatusSocket.emit("deleteInvitation");
+  };
+
+  const handleSpectateGame = (userToSpectateId: string) => {
+    setEnterQueue(true);
+    setQueueStatus(true);
+    setStartButton(true);
+    setReady(true);
+    setSpectator(true);
+    socket.emit("spectateGameServer", userToSpectateId);
+  };
+
+  if (!spectator) {
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("blur", handleBlur);
+  }
+  socket
+    .off("updateDirectionClient")
+    .on("updateDirectionClient", updatePlayerDirection);
+  socket.off("updateBallDirClient").on("updateBallDirClient", updateBallDir);
+  socket
+    .off("updatePlayerPosClient")
+    .on("updatePlayerPosClient", updatePlayerPos);
+  socket.off("updateBallPosClient").on("updateBallPosClient", updateBallPos);
+  socket.off("updateScoreClient").on("updateScoreClient", updateScore);
+  socket.off("updateReadyClient").on("updateReadyClient", updateReadyListener);
+  socket
+    .off("reconnectNotStartClient")
+    .on("reconnectNotStartClient", reconnectNotStart);
+  socket.off("reconnectStartClient").on("reconnectStartClient", reconnectStart);
+  socket.off("reconnectReadyClient").on("reconnectReadyClient", reconnectReady);
+  socket
+    .off("updateAlreadyStarted")
+    .on("updateAlreadyStarted", updateAlreadyStarted);
+  socket
+    .off("reconnectCustomClient")
+    .on("reconnectCustomClient", reconnectCustom);
+  socket.off("endGameClient").on("endGameClient", handleEndGame);
+  usersStatusSocket
+    .off("invitationGameClient")
+    .on("invitationGameClient", handleInvitationGame);
+  usersStatusSocket
+    .off("spectateGameClient")
+    .on("spectateGameClient", handleSpectateGame);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -594,16 +592,16 @@ function Game() {
     }
     startRef.current = false;
     timerRef.current && clearTimeout(timerRef.current);
-    // p1.setScore(0);
-    // p2.setScore(0);
-    // socket.emit("updateScoreServer", {
-    //   playerNumber: 1,
-    //   score: 0,
-    // });
-    // socket.emit("updateScoreServer", {
-    //   playerNumber: 2,
-    //   score: 0,
-    // });
+    p1.setScore(0);
+    p2.setScore(0);
+    socket.emit("updateScoreServer", {
+      playerNumber: 1,
+      score: 0,
+    });
+    socket.emit("updateScoreServer", {
+      playerNumber: 2,
+      score: 0,
+    });
     p1.resetPosition();
     p2.resetPosition();
   }
@@ -633,11 +631,15 @@ function Game() {
     socket.emit("updateReadyServer", ready);
   }
 
-  const token = useSelector(selectCurrentToken);
-
   async function postGame() {
     socket.emit("endGameServer");
   }
+
+  useEffect(() => {
+    return () => {
+      //   socket.disconnect();
+    };
+  }, []);
 
   return (
     <div className={"gameContainer"}>
