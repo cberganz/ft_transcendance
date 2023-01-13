@@ -53,6 +53,7 @@ services:
       - postgres
     volumes:
       - ./backend/src/:/app/src/
+      - ./backend/prisma/:/app/prisma/
       - db-volume:/app/upload/avatar
 
   frontend:
