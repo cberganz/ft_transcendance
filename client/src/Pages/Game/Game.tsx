@@ -77,6 +77,8 @@ function Game() {
     },
   });
 
+  console.log(socket);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
@@ -648,7 +650,7 @@ function Game() {
               queueStatus={queueStatus}
               setQueueStatus={setQueueStatus}
             />
-            {queueStatus && !spectator && (
+            {queueStatus && (
               <LeaveButton
                 setEnterQueue={setEnterQueue}
                 setQueueStatus={setQueueStatus}
@@ -657,6 +659,7 @@ function Game() {
                 setWin={setWin}
                 socket={socket}
                 resetGame={resetGame}
+                spectator={spectator}
               />
             )}
           </>
@@ -685,24 +688,23 @@ function Game() {
                 />
               </FormGroup>
             </div>
-            {!spectator && (
-              <LeaveButton
-                setEnterQueue={setEnterQueue}
-                setQueueStatus={setQueueStatus}
-                setStartButton={setStartButton}
-                setReady={setReady}
-                setWin={setWin}
-                socket={socket}
-                resetGame={resetGame}
-              />
-            )}
+            <LeaveButton
+              setEnterQueue={setEnterQueue}
+              setQueueStatus={setQueueStatus}
+              setStartButton={setStartButton}
+              setReady={setReady}
+              setWin={setWin}
+              socket={socket}
+              resetGame={resetGame}
+              spectator={spectator}
+            />
           </>
         ) : null}
         <canvas
           className={`${!ready && "display-none"}`}
           ref={canvasRef}
         ></canvas>
-        {startButton && ready && !spectator && (
+        {startButton && ready && (
           <LeaveButton
             setEnterQueue={setEnterQueue}
             setQueueStatus={setQueueStatus}
@@ -711,6 +713,7 @@ function Game() {
             setWin={setWin}
             socket={socket}
             resetGame={resetGame}
+            spectator={spectator}
           />
         )}
       </div>

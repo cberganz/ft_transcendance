@@ -92,7 +92,7 @@ export default function ConnectedUsers(props: any) {
       },
     },
   ];
-
+  
   return (
     <div>
       <Stack>

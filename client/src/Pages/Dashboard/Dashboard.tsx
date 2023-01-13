@@ -24,6 +24,7 @@ interface allUsers {
 	playgame: string,
 }
 
+
 export default function Dashboard() {
 	const navigate = useNavigate();
 	const currentUser = useSelector(selectCurrentUser)
@@ -36,9 +37,9 @@ export default function Dashboard() {
 	
 	const socketUpdateUsersStatus = (usersStatusList: userProfile[]) => {
 		for (let i = 0; i < usersStatusList.length; i++) {
-			if (usersStatusList[i].id === currentUser.id) {
+			if (usersStatusList[i].id === undefined || usersStatusList[i].id === currentUser.id) {
 				usersStatusList.splice(i, 1);
-				break ;
+				i--;
 			}
 		}
 		setUserList(usersStatusList);
