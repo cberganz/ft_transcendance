@@ -11,6 +11,7 @@ function LeaveButton({
   setWin,
   socket,
   resetGame,
+  spectator,
 }: {
   setEnterQueue: (value: boolean) => void;
   setQueueStatus: (value: boolean) => void;
@@ -19,6 +20,7 @@ function LeaveButton({
   setWin: (value: number) => void;
   socket: Socket;
   resetGame: () => void;
+  spectator: boolean;
 }) {
   useEffect(() => {
     const updateQueue = () => {
@@ -30,15 +32,28 @@ function LeaveButton({
       resetGame();
     };
 
+    const updateSpectator = () => {
+      setEnterQueue(false);
+      setQueueStatus(false);
+      setStartButton(false);
+      setReady(false);
+    };
+
     socket.on("updateQueueClient", updateQueue);
+    socket.on("updateSpectatorClient", updateSpectator);
 
     return () => {
       socket.off("updateQueueClient", updateQueue);
+      socket.off("updateSpectatorClient", updateSpectator);
     };
   });
 
-  function handleClick() {
+  function handleClickPlayer() {
     socket.emit("updateQueueServer", false);
+  }
+
+  function handleClickSpectator() {
+    socket.emit("updateSpectatorServer", false);
   }
 
   return (
@@ -47,7 +62,7 @@ function LeaveButton({
         variant="contained"
         size="large"
         color="error"
-        onClick={handleClick}
+        onClick={spectator ? handleClickSpectator : handleClickPlayer}
       >
         LEAVE
       </Button>
