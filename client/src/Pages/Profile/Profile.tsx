@@ -28,6 +28,16 @@ export default class Profile extends React.Component {
 			.then(Profile => { this.setState({ data: Profile }); })
 			.catch(error => alert("Profile " + error.status + ": " + error.message))
 	}
+
+	async componentDidUpdate(prevProps: any, prevState: any) {
+		const userId = new URLSearchParams(window.location.search).get("userId")
+		if(userId !== this.state.data.id){
+			await axios.get("http://localhost:3000/user/stats/" + userId)
+				.then(response => response.data)
+				.then(Profile => { this.setState({ data: Profile }); })
+				.catch(error => alert("Profile " + error.status + ": " + error.message))
+		}
+	}
 	
 	render() {
 		return (
