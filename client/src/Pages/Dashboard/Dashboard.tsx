@@ -80,6 +80,8 @@ export default function Dashboard() {
 						<h3>{currentUser.username}</h3>
 						<br />
 					</div>
+
+					{currentUser.friends.length ? 
 					<div className="friendList">
 						<TableContainer component={Paper}>
 							<Table>
@@ -111,7 +113,8 @@ export default function Dashboard() {
 							</Table>
 						</TableContainer>
 						<br />
-					</div>
+					</div> : null}
+
 				</div>
 
 				<div className="contentCol">
