@@ -14,6 +14,7 @@ import { selectCurrentUser } from '../Hooks/authSlice'
 import { selectCurrentToken } from '../Hooks/authSlice'
 import { useSelector } from "react-redux"
 import io from "socket.io-client";
+import AlertPopup from '../Components/AlertPopup';
 
 export const usersStatusSocket = io("http://localhost:3000/app");
 
@@ -31,6 +32,7 @@ function	OutletRoute() {
 		<div>
 			<PrimarySearchAppBar />
 			<Outlet/>
+			<AlertPopup/>
 		</div>
 	)
 }
