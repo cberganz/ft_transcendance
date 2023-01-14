@@ -16,7 +16,7 @@ function PlayerInfosHook(component: any) {
 		const user = useSelector(selectCurrentUser);
 		const token = useSelector(selectCurrentToken);
 		const navigate = useNavigate()
-		return (<PlayerInfos token={token} navigate={navigate} currentUser={user} username={props.username} avatar={props.avatar} />)
+		return (<PlayerInfos token={token} navigate={navigate} currentUser={user} username={props.username} avatar={props.avatar} userId={props.userId} />)
 	}
 }
 
@@ -44,10 +44,20 @@ async function removeFriend(user1: string, user2: string | null, navigate: any) 
 	navigate(0)
 }
 
-class PlayerInfos extends React.Component<{ token: string, navigate: any, currentUser: any, username: string, avatar: string }, {}> {
+class PlayerInfos extends React.Component<{ token: string, navigate: any, currentUser: any, userId: string, username: string, avatar: string }, {}> {
+
+	state = {
+		userId: this.props.userId
+	};
+
+	async componentDidUpdate(prevProps: any) {
+		if (prevProps.userId !== this.props.userId) {
+			this.props.navigate(0)
+			this.props.navigate(0)
+		}
+	}
 
 	render() {
-		const userId = new URLSearchParams(window.location.search).get("userId")
 		return (
 			<React.Fragment>
 				<CssBaseline />
@@ -73,23 +83,23 @@ class PlayerInfos extends React.Component<{ token: string, navigate: any, curren
 						spacing={2}
 					>
 						<Box sx={{ minWidth: '100%', minHeight: '100%', width: '80%', height: '80%' }}>
-					  		<BadgeAvatar username={this.props.username} avatar={this.props.avatar} />
+					  		<BadgeAvatar username={this.props.username} avatar={this.props.avatar} userId={this.state.userId} />
 					  	</Box>
 						<Box sx={{ display: 'flex', alignItems: 'center' }}>
 		  					<Stack direction="column" spacing={1}>
 								<Typography variant="h4">
 									{this.props.username}
 								</Typography>
-								{	this.props.currentUser.id === Number(userId)
+								{	this.props.currentUser.id === Number(this.state.userId)
 									?	(<Stack direction="row" spacing={1} />)
-									:	!IsFriend(this.props.currentUser, Number(userId))
+									:	!IsFriend(this.props.currentUser, Number(this.state.userId))
 									?	(<Stack direction="row" spacing={1}>
 											<Box sx={{ minWidth: '105px', display: 'flex', alignItems: 'center' }}>
 									 			<Button
 													variant="contained"
 													size="small"
 													onClick={() => {
-														addFriend(this.props.currentUser.id, userId, this.props.navigate)
+														addFriend(this.props.currentUser.id, this.state.userId, this.props.navigate)
 													}}
 												>
 													Add friend
@@ -103,7 +113,7 @@ class PlayerInfos extends React.Component<{ token: string, navigate: any, curren
 													size="small"
 													color="error"
 													onClick={() => {
-														removeFriend(this.props.currentUser.id, userId, this.props.navigate)
+														removeFriend(this.props.currentUser.id, this.state.userId, this.props.navigate)
 													}}
 												>
 													Remove friend

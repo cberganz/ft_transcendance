@@ -7,6 +7,7 @@ import { usersStatusSocket } from '../../../Router/Router'
 interface Props {
 	username: string;
 	avatar: string;
+	userId: string;
 }
 
 let userStatus = "offline"
@@ -48,10 +49,9 @@ export default class BadgeAvatar extends React.Component<Props, {}> {
 	};
 
 	socketUpdateUser(user: any) {
-		const userId = new URLSearchParams(window.location.search).get("userId")
 		let data = "offline"
 		for (let obj of user) {
-			if (obj.id === Number(userId))
+			if (obj.id === Number(this.props.userId))
 				data = obj.status
 		}
 		userStatus = data;
