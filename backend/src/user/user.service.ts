@@ -97,20 +97,28 @@ export class UserService {
 		user1: Prisma.UserWhereUniqueInput,
 		user2: Prisma.UserWhereUniqueInput
 	): Promise<User> {
-		return await this.prisma.user.update({
+		let user = await this.prisma.user.update({
 			where: user1,
 			data: {friends: {connect: [user2]}},
+			include: {friends: true}
 		});
+		delete user.TFASecret;
+		delete user.otpauthUrl;
+		return user;
 	}
 
 	async removeFriendship(
 		user1: Prisma.UserWhereUniqueInput,
 		user2: Prisma.UserWhereUniqueInput
 	): Promise<User> {
-		return await this.prisma.user.update({
+		let user = await this.prisma.user.update({
 			where: user1,
 			data: {friends: {disconnect: [user2]}},
+			include: {friends: true},
 		});
+		delete user.TFASecret;
+		delete user.otpauthUrl;
+		return user;
 	}
 
 	async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {

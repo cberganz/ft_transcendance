@@ -6,8 +6,8 @@ import BadgeAvatar from './Badge'
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { selectCurrentUser, selectCurrentToken } from '../../../Hooks/authSlice'
-import { useSelector } from "react-redux"
+import { selectCurrentUser, selectCurrentToken, setCredentials } from '../../../Hooks/authSlice'
+import { useSelector, useDispatch } from "react-redux"
 import { useNavigate } from 'react-router-dom'
 import axios from "axios"
 
@@ -15,8 +15,9 @@ function PlayerInfosHook(component: any) {
 	return function WrappedPlayerInfos(props: any) {
 		const user = useSelector(selectCurrentUser);
 		const token = useSelector(selectCurrentToken);
-		const navigate = useNavigate()
-		return (<PlayerInfos token={token} navigate={navigate} currentUser={user} username={props.username} avatar={props.avatar} userId={props.userId} />)
+		const navigate = useNavigate();
+		const dispatch = useDispatch();
+		return (<PlayerInfos dispatch={dispatch} token={token} navigate={navigate} currentUser={user} username={props.username} avatar={props.avatar} userId={props.userId} />)
 	}
 }
 
@@ -30,7 +31,7 @@ const IsFriend = (currentUser: any, id: number) => {
 	return false;
 }
 
-class PlayerInfos extends React.Component<{ token: string, navigate: any, currentUser: any, userId: string, username: string, avatar: string }, {}> {
+class PlayerInfos extends React.Component<{ dispatch: any, token: string, navigate: any, currentUser: any, userId: string, username: string, avatar: string }, {}> {
 
 	state = {
 		userId: this.props.userId,
@@ -43,18 +44,30 @@ class PlayerInfos extends React.Component<{ token: string, navigate: any, curren
 		}
 	}
 
-	async addFriend() {
+	async addFriend(dispatch: any, token: string) {
 		await axios("http://localhost:3000/user/addFriend/" + this.props.currentUser.id + "/" + this.state.userId,
 	        {method:'put', withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
-			.then(response => response.data)
+			.then(response => {
+				dispatch(setCredentials({
+					user: response.data,
+					accessToken: token
+				}))
+				return (response.data)
+			})
 			.catch(error => alert("Profile " + error.status + ": " + error.message))
 		this.setState({ friend: true })
 	}
 	
-	async removeFriend() {
+	async removeFriend(dispatch: any, token: string) {
 		await axios("http://localhost:3000/user/removeFriend/" + this.props.currentUser.id + "/" + this.state.userId,
 	        {method:'put', withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
-			.then(response => response.data)
+			.then(response => {
+				dispatch(setCredentials({
+					user: response.data,
+					accessToken: token
+				}))
+				return (response.data)
+			})
 			.catch(error => alert("Profile " + error.status + ": " + error.message))
 		this.setState({ friend: false })
 	}
@@ -101,7 +114,7 @@ class PlayerInfos extends React.Component<{ token: string, navigate: any, curren
 													variant="contained"
 													size="small"
 													onClick={() => {
-														this.addFriend()
+														this.addFriend(this.props.dispatch, this.props.token);
 													}}
 												>
 													Add friend
@@ -115,7 +128,7 @@ class PlayerInfos extends React.Component<{ token: string, navigate: any, curren
 													size="small"
 													color="error"
 													onClick={() => {
-														this.removeFriend()
+														this.removeFriend(this.props.dispatch, this.props.token)
 													}}
 												>
 													Remove friend
