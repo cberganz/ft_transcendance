@@ -194,21 +194,23 @@ export class UserController {
     @Param("id") id: string,
     @Body() body: updateUserDto
   ): Promise<UserMode1> {
-    if (body.username.indexOf(" ") !== -1) throw new BadRequestException();
-    const user = await this.userService.user({ id: Number(id) });
-    const userWithSameUsername = await this.userService.user({
-      username: String(body.username),
-    });
-    if (userWithSameUsername && userWithSameUsername.id !== Number(id))
-      throw new UnprocessableEntityException();
-    user.username = body.username;
-    return this.userService.updateUser({
-      where: {
-        id: Number(id),
-      },
-      data: {
-        username: user.username,
-      },
+		if (body.username.indexOf(" ") !== -1)
+			throw new BadRequestException()
+		const user = await this.userService.user({ id: Number(id) });
+		console.log("-----------------------------------------")
+		const userWithSameUsername = await this.userService.user({
+			username: String(body.username),
+		});
+		if (userWithSameUsername && userWithSameUsername.id !== Number(id))
+			throw new UnprocessableEntityException();
+		user.username = body.username;
+		return this.userService.updateUser({
+		where: {
+			id: Number(id),
+		},
+		data: {
+			username: user.username,
+		},
     });
   }
 
