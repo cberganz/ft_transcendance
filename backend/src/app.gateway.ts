@@ -101,6 +101,8 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("connection")
   handleInitTable(socket: Socket, data: userProfile) {
+    if (this.usersProfiles.find(userProfile => userProfile.id === data.id) === undefined)
+      socket.emit("firstConnectionFromServer");
     this.usersSockets.set(socket, data.id);
     this.setProfile(data);
     this.server.emit("updateStatusFromServer", this.usersProfiles);

@@ -162,6 +162,10 @@ export default function SettingsDialog() {
 		setOpen(false);
 	};
 
+	usersStatusSocket
+		.off("firstConnectionFromServer")
+		.on("firstConnectionFromServer", () => setOpen(true));
+
 	return (
 		<div>
 			<MenuItem onClick={handleClickOpen}>
