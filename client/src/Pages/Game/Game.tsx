@@ -13,7 +13,6 @@ import axios from "axios";
 import { usersStatusSocket } from "../../Router/Router";
 import useSocket from "./gameSocket";
 import { useNavigate } from "react-router-dom";
-import { wait } from "@testing-library/user-event/dist/utils";
 
 interface gameInfo {
   player1Id?: number;
@@ -210,8 +209,9 @@ function Game() {
     p1Id: number;
     p2Id: number;
     isp1: boolean;
+    finish: boolean;
   }) => {
-    if (!param.isp1) {
+    if (!param.isp1 || !param.finish) {
       navigate("/");
       window.location.reload();
     }
@@ -236,7 +236,6 @@ function Game() {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        socket.emit("debug", response.status);
         navigate("/");
         window.location.reload();
       })
@@ -361,8 +360,6 @@ function Game() {
     p1.setX(widthRef.current / 50);
     p2.setX(widthRef.current - boardWidthRef.current - widthRef.current / 50);
     p2.setY(heightRef.current * p2.getRelativePosition());
-    // ball.setX(ball.getX() - ballSizeRef.current / 2);
-    // ball.setY(ball.getY() - ballSizeRef.current / 2);
     ball.resetPosition();
     ball.setRelativePosition([
       ball.getX() / widthRef.current,
@@ -577,23 +574,6 @@ function Game() {
       p1.resetPosition();
       p2.resetPosition();
     }
-
-    // } else if (p2.getScore() === 10) {
-    //   postGame();
-    //   startRef.current = false;
-    //   timerRef.current && clearTimeout(timerRef.current);
-    //   p1.resetPosition();
-    //   p2.resetPosition();
-    //   setWin(2);
-    //     navigate("/");
-    //     window.location.reload();
-    // }
-    // p1.setScore(0);
-    // p2.setScore(0);
-    // startRef.current = false;
-    // timerRef.current && clearTimeout(timerRef.current);
-    // p1.resetPosition();
-    // p2.resetPosition();
   }
 
   const draw = (
@@ -647,7 +627,7 @@ function Game() {
               queueStatus={queueStatus}
               setQueueStatus={setQueueStatus}
             />
-            {queueStatus && (
+            {/* {queueStatus && (
               <LeaveButton
                 setEnterQueue={setEnterQueue}
                 setQueueStatus={setQueueStatus}
@@ -658,7 +638,7 @@ function Game() {
                 resetGame={resetGame}
                 spectator={spectator}
               />
-            )}
+            )} */}
           </>
         ) : !ready ? (
           <>
@@ -685,7 +665,7 @@ function Game() {
                 />
               </FormGroup>
             </div>
-            <LeaveButton
+            {/* <LeaveButton
               setEnterQueue={setEnterQueue}
               setQueueStatus={setQueueStatus}
               setStartButton={setStartButton}
@@ -694,7 +674,7 @@ function Game() {
               socket={socket}
               resetGame={resetGame}
               spectator={spectator}
-            />
+            /> */}
           </>
         ) : null}
         <canvas
