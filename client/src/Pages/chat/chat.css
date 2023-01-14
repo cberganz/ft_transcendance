@@ -7,7 +7,7 @@
 }
  
   .ChannelMenu {
-    background: #f0f7fa;
+    background: #e3e9f1;
     width: 400px;
   }
   .channelsDisplay {
@@ -42,7 +42,7 @@
     overflow: hidden;
   }
   .ChatHeader { 
-    background: #e3edf1;
+    background: #dde3eb;
     font-weight: bold;
     padding: 8px;
     padding-top: 15px;
