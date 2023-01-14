@@ -44,6 +44,8 @@ export class UserService {
 				},
 			}
 		});
+		if (!user)
+			return user
 		delete user.TFASecret
 		delete user.otpauthUrl
 		return user
