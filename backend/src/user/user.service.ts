@@ -14,7 +14,7 @@ export class UserService {
 	async user(
 		userWhereUniqueInput: Prisma.UserWhereUniqueInput
 	): Promise<User | null> {
-		return this.prisma.user.findUnique({
+		let user = await this.prisma.user.findUnique({
 			where: userWhereUniqueInput,
 			include: {
 				blacklist: {
@@ -44,8 +44,19 @@ export class UserService {
 				},
 			}
 		});
+		delete user.TFASecret
+		delete user.otpauthUrl
+		return user
 	}
 
+	async getOtpAuthUrl(
+		userWhereUniqueInput: Prisma.UserWhereUniqueInput
+	): Promise<string | null> {
+		const user = await this.prisma.user.findUnique({
+			where: userWhereUniqueInput
+		})
+		return user.otpauthUrl
+	}
 	async users(params: {
 		skip?: number;
 		take?: number;
