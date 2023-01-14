@@ -1,12 +1,21 @@
-import * as React from 'react';
-import CssBaseline from '@mui/material/CssBaseline';
-import { Grid, Container } from '@mui/material';
+import * as React from 'react'
+import CssBaseline from '@mui/material/CssBaseline'
+import { Grid, Container } from '@mui/material'
 import PlayerInfos from './components/PlayerInfos'
-import StatCard from './components/StatCard';
+import StatCard from './components/StatCard'
 import PlayedGames from './components/PlayedGames'
 import axios from "axios"
+import { useSearchParams } from "react-router-dom"
 
-export default class Profile extends React.Component {
+function ProfileHook(component: any) {
+	return function WrappedProfile(props: any) {
+		const [searchParams] = useSearchParams()
+		const userId = searchParams.get("userId")
+		return (<Profile userId={userId ? userId : ""} />)
+	}
+}
+
+class Profile extends React.Component<{ userId: string }, {}> {
 
 	state = {
 		data: {
@@ -18,27 +27,26 @@ export default class Profile extends React.Component {
 			gamesWon: "N/A",
 			gamesLost: "N/A",
 			winRate: -1,
-		}
+		},
+		userId: this.props.userId
 	};
 
 	async componentDidMount() {
-		const userId = new URLSearchParams(window.location.search).get("userId")
-		await axios.get("http://localhost:3000/user/stats/" + userId)
+		await axios.get("http://localhost:3000/user/stats/" + this.state.userId)
 			.then(response => response.data)
 			.then(Profile => { this.setState({ data: Profile }); })
 			.catch(error => alert("Profile " + error.status + ": " + error.message))
 	}
 
-	async componentDidUpdate(prevProps: any, prevState: any) {
-		const userId = new URLSearchParams(window.location.search).get("userId")
-		if(userId !== this.state.data.id){
-			await axios.get("http://localhost:3000/user/stats/" + userId)
+	async componentDidUpdate(prevProps: any) {
+		if (prevProps.userId !== this.props.userId) {
+			await axios.get("http://localhost:3000/user/stats/" + this.props.userId)
 				.then(response => response.data)
-				.then(Profile => { this.setState({ data: Profile }); })
+				.then(Profile => { this.setState({ data: Profile, userId: this.props.userId }); })
 				.catch(error => alert("Profile " + error.status + ": " + error.message))
 		}
 	}
-	
+
 	render() {
 		return (
 			<React.Fragment>
@@ -50,6 +58,7 @@ export default class Profile extends React.Component {
 								<PlayerInfos
 									username={this.state.data.username}
 									avatar={this.state.data.avatar}
+									userId={this.state.userId}
 								/>
 							</Grid>
 							<Grid item xs={12} sm={6} md={3}>
@@ -88,3 +97,5 @@ export default class Profile extends React.Component {
 		);
 	}
 }
+
+export default ProfileHook(Profile);

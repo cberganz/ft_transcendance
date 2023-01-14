@@ -31,7 +31,6 @@ function	OutletRoute() {
 		<div>
 			<PrimarySearchAppBar />
 			<Outlet/>
-			<AlertPopup/>
 		</div>
 	)
 }
