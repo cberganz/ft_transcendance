@@ -19,7 +19,6 @@ function ProfileHook(component: any) {
 }
 
 class Profile extends React.Component<{ token: string, userId: string }, {}> {
-
 	state = {
 		data: {
 			id: undefined,
