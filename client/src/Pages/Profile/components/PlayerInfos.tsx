@@ -30,32 +30,33 @@ const IsFriend = (currentUser: any, id: number) => {
 	return false;
 }
 
-async function addFriend(user1: string, user2: string | null, navigate: any, token: any) {
-	await axios("http://localhost:3000/user/addFriend/" + user1 + "/" + user2,
-        {method:'put', withCredentials: true, headers: {Authorization: `Bearer ${token}`}})
-		.then(response => response.data)
-		.catch(error => alert("Profile " + error.status + ": " + error.message))
-	navigate(0)
-}
-
-async function removeFriend(user1: string, user2: string | null, navigate: any, token: any) {
-	await axios("http://localhost:3000/user/removeFriend/" + user1 + "/" + user2,
-        {method:'put', withCredentials: true, headers: {Authorization: `Bearer ${token}`}})
-		.then(response => response.data)
-		.catch(error => alert("Profile " + error.status + ": " + error.message))
-	navigate(0)
-}
-
 class PlayerInfos extends React.Component<{ token: string, navigate: any, currentUser: any, userId: string, username: string, avatar: string }, {}> {
 
 	state = {
-		userId: this.props.userId
+		userId: this.props.userId,
+		friend: IsFriend(this.props.currentUser, Number(this.props.userId))
 	};
 
 	async componentDidUpdate(prevProps: any) {
 		if (prevProps.userId !== this.props.userId) {
-			this.setState({ userId: this.props.userId})
+			this.setState({ userId: this.props.userId })
 		}
+	}
+
+	async addFriend() {
+		await axios("http://localhost:3000/user/addFriend/" + this.props.currentUser.id + "/" + this.state.userId,
+	        {method:'put', withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
+			.then(response => response.data)
+			.catch(error => alert("Profile " + error.status + ": " + error.message))
+		this.setState({ friend: true })
+	}
+	
+	async removeFriend() {
+		await axios("http://localhost:3000/user/removeFriend/" + this.props.currentUser.id + "/" + this.state.userId,
+	        {method:'put', withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
+			.then(response => response.data)
+			.catch(error => alert("Profile " + error.status + ": " + error.message))
+		this.setState({ friend: false })
 	}
 
 	render() {
@@ -93,14 +94,14 @@ class PlayerInfos extends React.Component<{ token: string, navigate: any, curren
 								</Typography>
 								{	this.props.currentUser.id === Number(this.state.userId)
 									?	(<Stack direction="row" spacing={1} />)
-									:	!IsFriend(this.props.currentUser, Number(this.state.userId))
+									:	!this.state.friend
 									?	(<Stack direction="row" spacing={1}>
 											<Box sx={{ minWidth: '105px', display: 'flex', alignItems: 'center' }}>
 									 			<Button
 													variant="contained"
 													size="small"
 													onClick={() => {
-														addFriend(this.props.currentUser.id, this.state.userId, this.props.navigate, this.props.token)
+														this.addFriend()
 													}}
 												>
 													Add friend
@@ -114,7 +115,7 @@ class PlayerInfos extends React.Component<{ token: string, navigate: any, curren
 													size="small"
 													color="error"
 													onClick={() => {
-														removeFriend(this.props.currentUser.id, this.state.userId, this.props.navigate, this.props.token)
+														this.removeFriend()
 													}}
 												>
 													Remove friend

@@ -31,16 +31,13 @@ export class GameController {
       player2Id: number;
       player1_score: number;
       player2_score: number;
-      winner: number;
     }
   ): Promise<GameMode1> {
-    console.log(gameData);
     return this.gameService.createGame({
       player1: { connect: { id: Number(gameData.player1Id) } },
       player2: { connect: { id: Number(gameData.player2Id) } },
       player1_score: gameData.player1_score,
       player2_score: gameData.player2_score,
-      winner: gameData.winner,
     });
   }
 
