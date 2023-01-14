@@ -30,15 +30,17 @@ const IsFriend = (currentUser: any, id: number) => {
 	return false;
 }
 
-async function addFriend(user1: string, user2: string | null, navigate: any) {
-	await axios.put("http://localhost:3000/user/addFriend/" + user1 + "/" + user2)
+async function addFriend(user1: string, user2: string | null, navigate: any, token: any) {
+	await axios("http://localhost:3000/user/addFriend/" + user1 + "/" + user2,
+        {method:'put', withCredentials: true, headers: {Authorization: `Bearer ${token}`}})
 		.then(response => response.data)
 		.catch(error => alert("Profile " + error.status + ": " + error.message))
 	navigate(0)
 }
 
-async function removeFriend(user1: string, user2: string | null, navigate: any) {
-	await axios.put("http://localhost:3000/user/removeFriend/" + user1 + "/" + user2)
+async function removeFriend(user1: string, user2: string | null, navigate: any, token: any) {
+	await axios("http://localhost:3000/user/removeFriend/" + user1 + "/" + user2,
+        {method:'put', withCredentials: true, headers: {Authorization: `Bearer ${token}`}})
 		.then(response => response.data)
 		.catch(error => alert("Profile " + error.status + ": " + error.message))
 	navigate(0)
@@ -98,7 +100,7 @@ class PlayerInfos extends React.Component<{ token: string, navigate: any, curren
 													variant="contained"
 													size="small"
 													onClick={() => {
-														addFriend(this.props.currentUser.id, this.state.userId, this.props.navigate)
+														addFriend(this.props.currentUser.id, this.state.userId, this.props.navigate, this.props.token)
 													}}
 												>
 													Add friend
@@ -112,7 +114,7 @@ class PlayerInfos extends React.Component<{ token: string, navigate: any, curren
 													size="small"
 													color="error"
 													onClick={() => {
-														removeFriend(this.props.currentUser.id, this.state.userId, this.props.navigate)
+														removeFriend(this.props.currentUser.id, this.state.userId, this.props.navigate, this.props.token)
 													}}
 												>
 													Remove friend
