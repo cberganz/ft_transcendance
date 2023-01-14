@@ -2,6 +2,7 @@ import { Socket } from "socket.io-client";
 import { useEffect } from "react";
 import Button from "@mui/material/Button";
 import "../../game.css";
+import { useNavigate } from "react-router-dom";
 
 function LeaveButton({
   setEnterQueue,
@@ -22,6 +23,7 @@ function LeaveButton({
   resetGame: () => void;
   spectator: boolean;
 }) {
+  const navigate = useNavigate();
   useEffect(() => {
     const updateQueue = () => {
       setEnterQueue(false);
@@ -37,6 +39,8 @@ function LeaveButton({
       setQueueStatus(false);
       setStartButton(false);
       setReady(false);
+      navigate("/");
+      window.location.reload();
     };
 
     socket.on("updateQueueClient", updateQueue);
