@@ -77,33 +77,28 @@ export class UserController {
   async getUserStats(@Param("id") id: string): Promise<UserStats> {
     let user = (await this.userService.user({ id: Number(id) })) as any;
     let games = [...user.p1_games, ...user.p2_games];
-    let gamesPlayed = games
-      .filter(function (obj) {
-        return obj.player1_score;
-      })
-      .map((game) => {
-        let player = game.player1Id === user.id ? 1 : 2;
-        return {
-          id: game.id,
-          date: game.date,
-          playerScore: player === 1 ? game.player1_score : game.player2_score,
-          opponent:
-            player === 1 ? game.player2.username : game.player1.username,
-          opponentScore: player === 1 ? game.player2_score : game.player1_score,
-          result:
-            player === 1
-              ? game.player1_score > game.player2_score
-                ? "Winner"
-                : game.player2_score > game.player1_score
-                ? "Loser"
-                : "Equality"
-              : game.player2_score > game.player1_score
+    let gamesPlayed = games.map((game) => {
+      let player = game.player1Id === user.id ? 1 : 2;
+      return {
+        id: game.id,
+        date: game.date,
+        playerScore: player === 1 ? game.player1_score : game.player2_score,
+        opponent: player === 1 ? game.player2.username : game.player1.username,
+        opponentScore: player === 1 ? game.player2_score : game.player1_score,
+        result:
+          player === 1
+            ? game.player1_score > game.player2_score
               ? "Winner"
-              : game.player1_score > game.player2_score
+              : game.player2_score > game.player1_score
               ? "Loser"
-              : "Equality",
-        };
-      });
+              : "Equality"
+            : game.player2_score > game.player1_score
+            ? "Winner"
+            : game.player1_score > game.player2_score
+            ? "Loser"
+            : "Equality",
+      };
+    });
     let winrate = Math.round(
       (gamesPlayed.filter(function (obj) {
         return obj.result === "Winner";
@@ -134,7 +129,7 @@ export class UserController {
       ...userData,
       avatar:
         "https://profile.intra.42.fr/assets/42_logo_black-684989d43d629b3c0ff6fd7e1157ee04db9bb7a73fba8ec4e01543d650a1c607.png",
-      email: "robin@gmail.com",
+      email: "robi@gmail.com",
     };
     return this.userService.createUser(newUser);
   }
@@ -194,21 +189,23 @@ export class UserController {
     @Param("id") id: string,
     @Body() body: updateUserDto
   ): Promise<UserMode1> {
-    if (body.username.indexOf(" ") !== -1) throw new BadRequestException();
-    const user = await this.userService.user({ id: Number(id) });
-    const userWithSameUsername = await this.userService.user({
-      username: String(body.username),
-    });
-    if (userWithSameUsername && userWithSameUsername.id !== Number(id))
-      throw new UnprocessableEntityException();
-    user.username = body.username;
-    return this.userService.updateUser({
-      where: {
-        id: Number(id),
-      },
-      data: {
-        username: user.username,
-      },
+		if (body.username.indexOf(" ") !== -1)
+			throw new BadRequestException()
+		const user = await this.userService.user({ id: Number(id) });
+		console.log("-----------------------------------------")
+		const userWithSameUsername = await this.userService.user({
+			username: String(body.username),
+		});
+		if (userWithSameUsername && userWithSameUsername.id !== Number(id))
+			throw new UnprocessableEntityException();
+		user.username = body.username;
+		return this.userService.updateUser({
+		where: {
+			id: Number(id),
+		},
+		data: {
+			username: user.username,
+		},
     });
   }
 
@@ -216,8 +213,7 @@ export class UserController {
   @UseGuards(OwnGuard)
   @UseGuards(JwtAuthGuard)
   async getTfaQrCode(@Param("id") id: string) {
-    const otpauthUrl = (await this.userService.user({ id: Number(id) }))
-      .otpauthUrl;
+    const otpauthUrl = await this.userService.getOtpAuthUrl({ id: Number(id) })
     return this.userService.generateQrCodeDataURL(otpauthUrl);
   }
 
@@ -226,7 +222,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async updateTfa(
     @Param("id") id: string,
-    @Body() body: any // peut etre mettre dto
+    @Body() body: any
   ) {
     this.userService.updateUser({
       where: {

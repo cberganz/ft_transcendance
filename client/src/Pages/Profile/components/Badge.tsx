@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { styled } from '@mui/material/styles';
 import Badge from '@mui/material/Badge';
 import Avatar from '@mui/material/Avatar';
 
@@ -9,10 +8,6 @@ interface Props {
 }
 
 export default class BadgeAvatar extends React.Component<Props, {}> {
-
-	constructor(props: any) {
-		super(props)
-	};
 
 	render() {
 		return (
