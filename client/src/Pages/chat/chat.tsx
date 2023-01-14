@@ -197,6 +197,7 @@ class Chat extends React.Component<Props, ChatState> {
     this.setState(ChatData);
   }
 
+  /** RESPONSIVE **/
   setMobile(state: ChatState) {
     let change: boolean = false;
   
