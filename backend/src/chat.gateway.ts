@@ -48,8 +48,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
       else
         user2 = chan.members[0].login;
       for (let [userSocket, login] of this.userSockets) {
-        console.log(login)
-        console.log(user2)
         if (login === user2)
           userSocket.join("chat" + chan.id)
       }
@@ -111,8 +109,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   @SubscribeMessage('updateUserFromClient')
-  updateUser(socket: Socket, user: any): void {
-    socket.emit('updateUserFromServer', user);
+  updateUser(socket: Socket): void {
+    this.server.emit('updateUserFromServer');
   }
 
   @SubscribeMessage('banFromClient')

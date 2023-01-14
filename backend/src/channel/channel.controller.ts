@@ -146,7 +146,6 @@ export class ChannelController {
 			type: "dm",
 			members: { connect: [{ id: Number(channelData.user1) }, { id: Number(channelData.user2) }] },
 		});
-		console.log(newChan)
 		return this.channelService.channel({ id: Number(newChan.id) });
 	}
 }

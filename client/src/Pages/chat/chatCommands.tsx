@@ -172,10 +172,7 @@ async function Block(inputs: string[], state: ChatState, socket: any, params: an
         .catch(error => "error");
     if (ret === "error")
         return "Error: User already blocked.";
-    await axios.get("http://localhost:3000/user/" + state.actualUser.user.id, 
-        {withCredentials: true, headers: {Authorization: `Bearer ${state.actualUser.token}`}})
-        .then(response => socket.emit('updateUserFromClient', response.data))
-        .catch()
+    socket.emit('updateUserFromClient');
     return "User successfully blocked.";
 }
 
@@ -184,7 +181,7 @@ async function Unblock(inputs: string[], state: ChatState, socket: any, params: 
     let     blacklistId = -1;
     
     if (chan === undefined || state.actualUser.user.blacklist === undefined)
-    return "";
+        return "";
     if (inputs.length === 1 && chan.type === 'dm') {
         if (chan.members[0].id === state.actualUser.user.id)
         inputs = [inputs[0], chan.members[1].username.valueOf()]
@@ -213,10 +210,7 @@ async function Unblock(inputs: string[], state: ChatState, socket: any, params: 
         .catch(error => "error");
     if (ret === "error")
         return "Error: User not blocked.";
-    await axios.get("http://localhost:3000/user/" + state.actualUser.user.id, 
-        {withCredentials: true, headers: {Authorization: `Bearer ${state.actualUser.token}`}})
-        .then(response => socket.emit('updateUserFromClient', response.data))
-        .catch()
+    socket.emit('updateUserFromClient');
     return "User successfully unblocked.";
 }
 

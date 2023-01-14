@@ -42,7 +42,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async initUsersProfiles() {
     let list = await this.userService.users({});
     let profile: userProfile;
-    
+
     for (let user of list) {
       profile = {
         id: user.id,
@@ -50,21 +50,21 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
         username: user.username,
         avatar: user.avatar,
         status: "offline",
-      }
+      };
       this.usersProfiles.push(profile);
     }
   }
-  
+
   @WebSocketServer() public server: Server;
 
   handleConnection(socket: Socket) {}
 
+  /** Profiles */
   getProfile(id: number): userProfile {
     for (let profile of this.usersProfiles) {
       if (profile.id === id) return profile;
     }
   }
-
 
   setProfile(data: {
     id: number;
@@ -99,8 +99,11 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return this.usersProfiles.push(data);
   }
 
+  /** Connection */
   @SubscribeMessage("connection")
   handleInitTable(socket: Socket, data: userProfile) {
+    if (this.usersProfiles.find(userProfile => userProfile.id === data.id) === undefined)
+      socket.emit("firstConnectionFromServer");
     this.usersSockets.set(socket, data.id);
     this.setProfile(data);
     this.server.emit("updateStatusFromServer", this.usersProfiles);
@@ -108,7 +111,8 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // so that socket signal received by search bar doesnt get mixed up as it is rendered everywhere
   }
 
-  // update to anything: online, offline, in game...
+
+  /** update to anything: online, offline, in game... */
   @SubscribeMessage("updateStatus")
   handleUpdateStatus(socket: Socket, status: string) {
     this.setProfile({ id: this.usersSockets.get(socket), status: status });
@@ -129,6 +133,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit("updateSearchBarUserList", this.usersProfiles);
   }
 
+  /** Game */
   @SubscribeMessage("invitePlayer")
   handleInvitePlayer(socket: Socket, invitedPlayerId: number) {
     for (let [sock, id] of this.usersSockets) {
@@ -168,16 +173,20 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("spectatePlayer")
   handleSpectatePlayer(socket: Socket, playerIdToSpectate: number) {
-    const socketId = this.usersSockets.get(socket);
-    for (let [sock, sockId] of this.usersSockets) {
-      if (sockId === socketId) {
-        this.server
-          .to(sock.id)
-          .emit("spectateGameClient", playerIdToSpectate.toString());
-      }
-    }
+    // const socketId = this.usersSockets.get(socket);
+    // for (let [sock, sockId] of this.usersSockets) {
+    //   if (sockId === socketId) {
+    //     this.server
+    //       .to(sock.id)
+    //       .emit("spectateGameClient", playerIdToSpectate.toString());
+    //   }
+    // }
+    this.server
+      .to(socket.id)
+      .emit("spectateGameClient", playerIdToSpectate.toString());
   }
 
+  /** Disconnect */
   handleDisconnect(socket: Socket) {
     const userId: number = this.usersSockets.get(socket);
     if (userId !== undefined)

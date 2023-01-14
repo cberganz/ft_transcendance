@@ -27,6 +27,14 @@ export default function ChatHeader(props: any) {
 
   if (chan === undefined) return <div></div>;
 
+  const isBlacklisted = (id: number) => {
+    for (let blacklisted of props.state.actualUser.user.blacklisted) {
+      if (blacklisted.creatorId === id && blacklisted.type === "block")
+        return (true);
+    }
+    return (false);
+  }
+
   const handleClickGame = (param: any) => {
     navigate("/game");
     invitationGame(param);
@@ -112,12 +120,14 @@ export default function ChatHeader(props: any) {
         dmUser !== null &&
         !isBlocked(props.state.actualUser.user, dmUser) ? (
           <div>
+            {isBlacklisted(dmUser?.id) ? null :
             <Tooltip title="Invite for a pong">
               <SportsEsportsIcon
                 onClick={() => handleClickGame(dmUser?.id)}
                 sx={{ cursor: "pointer", color: "grey", marginRight: "20px" }}
               />
             </Tooltip>
+            }
             <Tooltip title="Block user">
               <BlockIcon
                 onClick={(event) => chatCmd("/block " + title.valueOf())}
