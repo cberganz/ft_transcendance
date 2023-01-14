@@ -22,6 +22,7 @@ interface Room {
   score: number[];
   custom: boolean[];
   reload: boolean;
+  finish: boolean;
 }
 
 @WebSocketGateway({
@@ -44,7 +45,6 @@ export class GameGateway
   }
 
   handleClient(client: Socket) {
-    console.log(this.clientList.get(client.handshake.auth.id.toString()));
     if (this.clientList.get(client.handshake.auth.id.toString())) {
       this.server
         .to(this.clientList.get(client.handshake.auth.id.toString()).id)
@@ -52,19 +52,15 @@ export class GameGateway
       this.clientList.delete(client.handshake.auth.id.toString());
     }
     this.clientList.set(client.handshake.auth.id.toString(), client);
-    console.log(this.clientList.keys());
   }
 
   async handleConnection(client: Socket, ...args: any[]) {
-    // console.log(this.server);
     this.logger.log(
       `Client connected: ID ${client.handshake.auth.id.toString()}`
     );
     if (!this.players.includes(client.handshake.auth.id.toString())) {
       this.players.push(client.handshake.auth.id.toString());
     }
-    const sockets = await this.server.fetchSockets();
-    console.log(sockets.length);
     // this.handleClient(client);
     this.reconnectRoom(client);
     if (this.findCurrentRoom(client) === -1) {
@@ -90,6 +86,9 @@ export class GameGateway
       this.rooms[this.findCurrentRoom(client)].pause[0] = true;
     } else if (this.isPlayerTwo(client)) {
       this.rooms[this.findCurrentRoom(client)].pause[1] = true;
+    }
+    if (!this.rooms[this.findCurrentRoom(client)].finish) {
+      this.handleConnection(client);
     }
   }
 
@@ -409,11 +408,16 @@ export class GameGateway
     if (this.isSpectator(client)) {
       return;
     }
+    if (this.findCurrentRoom(client) === -1) {
+      return;
+    }
+    this.rooms[this.findCurrentRoom(client)].finish = true;
     if (!this.isPlayerOne(client)) {
       const param = {
         p1Id: 0,
         p2Id: 0,
         isp1: false,
+        finish: false,
       };
       this.server.to(client.id).emit("endGameClient", param);
       this.leaveRoom(client);
@@ -426,6 +430,7 @@ export class GameGateway
       p1Id: +this.roomPlayers(client)[0],
       p2Id: +this.roomPlayers(client)[1],
       isp1: false,
+      finish: true,
     };
     if (this.isPlayerOne(client)) {
       param.isp1 = true;
@@ -536,6 +541,7 @@ export class GameGateway
       score: [0, 0],
       custom: [false, false],
       reload: false,
+      finish: false,
     };
     this.rooms.push(newRoom);
   }
