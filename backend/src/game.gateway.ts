@@ -21,6 +21,7 @@ interface Room {
   ballDirection: number[];
   score: number[];
   custom: boolean[];
+  reload: boolean;
 }
 
 @WebSocketGateway({
@@ -84,6 +85,7 @@ export class GameGateway
     if (this.findCurrentRoom(client) === -1) {
       return;
     }
+    this.logRoom();
     if (this.isPlayerOne(client)) {
       this.rooms[this.findCurrentRoom(client)].pause[0] = true;
     } else if (this.isPlayerTwo(client)) {
@@ -365,6 +367,10 @@ export class GameGateway
       this.rooms[this.findCurrentRoom(client)].ready[1]
     ) {
       this.server.to(this.roomId(client)).emit("updateReadyClient", true);
+      if (!this.rooms[this.findCurrentRoom(client)].reload) {
+        this.rooms[this.findCurrentRoom(client)].reload = true;
+        this.server.to(this.roomId(client)).emit("reloadClient");
+      }
     } else {
       this.server.to(this.roomId(client)).emit("updateReadyClient", false);
     }
@@ -372,6 +378,9 @@ export class GameGateway
 
   @SubscribeMessage("updateQueueServer")
   handleUpdateQueue(client: Socket, queueStatus: boolean): void {
+    if (this.findCurrentRoom(client) === -1) {
+      return;
+    }
     if (queueStatus === true) {
       this.joinRoom(client);
       if (this.roomIsFull(client)) {
@@ -507,6 +516,7 @@ export class GameGateway
       ballDirection: [],
       score: [0, 0],
       custom: [false, false],
+      reload: false,
     };
     this.rooms.push(newRoom);
   }

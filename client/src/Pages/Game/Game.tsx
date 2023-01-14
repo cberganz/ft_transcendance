@@ -14,6 +14,7 @@ import axios from "axios";
 import { usersStatusSocket } from "../../Router/Router";
 import socket from "./gameSocket";
 import useSocket from "./gameSocket";
+import { useNavigate } from "react-router-dom";
 
 interface gameInfo {
   player1Id?: number;
@@ -40,6 +41,7 @@ function Game() {
   let startRef = useRef(false);
   let timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gameInfo: gameInfo = {};
+  const navigate = useNavigate();
 
   const p1Ref = useRef(
     new Player(
@@ -179,7 +181,7 @@ function Game() {
       setReady(true);
       usersStatusSocket.emit("updateStatus", "in game");
     } else if (value === false && ready === true) {
-      resetGame();
+      socket.emit("updateQueueServer", false);
     }
   };
 
@@ -257,12 +259,7 @@ function Game() {
   };
 
   const handleInvitationGame = (id: string) => {
-    setEnterQueue(false);
-    setQueueStatus(false);
-    setStartButton(false);
-    setReady(false);
-    setWin(0);
-    resetGame();
+    socket.emit("updateQueueServer", false);
     socket.emit("invitationGameServer", id);
     usersStatusSocket.emit("deleteInvitation");
   };
@@ -274,6 +271,10 @@ function Game() {
     setReady(true);
     setSpectator(true);
     socket.emit("spectateGameServer", userToSpectateId);
+  };
+
+  const handleReload = () => {
+    window.location.reload();
   };
 
   if (!spectator) {
@@ -303,6 +304,7 @@ function Game() {
     .off("reconnectCustomClient")
     .on("reconnectCustomClient", reconnectCustom);
   socket.off("endGameClient").on("endGameClient", handleEndGame);
+  socket.off("reloadClient").on("reloadClient", handleReload);
   usersStatusSocket
     .off("invitationGameClient")
     .on("invitationGameClient", handleInvitationGame);
@@ -354,8 +356,7 @@ function Game() {
       if (p1.getScore() < 10 && p2.getScore() < 10) {
         animationFrameId = requestAnimationFrame(loopGame);
       } else {
-        // postGame();
-        resetGame();
+        socket.emit("updateQueueServer", false);
       }
     };
     loopGame();
@@ -583,17 +584,6 @@ function Game() {
     updateReady(false);
     setReady(false);
     setStartButton(false);
-    if (p1.getScore() === 10) {
-      setWin(1);
-      postGame();
-    } else if (p2.getScore() === 10) {
-      setWin(2);
-      postGame();
-    }
-    startRef.current = false;
-    timerRef.current && clearTimeout(timerRef.current);
-    p1.setScore(0);
-    p2.setScore(0);
     socket.emit("updateScoreServer", {
       playerNumber: 1,
       score: 0,
@@ -602,6 +592,34 @@ function Game() {
       playerNumber: 2,
       score: 0,
     });
+
+    if (p1.getScore() === 10) {
+      p1.setScore(0);
+      p2.setScore(0);
+      startRef.current = false;
+      timerRef.current && clearTimeout(timerRef.current);
+      p1.resetPosition();
+      p2.resetPosition();
+      setWin(1);
+      postGame();
+      navigate("/");
+      window.location.reload();
+    } else if (p2.getScore() === 10) {
+      p1.setScore(0);
+      p2.setScore(0);
+      startRef.current = false;
+      timerRef.current && clearTimeout(timerRef.current);
+      p1.resetPosition();
+      p2.resetPosition();
+      setWin(2);
+      postGame();
+      navigate("/");
+      window.location.reload();
+    }
+    p1.setScore(0);
+    p2.setScore(0);
+    startRef.current = false;
+    timerRef.current && clearTimeout(timerRef.current);
     p1.resetPosition();
     p2.resetPosition();
   }
@@ -637,9 +655,14 @@ function Game() {
 
   useEffect(() => {
     return () => {
+      if (!spectator) {
+        window.removeEventListener("keydown", handleKeyDown);
+        window.removeEventListener("keyup", handleKeyUp);
+        window.removeEventListener("blur", handleBlur);
+      }
       //   socket.disconnect();
     };
-  }, []);
+  });
 
   return (
     <div className={"gameContainer"}>
@@ -707,16 +730,20 @@ function Game() {
           ref={canvasRef}
         ></canvas>
         {startButton && ready && (
-          <LeaveButton
-            setEnterQueue={setEnterQueue}
-            setQueueStatus={setQueueStatus}
-            setStartButton={setStartButton}
-            setReady={setReady}
-            setWin={setWin}
-            socket={socket}
-            resetGame={resetGame}
-            spectator={spectator}
-          />
+          <>
+            <p>W: Go Up</p>
+            <p>S: Go Down</p>
+            <LeaveButton
+              setEnterQueue={setEnterQueue}
+              setQueueStatus={setQueueStatus}
+              setStartButton={setStartButton}
+              setReady={setReady}
+              setWin={setWin}
+              socket={socket}
+              resetGame={resetGame}
+              spectator={spectator}
+            />
+          </>
         )}
       </div>
     </div>
