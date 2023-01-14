@@ -211,8 +211,7 @@ export class UserController {
   @UseGuards(OwnGuard)
   @UseGuards(JwtAuthGuard)
   async getTfaQrCode(@Param("id") id: string) {
-    const otpauthUrl = (await this.userService.user({ id: Number(id) }))
-      .otpauthUrl;
+    const otpauthUrl = await this.userService.getOtpAuthUrl({ id: Number(id) })
     return this.userService.generateQrCodeDataURL(otpauthUrl);
   }
 
@@ -221,7 +220,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async updateTfa(
     @Param("id") id: string,
-    @Body() body: any // peut etre mettre dto
+    @Body() body: any
   ) {
     this.userService.updateUser({
       where: {

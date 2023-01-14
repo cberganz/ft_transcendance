@@ -16,7 +16,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 export class FileController {
 
 	@Get('/avatar/:filename')
-	// @UseGuards(JwtAuthGuard)
 	async getFile(@Param('filename') filename: string, @Res() res): Promise<any> {
 		const config = new ConfigService()
 		const filePath = `${config.get('UPLOAD_PATH')}/${filename}`
