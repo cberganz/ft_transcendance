@@ -85,7 +85,7 @@ export default function Dashboard() {
 							<Table>
 								<TableHead>
 									<TableRow>
-										<TableCell>Friend username</TableCell>
+										<TableCell>Friend</TableCell>
 										<TableCell>Status</TableCell>
 									</TableRow>
 								</TableHead>

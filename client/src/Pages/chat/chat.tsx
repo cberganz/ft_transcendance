@@ -5,7 +5,7 @@ import SendBox from "./message/sendMsg/SendBox";
 import HeaderChannels from "./channel/headerChannels";
 import './chat.css'
 import React from "react";
-import { actualUser, ChatState, Channel, Message, User } from "./stateInterface";
+import { actualUser, ChatState, Channel, Message } from "./stateInterface";
 import io from "socket.io-client";
 import axios from "axios"
 import { getChan, userIsInChan, sortChannels } from './utils'

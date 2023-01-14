@@ -59,12 +59,12 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleConnection(socket: Socket) {}
 
+  /** Profiles */
   getProfile(id: number): userProfile {
     for (let profile of this.usersProfiles) {
       if (profile.id === id) return profile;
     }
   }
-
 
   setProfile(data: {
     id: number;
@@ -99,6 +99,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return this.usersProfiles.push(data);
   }
 
+  /** Connection */
   @SubscribeMessage("connection")
   handleInitTable(socket: Socket, data: userProfile) {
     if (this.usersProfiles.find(userProfile => userProfile.id === data.id) === undefined)
@@ -110,7 +111,8 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // so that socket signal received by search bar doesnt get mixed up as it is rendered everywhere
   }
 
-  // update to anything: online, offline, in game...
+
+  /** update to anything: online, offline, in game... */
   @SubscribeMessage("updateStatus")
   handleUpdateStatus(socket: Socket, status: string) {
     this.setProfile({ id: this.usersSockets.get(socket), status: status });
@@ -131,6 +133,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit("updateSearchBarUserList", this.usersProfiles);
   }
 
+  /** Game */
   @SubscribeMessage("invitePlayer")
   handleInvitePlayer(socket: Socket, invitedPlayerId: number) {
     for (let [sock, id] of this.usersSockets) {
@@ -180,6 +183,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  /** Disconnect */
   handleDisconnect(socket: Socket) {
     const userId: number = this.usersSockets.get(socket);
     if (userId !== undefined)

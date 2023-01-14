@@ -1,8 +1,6 @@
 import { ChatState } from './stateInterface'
 import axios from 'axios'
 import { getChan } from './utils';
-import { useNavigate } from "react-router-dom";
-import invitationGame from "../Game/components/Invitation/Invitation";
 
 const commands = new Map([
     ["/join", JoinChan],

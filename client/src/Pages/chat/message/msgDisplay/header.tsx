@@ -10,7 +10,6 @@ import ChatCommands from "../../chatCommands";
 import useAlert from "../../../../Hooks/useAlert";
 import { useNavigate } from "react-router-dom";
 import invitationGame from "../../../Game/components/Invitation/Invitation";
-import axios from "axios"
 
 function isAdmin(userId: number, chan?: Channel): boolean {
   if (chan === undefined) return false;
@@ -30,8 +29,6 @@ export default function ChatHeader(props: any) {
 
   const isBlacklisted = (id: number) => {
     for (let blacklisted of props.state.actualUser.user.blacklisted) {
-      console.log(blacklisted)
-      console.log(id)
       if (blacklisted.creatorId === id && blacklisted.type === "block")
         return (true);
     }
