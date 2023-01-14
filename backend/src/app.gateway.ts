@@ -42,7 +42,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async initUsersProfiles() {
     let list = await this.userService.users({});
     let profile: userProfile;
-    
+
     for (let user of list) {
       profile = {
         id: user.id,
@@ -50,11 +50,11 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
         username: user.username,
         avatar: user.avatar,
         status: "offline",
-      }
+      };
       this.usersProfiles.push(profile);
     }
   }
-  
+
   @WebSocketServer() public server: Server;
 
   handleConnection(socket: Socket) {}
@@ -64,7 +64,6 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (profile.id === id) return profile;
     }
   }
-
 
   setProfile(data: {
     id: number;
@@ -170,14 +169,17 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("spectatePlayer")
   handleSpectatePlayer(socket: Socket, playerIdToSpectate: number) {
-    const socketId = this.usersSockets.get(socket);
-    for (let [sock, sockId] of this.usersSockets) {
-      if (sockId === socketId) {
-        this.server
-          .to(sock.id)
-          .emit("spectateGameClient", playerIdToSpectate.toString());
-      }
-    }
+    // const socketId = this.usersSockets.get(socket);
+    // for (let [sock, sockId] of this.usersSockets) {
+    //   if (sockId === socketId) {
+    //     this.server
+    //       .to(sock.id)
+    //       .emit("spectateGameClient", playerIdToSpectate.toString());
+    //   }
+    // }
+    this.server
+      .to(socket.id)
+      .emit("spectateGameClient", playerIdToSpectate.toString());
   }
 
   handleDisconnect(socket: Socket) {

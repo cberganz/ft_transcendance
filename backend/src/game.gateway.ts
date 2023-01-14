@@ -21,6 +21,7 @@ interface Room {
   ballDirection: number[];
   score: number[];
   custom: boolean[];
+  reload: boolean;
 }
 
 @WebSocketGateway({
@@ -35,15 +36,36 @@ export class GameGateway
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger("GameGateway");
   private rooms: Array<Room> = [];
+  private clientList: Map<string, Socket> = new Map<string, Socket>();
+  private players: Array<string> = [];
 
   afterInit(server: Server) {
     this.logger.log("Init");
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
+  handleClient(client: Socket) {
+    console.log(this.clientList.get(client.handshake.auth.id.toString()));
+    if (this.clientList.get(client.handshake.auth.id.toString())) {
+      this.server
+        .to(this.clientList.get(client.handshake.auth.id.toString()).id)
+        .disconnectSockets();
+      this.clientList.delete(client.handshake.auth.id.toString());
+    }
+    this.clientList.set(client.handshake.auth.id.toString(), client);
+    console.log(this.clientList.keys());
+  }
+
+  async handleConnection(client: Socket, ...args: any[]) {
+    // console.log(this.server);
     this.logger.log(
       `Client connected: ID ${client.handshake.auth.id.toString()}`
     );
+    if (!this.players.includes(client.handshake.auth.id.toString())) {
+      this.players.push(client.handshake.auth.id.toString());
+    }
+    const sockets = await this.server.fetchSockets();
+    console.log(sockets.length);
+    // this.handleClient(client);
     this.reconnectRoom(client);
     if (this.findCurrentRoom(client) === -1) {
       return;
@@ -63,6 +85,7 @@ export class GameGateway
     if (this.findCurrentRoom(client) === -1) {
       return;
     }
+    this.logRoom();
     if (this.isPlayerOne(client)) {
       this.rooms[this.findCurrentRoom(client)].pause[0] = true;
     } else if (this.isPlayerTwo(client)) {
@@ -344,6 +367,10 @@ export class GameGateway
       this.rooms[this.findCurrentRoom(client)].ready[1]
     ) {
       this.server.to(this.roomId(client)).emit("updateReadyClient", true);
+      if (!this.rooms[this.findCurrentRoom(client)].reload) {
+        this.rooms[this.findCurrentRoom(client)].reload = true;
+        this.server.to(this.roomId(client)).emit("reloadClient");
+      }
     } else {
       this.server.to(this.roomId(client)).emit("updateReadyClient", false);
     }
@@ -351,6 +378,9 @@ export class GameGateway
 
   @SubscribeMessage("updateQueueServer")
   handleUpdateQueue(client: Socket, queueStatus: boolean): void {
+    if (this.findCurrentRoom(client) === -1) {
+      return;
+    }
     if (queueStatus === true) {
       this.joinRoom(client);
       if (this.roomIsFull(client)) {
@@ -434,6 +464,11 @@ export class GameGateway
     }
   }
 
+  @SubscribeMessage("testServer")
+  handleTest(client: Socket) {
+    this.server.to(client.id).emit("testClient");
+  }
+
   findRoomById(id: string): number {
     for (const room of this.rooms) {
       if (room.roomId === id) {
@@ -481,6 +516,7 @@ export class GameGateway
       ballDirection: [],
       score: [0, 0],
       custom: [false, false],
+      reload: false,
     };
     this.rooms.push(newRoom);
   }
