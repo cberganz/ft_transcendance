@@ -199,8 +199,9 @@ export class GameGateway
     } else {
       for (const room of this.rooms) {
         if (
-          room.players[0] === client.handshake.auth.id.toString() ||
-          room.players[1] === client.handshake.auth.id.toString()
+          (room.players[0] === client.handshake.auth.id.toString() ||
+            room.players[1] === client.handshake.auth.id.toString()) &&
+          this.isPlayerOne(client)
         ) {
           this.rooms.splice(this.rooms.indexOf(room), 1);
         }
@@ -378,17 +379,16 @@ export class GameGateway
 
   @SubscribeMessage("updateQueueServer")
   handleUpdateQueue(client: Socket, queueStatus: boolean): void {
-    if (this.findCurrentRoom(client) === -1) {
-      return;
-    }
     if (queueStatus === true) {
       this.joinRoom(client);
       if (this.roomIsFull(client)) {
         this.server.to(this.roomId(client)).emit("updateQueueClient");
       }
     } else {
+      if (this.findCurrentRoom(client) === -1) {
+        return;
+      }
       this.server.to(this.roomId(client)).emit("updateQueueClient");
-      this.leaveRoom(client);
     }
   }
 
@@ -409,6 +409,19 @@ export class GameGateway
     if (this.isSpectator(client)) {
       return;
     }
+    if (!this.isPlayerOne(client)) {
+      const param = {
+        p1Id: 0,
+        p2Id: 0,
+        isp1: false,
+      };
+      this.server.to(client.id).emit("endGameClient", param);
+      this.leaveRoom(client);
+      return;
+    }
+    // if (this.roomPlayers(client) === undefined) {
+    //   return;
+    // }
     const param = {
       p1Id: +this.roomPlayers(client)[0],
       p2Id: +this.roomPlayers(client)[1],
@@ -418,6 +431,7 @@ export class GameGateway
       param.isp1 = true;
     }
     this.server.to(client.id).emit("endGameClient", param);
+    this.leaveRoom(client);
   }
 
   @SubscribeMessage("invitationGameServer")
@@ -435,7 +449,7 @@ export class GameGateway
   }
 
   @SubscribeMessage("spectateGameServer")
-  handleSpectateGamee(client: Socket, id: string): void {
+  handleSpectateGame(client: Socket, id: string): void {
     let roomToSpectate = "";
 
     for (const room of this.rooms) {
@@ -467,6 +481,11 @@ export class GameGateway
   @SubscribeMessage("testServer")
   handleTest(client: Socket) {
     this.server.to(client.id).emit("testClient");
+  }
+
+  @SubscribeMessage("debug")
+  handleDebug(client: Socket, message: any) {
+    console.log(`DEBUG: ${message}`);
   }
 
   findRoomById(id: string): number {
@@ -545,6 +564,9 @@ export class GameGateway
   }
 
   isPlayerOne(client: Socket): boolean {
+    if (this.findCurrentRoom(client) === -1) {
+      return;
+    }
     if (
       this.rooms[this.findCurrentRoom(client)].players[0] ===
       client.handshake.auth.id.toString()
@@ -579,6 +601,9 @@ export class GameGateway
   }
 
   roomPlayers(client: Socket): Array<string> {
+    if (!this.rooms[this.findCurrentRoom(client)]) {
+      return undefined;
+    }
     return this.rooms[this.findCurrentRoom(client)].players;
   }
 
