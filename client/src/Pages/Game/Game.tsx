@@ -2,26 +2,24 @@ import React, { useEffect, useRef, useState } from "react";
 import Ball from "./classes/Ball";
 import Player from "./classes/Player";
 import StartButton from "./components/StartButton/StartButton";
-import io, { Socket } from "socket.io-client";
 import EnterQueue from "./components/EnterQueue/EnterQueue";
 import "./game.css";
-import { selectCurrentUser, selectCurrentToken } from "../../Hooks/authSlice";
+import { selectCurrentToken } from "../../Hooks/authSlice";
 import { useSelector } from "react-redux";
 import LeaveButton from "./components/LeaveButton/LeaveButton";
 import { FormControlLabel, FormGroup } from "@mui/material";
 import Switch from "@mui/material/Switch";
 import axios from "axios";
 import { usersStatusSocket } from "../../Router/Router";
-import socket from "./gameSocket";
 import useSocket from "./gameSocket";
 import { useNavigate } from "react-router-dom";
+import { wait } from "@testing-library/user-event/dist/utils";
 
 interface gameInfo {
   player1Id?: number;
   player2Id?: number;
   player1_score?: number | null;
   player2_score?: number | null;
-  winner?: number | null;
 }
 
 function Game() {
@@ -75,20 +73,8 @@ function Game() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
 
-  //   const userId = useSelector(selectCurrentUser).id;
   const token = useSelector(selectCurrentToken);
   const socket = useSocket();
-  //   const socket: Socket = io("http://localhost:3000/game", {
-  //     auth: {
-  //       id: userId,
-  //     },
-  //   });
-
-  //   console.log(socket);
-  //   socket.emit("testServer");
-  socket.on("testClient", () => {
-    console.log("CONNECT");
-  });
 
   const handleKeyDown = (e: KeyboardEvent) => {
     switch (e.key) {
@@ -226,28 +212,15 @@ function Game() {
     isp1: boolean;
   }) => {
     if (!param.isp1) {
-      return;
+      navigate("/");
+      window.location.reload();
     }
     gameInfo.player1Id = param.p1Id;
     gameInfo.player2Id = param.p2Id;
     gameInfo.player1_score = p1.getScore();
     gameInfo.player2_score = p2.getScore();
-    if (gameInfo.player1_score === 10) {
-      gameInfo.winner = gameInfo.player1Id;
-    } else {
-      gameInfo.winner = gameInfo.player2Id;
-    }
     p1.setScore(0);
     p2.setScore(0);
-
-    axios
-      .post("http://localhost:3000/game/", gameInfo, {
-        withCredentials: true,
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => console.log(response))
-      .catch((error) => console.log(error));
-
     socket.emit("updateScoreServer", {
       playerNumber: 1,
       score: 0,
@@ -256,6 +229,18 @@ function Game() {
       playerNumber: 2,
       score: 0,
     });
+
+    axios
+      .post("http://localhost:3000/game/", gameInfo, {
+        withCredentials: true,
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => {
+        socket.emit("debug", response.status);
+        navigate("/");
+        window.location.reload();
+      })
+      .catch((error) => console.log(error));
   };
 
   const handleInvitationGame = (id: string) => {
@@ -584,44 +569,31 @@ function Game() {
     updateReady(false);
     setReady(false);
     setStartButton(false);
-    socket.emit("updateScoreServer", {
-      playerNumber: 1,
-      score: 0,
-    });
-    socket.emit("updateScoreServer", {
-      playerNumber: 2,
-      score: 0,
-    });
-
-    if (p1.getScore() === 10) {
-      p1.setScore(0);
-      p2.setScore(0);
+    // if (p1.getScore() === 10 || p2.getScore() === 10) {
+    if (startRef.current) {
+      postGame();
       startRef.current = false;
       timerRef.current && clearTimeout(timerRef.current);
       p1.resetPosition();
       p2.resetPosition();
-      setWin(1);
-      postGame();
-      navigate("/");
-      window.location.reload();
-    } else if (p2.getScore() === 10) {
-      p1.setScore(0);
-      p2.setScore(0);
-      startRef.current = false;
-      timerRef.current && clearTimeout(timerRef.current);
-      p1.resetPosition();
-      p2.resetPosition();
-      setWin(2);
-      postGame();
-      navigate("/");
-      window.location.reload();
     }
-    p1.setScore(0);
-    p2.setScore(0);
-    startRef.current = false;
-    timerRef.current && clearTimeout(timerRef.current);
-    p1.resetPosition();
-    p2.resetPosition();
+
+    // } else if (p2.getScore() === 10) {
+    //   postGame();
+    //   startRef.current = false;
+    //   timerRef.current && clearTimeout(timerRef.current);
+    //   p1.resetPosition();
+    //   p2.resetPosition();
+    //   setWin(2);
+    //     navigate("/");
+    //     window.location.reload();
+    // }
+    // p1.setScore(0);
+    // p2.setScore(0);
+    // startRef.current = false;
+    // timerRef.current && clearTimeout(timerRef.current);
+    // p1.resetPosition();
+    // p2.resetPosition();
   }
 
   const draw = (

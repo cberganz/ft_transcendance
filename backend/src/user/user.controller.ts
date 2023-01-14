@@ -76,33 +76,28 @@ export class UserController {
   async getUserStats(@Param("id") id: string): Promise<UserStats> {
     let user = (await this.userService.user({ id: Number(id) })) as any;
     let games = [...user.p1_games, ...user.p2_games];
-    let gamesPlayed = games
-      .filter(function (obj) {
-        return obj.player1_score;
-      })
-      .map((game) => {
-        let player = game.player1Id === user.id ? 1 : 2;
-        return {
-          id: game.id,
-          date: game.date,
-          playerScore: player === 1 ? game.player1_score : game.player2_score,
-          opponent:
-            player === 1 ? game.player2.username : game.player1.username,
-          opponentScore: player === 1 ? game.player2_score : game.player1_score,
-          result:
-            player === 1
-              ? game.player1_score > game.player2_score
-                ? "Winner"
-                : game.player2_score > game.player1_score
-                ? "Loser"
-                : "Equality"
-              : game.player2_score > game.player1_score
+    let gamesPlayed = games.map((game) => {
+      let player = game.player1Id === user.id ? 1 : 2;
+      return {
+        id: game.id,
+        date: game.date,
+        playerScore: player === 1 ? game.player1_score : game.player2_score,
+        opponent: player === 1 ? game.player2.username : game.player1.username,
+        opponentScore: player === 1 ? game.player2_score : game.player1_score,
+        result:
+          player === 1
+            ? game.player1_score > game.player2_score
               ? "Winner"
-              : game.player1_score > game.player2_score
+              : game.player2_score > game.player1_score
               ? "Loser"
-              : "Equality",
-        };
-      });
+              : "Equality"
+            : game.player2_score > game.player1_score
+            ? "Winner"
+            : game.player1_score > game.player2_score
+            ? "Loser"
+            : "Equality",
+      };
+    });
     let winrate = Math.round(
       (gamesPlayed.filter(function (obj) {
         return obj.result === "Winner";
