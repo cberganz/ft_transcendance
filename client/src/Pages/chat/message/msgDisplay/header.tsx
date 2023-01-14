@@ -10,6 +10,7 @@ import ChatCommands from "../../chatCommands";
 import useAlert from "../../../../Hooks/useAlert";
 import { useNavigate } from "react-router-dom";
 import invitationGame from "../../../Game/components/Invitation/Invitation";
+import axios from "axios"
 
 function isAdmin(userId: number, chan?: Channel): boolean {
   if (chan === undefined) return false;
@@ -26,6 +27,16 @@ export default function ChatHeader(props: any) {
   let profileLink: string = "";
 
   if (chan === undefined) return <div></div>;
+
+  const isBlacklisted = (id: number) => {
+    for (let blacklisted of props.state.actualUser.user.blacklisted) {
+      console.log(blacklisted)
+      console.log(id)
+      if (blacklisted.creatorId === id && blacklisted.type === "block")
+        return (true);
+    }
+    return (false);
+  }
 
   const handleClickGame = (param: any) => {
     navigate("/game");
@@ -112,12 +123,14 @@ export default function ChatHeader(props: any) {
         dmUser !== null &&
         !isBlocked(props.state.actualUser.user, dmUser) ? (
           <div>
+            {isBlacklisted(dmUser?.id) ? null :
             <Tooltip title="Invite for a pong">
               <SportsEsportsIcon
                 onClick={() => handleClickGame(dmUser?.id)}
                 sx={{ cursor: "pointer", color: "grey", marginRight: "20px" }}
               />
             </Tooltip>
+            }
             <Tooltip title="Block user">
               <BlockIcon
                 onClick={(event) => chatCmd("/block " + title.valueOf())}

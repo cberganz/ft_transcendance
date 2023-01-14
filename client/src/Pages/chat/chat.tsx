@@ -180,9 +180,13 @@ class Chat extends React.Component<Props, ChatState> {
     this.setState(ChatData)
   }
 
-  socketUpdateUser(user: User) {
-    let ChatData: ChatState = structuredClone(this.state);
-    ChatData.actualUser.user = user;
+  async socketUpdateUser(state: ChatState) {
+    let ChatData: ChatState = structuredClone(state);
+
+    ChatData.actualUser.user = await axios.get("http://localhost:3000/user/" + state.actualUser.user.id, 
+      {withCredentials: true, headers: {Authorization: `Bearer ${state.actualUser.token}`}})
+      .then(response => response.data)
+      .catch()
     this.setState(ChatData);
   }
 
@@ -193,6 +197,7 @@ class Chat extends React.Component<Props, ChatState> {
     this.setState(ChatData);
   }
 
+  /** RESPONSIVE **/
   setMobile(state: ChatState) {
     let change: boolean = false;
   
@@ -213,7 +218,7 @@ class Chat extends React.Component<Props, ChatState> {
     this.socket.off('updateChanFromServer').on('updateChanFromServer', (chan) => this.socketUpdateChan(chan));
     this.socket.off('newChanFromServer').on('newChanFromServer', (chan) => this.socketNewChan(chan));
     this.socket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.socketNewMsg(msg));
-    this.socket.off('updateUserFromServer').on('updateUserFromServer', (user) => this.socketUpdateUser(user));
+    this.socket.off('updateUserFromServer').on('updateUserFromServer', () => this.socketUpdateUser(this.state));
     usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (profilesList) => this.socketUpdateUsersStatus(profilesList));
 
     window.addEventListener('resize', () => this.setMobile(this.state));

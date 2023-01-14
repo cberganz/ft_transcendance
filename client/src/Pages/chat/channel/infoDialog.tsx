@@ -49,7 +49,6 @@ const rows = [
     createData('/addadmin [username]', 'Adds new administrator (only if administrator).'),
     createData('/ban [username] [time]', 'Bans [username] for [time] minutes (only if administrator).'),
     createData('/mute [username] [time]', 'Mutes [username] for [time] minutes (only if administrator).'),
-    createData('/game [username]', 'Sends game invitation to [username].'),
   ];
 
 export function InfoDialog() {
