@@ -10,7 +10,6 @@ import {
 import * as fs from 'fs'
 import * as path from 'path'
 import { ConfigService } from '@nestjs/config';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('file')
 export class FileController {
