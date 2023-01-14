@@ -52,8 +52,7 @@ class PlayerInfos extends React.Component<{ token: string, navigate: any, curren
 
 	async componentDidUpdate(prevProps: any) {
 		if (prevProps.userId !== this.props.userId) {
-			this.props.navigate(0)
-			this.props.navigate(0)
+			this.setState({ userId: this.props.userId})
 		}
 	}
 
@@ -83,7 +82,7 @@ class PlayerInfos extends React.Component<{ token: string, navigate: any, curren
 						spacing={2}
 					>
 						<Box sx={{ minWidth: '100%', minHeight: '100%', width: '80%', height: '80%' }}>
-					  		<BadgeAvatar username={this.props.username} avatar={this.props.avatar} userId={this.state.userId} />
+					  		<BadgeAvatar username={this.props.username} avatar={this.props.avatar} />
 					  	</Box>
 						<Box sx={{ display: 'flex', alignItems: 'center' }}>
 		  					<Stack direction="column" spacing={1}>
