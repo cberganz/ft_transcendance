@@ -6,16 +6,19 @@ import StatCard from './components/StatCard'
 import PlayedGames from './components/PlayedGames'
 import axios from "axios"
 import { useSearchParams } from "react-router-dom"
+import { useSelector } from "react-redux"
+import { selectCurrentToken } from '../../Hooks/authSlice'
 
 function ProfileHook(component: any) {
 	return function WrappedProfile(props: any) {
 		const [searchParams] = useSearchParams()
 		const userId = searchParams.get("userId")
-		return (<Profile userId={userId ? userId : ""} />)
+		const token = useSelector(selectCurrentToken);
+		return (<Profile token={token} userId={userId ? userId : ""} />)
 	}
 }
 
-class Profile extends React.Component<{ userId: string }, {}> {
+class Profile extends React.Component<{ token: string, userId: string }, {}> {
 
 	state = {
 		data: {
@@ -32,7 +35,8 @@ class Profile extends React.Component<{ userId: string }, {}> {
 	};
 
 	async componentDidMount() {
-		await axios.get("http://localhost:3000/user/stats/" + this.state.userId)
+		await axios.get("http://localhost:3000/user/stats/" + this.state.userId,
+			{withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
 			.then(response => response.data)
 			.then(Profile => { this.setState({ data: Profile }); })
 			.catch(error => alert("Profile " + error.status + ": " + error.message))
@@ -40,7 +44,8 @@ class Profile extends React.Component<{ userId: string }, {}> {
 
 	async componentDidUpdate(prevProps: any) {
 		if (prevProps.userId !== this.props.userId) {
-			await axios.get("http://localhost:3000/user/stats/" + this.props.userId)
+			await axios.get("http://localhost:3000/user/stats/" + this.props.userId,
+			{withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
 				.then(response => response.data)
 				.then(Profile => { this.setState({ data: Profile, userId: this.props.userId }); })
 				.catch(error => alert("Profile " + error.status + ": " + error.message))

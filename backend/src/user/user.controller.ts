@@ -73,6 +73,7 @@ export class UserController {
   }
 
   @Get("/stats/:id")
+  @UseGuards(JwtAuthGuard)
   async getUserStats(@Param("id") id: string): Promise<UserStats> {
     let user = (await this.userService.user({ id: Number(id) })) as any;
     let games = [...user.p1_games, ...user.p2_games];
@@ -165,26 +166,24 @@ export class UserController {
     });
   }
 
-  @Put("/addFriend/:user1/:user2")
+  @Put('/addFriend/:id/:target')
+  @UseGuards(OwnGuard)
+  @UseGuards(JwtAuthGuard)
   async userAddFriend(
-    @Param("user1") user1: string,
-    @Param("user2") user2: string
+  	@Param('id') user1: string,
+  	@Param('target') user2: string
   ): Promise<UserMode1> {
-    return await this.userService.addFriendship(
-      { id: Number(user1) },
-      { id: Number(user2) }
-    );
+  	return await this.userService.addFriendship({ id: Number(user1) }, { id: Number(user2) });
   }
-
-  @Put("/removeFriend/:user1/:user2")
+  
+  @Put('/removeFriend/:id/:target')
+  @UseGuards(OwnGuard)
+  @UseGuards(JwtAuthGuard)
   async userRemoveFriend(
-    @Param("user1") user1: string,
-    @Param("user2") user2: string
+  	@Param('id') user1: string,
+  	@Param('target') user2: string
   ): Promise<UserMode1> {
-    return await this.userService.removeFriendship(
-      { id: Number(user1) },
-      { id: Number(user2) }
-    );
+  	return await this.userService.removeFriendship({ id: Number(user1) }, { id: Number(user2) });
   }
 
   @Put(":id")
