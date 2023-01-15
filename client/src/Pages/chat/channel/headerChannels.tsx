@@ -44,16 +44,12 @@ function CreateChannelButton(props: any) {
       e.preventDefault();
       var title = e.target.name.value.trim();
       if (title === "")
-        return (alert("Please a channel title."))
+        return (alert("Please enter a channel title."))
       if (titleAlreadyExists(title, props.props.state.notJoinedChans, props.props.state.joinedChans))
         return (setOpen(true), alert("Title already exists."))
-      let chanType
-      if (e.target.password.value === "")
-        chanType = "public"
-      else
-        chanType = "private"
+      
       const newChan = {
-        type:      chanType,
+        type:      e.target.password.value === "" ? "public" : "private",
         password:  e.target.password.value,
         title:     title,
         ownerId:   props.props.state.actualUser.user.id,
@@ -112,17 +108,15 @@ function CreateChannelButton(props: any) {
 }
 
 export default function HeaderChannels(props: ChatProps) {
-  const navigate = useNavigate();
-  let avatar = getProfile(props.state.userList, props.state.actualUser.user.id)?.avatar;
-  if (!avatar)
-    avatar = "";
+  const   navigate            = useNavigate();
+  let     avatar              = getProfile(props.state.userList, props.state.actualUser.user.id)?.avatar;
   const   profileLink: string = "/profile?userId=" + props.state.actualUser.user.id.toString();
   return (
     <div className='ChannelHeader'>
         <Tooltip title={getProfile(props.state.userList, props.state.actualUser.user.id)?.username}>
                  <Avatar 
-          alt={avatar.toString()} 
-          src={avatar.toString()}
+          alt={avatar?.toString()} 
+          src={avatar?.toString()}
           sx={{ width: 30, height: 30, marginTop: '10px', marginLeft: '25%', cursor: 'pointer' }}
           onClick={() => navigate(profileLink)} />
         </Tooltip>

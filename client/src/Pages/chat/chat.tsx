@@ -1,6 +1,6 @@
 import ChannelDisplay from "./channel/channels/channelDisplay";
 import MessageDisplay from "./message/msgDisplay/messageDisplay";
-import ChatHeader from "./message/msgDisplay/header";
+import ChatHeader from "./message/msgDisplay/chatHeader";
 import SendBox from "./message/sendMsg/SendBox";
 import HeaderChannels from "./channel/headerChannels";
 import './chat.css'

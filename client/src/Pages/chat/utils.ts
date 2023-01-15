@@ -2,12 +2,23 @@ import { ChatState, Channel, User, userProfile } from "./stateInterface"
 import { styled } from '@mui/material/styles';
 import Badge from '@mui/material/Badge';
 
+export function dateToString(date: Date) {
+  return (
+    String(date.getDay()) 
+    + "/" + String(date.getMonth()) 
+    + "/" + String(date.getFullYear()) 
+    + " " + String(date.getHours()) 
+    + ":" + String(date.getMinutes())
+  ); 
+}
+
 export function getChan(id: number, state: ChatState) {
     for (const chan of state.joinedChans) {
       if (chan.id === id)
-        return chan
+        return chan;
     }
-  }
+    return (undefined);
+}
 
 export function userIsInChan(chan: Channel, userId: number) {
     if (chan.members === undefined)
@@ -17,6 +28,17 @@ export function userIsInChan(chan: Channel, userId: number) {
         return (true)
     }
     return (false)
+}
+
+export function getLastMsg(state: ChatState, chan: Channel) {
+  if (!chan.Message)
+    return undefined ;
+  for (let i = chan.Message.length - 1; i >= 0; i--) {
+    if (!isBlocked(state.actualUser.user, chan?.Message[i].author)) {
+      return chan?.Message[i];
+    }
+  }
+  return undefined ;
 }
 
 export function sortChannels(chans: Channel[]) {
@@ -43,6 +65,33 @@ export function sortChannels(chans: Channel[]) {
         return (true);
     }
     return (false)
+  }
+
+  export function isAdmin(userId: number, chan?: Channel): boolean {
+    if (chan === undefined) return false;
+    for (let admin of chan.admin) {
+      if (admin.id === userId) return true;
+    }
+    return false;
+  }
+  
+  export function isBlacklisted(id: number, user: User) {
+    if (!user.blacklisted)
+      return (false);
+    for (let blacklisted of user.blacklisted) {
+      if (blacklisted.creatorId === id && blacklisted.type === "block")
+        return (true);
+    }
+    return (false);
+  }
+
+  export function getDmUser(state: ChatState, chan: any) {
+    if (!chan || chan.type != 'dm')
+      return undefined;
+    if (state.actualUser.user.id === chan.members[0].id)
+      return getProfile(state.userList, chan.members[1].id);
+    else
+      return getProfile(state.userList, chan.members[0].id);
   }
 
   export const StyledBadge = styled(Badge)(({ theme }) => ({
