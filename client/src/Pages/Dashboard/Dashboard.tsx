@@ -1,27 +1,56 @@
-import * as React from "react"
 import { selectCurrentUser } from '../../Hooks/authSlice'
 import ConnectedUsers from './ConnectedUsers';
-import { Avatar } from "@mui/material";
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import {
+	Avatar,
+	Box,
+	Link,
+	Typography
+} from '@mui/material';
+
 import './Dashboard.css'
 import { useSelector } from "react-redux"
 import { useEffect, useState } from 'react';
 import { usersStatusSocket } from "../../App/App";
 import { userProfile } from '../chat/stateInterface';
-import Paper from '@mui/material/Paper';
 import { useNavigate } from "react-router-dom";
-import Chip from '@mui/material/Chip';
+import { styled, alpha } from '@mui/material/styles';
+import FriendSection from "./FriendList";
 
 interface allUsers {
 	id: number,
 	User: string,
 	status: string,
 	playgame: string,
+}
+
+function UserCard() {
+	const currentUser = useSelector(selectCurrentUser)
+
+	const StyledAccount = styled('div')(({ theme }) => ({
+		display: 'flex',
+		alignItems: 'center',
+		padding: theme.spacing(2, 2.5),
+		borderRadius: Number(theme.shape.borderRadius) * 1.5,
+		backgroundColor: alpha(theme.palette.grey[500], 0.12),
+	}));
+
+	return (
+		<Box sx={{ mb: 5, mx: 2.5 }}>
+			<Link underline="none">
+			<StyledAccount>
+				<Avatar src={currentUser.avatar} alt="photoURL" />
+				<Box sx={{ ml: 2 }}>
+				<Typography variant="subtitle2" sx={{ color: 'text.primary', fontWeight: 'bold' }}>
+					{currentUser.username}
+				</Typography>
+				<Typography variant="body2" sx={{ color: 'text.secondary' }}>
+					{currentUser.login}
+				</Typography>
+				</Box>
+			</StyledAccount>
+			</Link>
+		</Box>
+	)
 }
 
 
@@ -55,6 +84,7 @@ export default function Dashboard() {
 		}
 		setAllUsersTab(allUsers);
 	}
+
 	const isFriend = (id: number) => {
 		if (!currentUser.friends)
 			return false
@@ -70,55 +100,23 @@ export default function Dashboard() {
 		<div>
 			<div className="dashboard">
 				<div className="userCol">
-					<div className="userProfile">
-						<Avatar 
-						src={currentUser.avatar}
-						sx={{ width: 160, height: 160, marginTop: '30px' }}
-						className="dashboardAvatar"
-						/>
-						<br />
-						<h3>{currentUser.username}</h3>
-						<br />
+					<div className="userCol">
+						<UserCard/>
+						{currentUser.friends.length
+							? 
+								<div>
+									<Typography sx={{ color: 'text.primary', fontWeight: 'bold' }}>
+										Friends:
+									</Typography>
+									<FriendSection data={userList.filter((user) => isFriend(user.id))}/>
+								</div>
+							: null}
 					</div>
-
-					{currentUser.friends.length ? 
-					<div className="friendList">
-						<TableContainer component={Paper}>
-							<Table>
-								<TableHead>
-									<TableRow>
-										<TableCell>Friend</TableCell>
-										<TableCell>Status</TableCell>
-									</TableRow>
-								</TableHead>
-								<TableBody>
-
-								{userList.filter((user) => isFriend(user.id)).map((user) => (
-									
-									<TableRow
-									key={user.id}
-									sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-									>
-										<TableCell component="th" scope="row">
-											<b onClick={() => navigate("/profile?userId=" + user.id)} style={{cursor: 'pointer'}}>{user.username}</b>
-										</TableCell>
-										<TableCell>
-											{user.status === "offline" ? 
-											<Chip color="warning" label={user.status}></Chip>
-											:<Chip color="primary" label={user.status}></Chip>}
-										</TableCell>
-									</TableRow>
-								))}
-								</TableBody>
-							</Table>
-						</TableContainer>
-						<br />
-					</div> : null}
-
 				</div>
-
-				<div className="contentCol">
-					<div className="connectedUsers"><ConnectedUsers allUsersTab={allUsersTab} navigate={navigate} /></div>
+				<div className="userContentContainer">
+					<div className="contentCol">
+							<div className="connectedUsers"><ConnectedUsers allUsersTab={allUsersTab} navigate={navigate} /></div>
+					</div>
 				</div>
 			</div>
 		</div>
