@@ -151,11 +151,11 @@ function ProfileBox() {
             cursor: "pointer",
           }}
         >
-          <Grid item sx={{ marginRight: 1 }} xs={0}>
-            <Avatar src={user.avatar} />
+          <Grid item sx={{ marginRight: 2 }} xs={0}>
+            <UserNameTypographie username={user.username} />
           </Grid>
           <Grid item xs={0}>
-            <UserNameTypographie username={user.username} />
+            <Avatar src={user.avatar} />
           </Grid>
         </Grid>
       </Box>
@@ -178,7 +178,7 @@ function ProfileBox() {
 }
 
 function SearchBar() {
-	const userList 		  = useSelector(selectUserlist).userList
+	const userList 	  = useSelector(selectUserlist).userList
   const { setAlert }  = useAlert();
   const navigate      = useNavigate();
 
@@ -258,7 +258,7 @@ export default function PrimarySearchAppBar() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" color="default" sx={{ boxShadow: 0 }}>
+      <AppBar position="static" color="default" sx={{ backgroundColor: "white", borderBottom: "solid 1px #f4f4f4", boxShadow: 0 }}>
         <Toolbar>
           <SwipeableTemporaryDrawer />
           {invitation && (
