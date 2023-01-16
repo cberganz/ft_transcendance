@@ -18,7 +18,7 @@
         background-position: right;
         background-size: 1px 3px;
         background-repeat: repeat-y;
-        padding-top: 50px;
+        padding-top: 30px;
     }
 
     .userContentContainer {
@@ -35,7 +35,7 @@
         grid-column-start: 2;
         grid-column-end: 2;
         grid-template-rows: 6vw auto;
-        width: 80%;
+        width: 60%;
     }
 
     .homeHeader {
