@@ -2,12 +2,12 @@ import * as React from 'react'
 import CssBaseline from '@mui/material/CssBaseline'
 import { Grid, Container } from '@mui/material'
 import PlayerInfos from './components/PlayerInfos'
-import StatCard from './components/StatCard'
 import PlayedGames from './components/PlayedGames'
 import axios from "axios"
 import { useSearchParams } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { selectCurrentToken } from '../../Hooks/authSlice'
+import StatCard from "./components/StatCard"
 
 function ProfileHook(component: any) {
 	return function WrappedProfile(props: any) {
@@ -56,7 +56,7 @@ class Profile extends React.Component<{ token: string, userId: string }, {}> {
 			<React.Fragment>
 				<CssBaseline />
 				<div>
-					<Container maxWidth="md" sx={{ mt: 6 }}>
+					<Container maxWidth="lg" sx={{ mt: 6 }}>
 						<Grid container spacing={3}>
 							<Grid item xs={12} sm={12} md={12}>
 								<PlayerInfos
@@ -68,25 +68,36 @@ class Profile extends React.Component<{ token: string, userId: string }, {}> {
 							<Grid item xs={12} sm={6} md={3}>
 								<StatCard
 									title="Games played"
-									data={String(this.state.data.playedGames)}
+									total={String(this.state.data.playedGames)}
+									icon={'ant-design:check-circle-filled'}
+									sx={{ borderRadius: "10px" }}
 								/>
 							</Grid>
 							<Grid item xs={12} sm={6} md={3}>
 								<StatCard
 									title="Games won"
-									data={String(this.state.data.gamesWon)}
+									total={String(this.state.data.gamesWon)}
+									color="success"
+									icon={'ant-design:trophy-filled'}
+									sx={{ borderRadius: "10px" }}
 								/>
 							</Grid>
 							<Grid item xs={12} sm={6} md={3}>
 								<StatCard
 									title="Games lost"
-									data={String(this.state.data.gamesLost)}
+									total={String(this.state.data.gamesLost)}
+									color="error"
+									icon={'ant-design:frown-filled'}
+									sx={{ borderRadius: "10px" }}
 								/>
 							</Grid>
 							<Grid item xs={12} sm={6} md={3}>
 								<StatCard
 									title="Win rate"
-									data={this.state.data.winRate !== -1 ? String(this.state.data.winRate) + "%" : "N/A"}
+									total={this.state.data.winRate !== -1 ? String(this.state.data.winRate) + "%" : "N/A"}
+									color="warning"
+									icon={'ant-design:fund-filled'}
+									sx={{ borderRadius: "10px" }}
 								/>
 							</Grid>
 							<Grid item xs={12} md={18} lg={18}>
