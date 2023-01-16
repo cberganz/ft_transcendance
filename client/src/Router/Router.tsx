@@ -10,24 +10,12 @@ import Signup from "../Pages/Auth/SignUp"
 import TfaAuth from "../Pages/Auth/TfaAuth"
 import TfaSettings from "../Pages/Auth/TfaSettings"
 import PersistLogin from '../Hooks/persistLogin';
-import { selectCurrentUser } from '../Hooks/authSlice'
 import { selectCurrentToken } from '../Hooks/authSlice'
 import { useSelector } from "react-redux"
-import io from "socket.io-client";
 import AlertPopup from '../Components/AlertPopup';
 
-export const usersStatusSocket = io("http://localhost:3000/app");
 
 function	OutletRoute() {
-	const user = useSelector(selectCurrentUser);
-	const userData = {
-		id: user.id,
-		login: user.login,
-		username: user.username,
-		status: "online",
-		avatar: user.avatar,
-	}
-	usersStatusSocket.emit("connection", userData);
 	return (
 		<div>
 			<PrimarySearchAppBar />

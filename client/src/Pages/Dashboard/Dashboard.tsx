@@ -11,7 +11,7 @@ import TableRow from '@mui/material/TableRow';
 import './Dashboard.css'
 import { useSelector } from "react-redux"
 import { useEffect, useState } from 'react';
-import { usersStatusSocket } from "../../Router/Router";
+import { usersStatusSocket } from "../../App/App";
 import { userProfile } from '../chat/stateInterface';
 import Paper from '@mui/material/Paper';
 import { useNavigate } from "react-router-dom";

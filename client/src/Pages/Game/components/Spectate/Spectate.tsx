@@ -1,4 +1,4 @@
-import { usersStatusSocket } from "../../../../Router/Router";
+import { usersStatusSocket } from "../../../../App/App";
 
 function spectateGame(invitedPlayerId: number): void {
   usersStatusSocket.emit("spectatePlayer", invitedPlayerId);

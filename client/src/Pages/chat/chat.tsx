@@ -14,7 +14,7 @@ import { selectCurrentUser } from '../../Hooks/authSlice'
 import { selectCurrentToken } from '../../Hooks/authSlice'
 import { useSelector } from "react-redux"
 import SearchBar from "./channel/searchBar"
-import { usersStatusSocket } from "../../Router/Router";
+import { usersStatusSocket } from "../../App/App";
 import { useSearchParams } from 'react-router-dom';
 
 function ChatWithHook(component: any) {

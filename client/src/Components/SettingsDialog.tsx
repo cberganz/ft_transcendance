@@ -17,7 +17,7 @@ import { useSelector, useDispatch } from "react-redux"
 import useAlert from "../Hooks/useAlert";
 import { AvatarUpload } from './AvatarUpload';
 import axios from 'axios'
-import { usersStatusSocket } from "../Router/Router";
+import { usersStatusSocket } from "../App/App";
 
 export interface SimpleDialogProps {
 	open: boolean;
