@@ -1,3 +1,5 @@
+import { useSelector } from "react-redux"
+import { selectUserlist } from '../../Hooks/userListSlice'
 import { selectCurrentUser } from '../../Hooks/authSlice'
 import ConnectedUsers from './ConnectedUsers';
 import {
@@ -8,9 +10,6 @@ import {
 } from '@mui/material';
 
 import './Dashboard.css'
-import { useSelector } from "react-redux"
-import { useEffect, useState } from 'react';
-import { usersStatusSocket } from "../../App/App";
 import { userProfile } from '../chat/stateInterface';
 import { useNavigate } from "react-router-dom";
 import { styled, alpha } from '@mui/material/styles';
@@ -55,25 +54,25 @@ function UserCard() {
 
 
 export default function Dashboard() {
-	const navigate = useNavigate();
-	const currentUser = useSelector(selectCurrentUser)
-	const [ userList, setUserList ] = useState<userProfile[]>([]);
-	const [allUsersTab, setAllUsersTab ] = useState<allUsers[]>([]);
-
-	useEffect(() => {
-		usersStatusSocket.emit("updateStatus", "online");
-	}, []);
+	const navigate 		= useNavigate();
+	const currentUser 	= useSelector(selectCurrentUser)
+	const userList 		= useSelector(selectUserlist).userList
 	
-	const socketUpdateUsersStatus = (usersStatusList: userProfile[]) => {
-		for (let i = 0; i < usersStatusList.length; i++) {
-			if (usersStatusList[i].id === undefined || usersStatusList[i].id === currentUser.id) {
-				usersStatusList.splice(i, 1);
-				i--;
-			}
+	const userListWithoutCurrentUser = () => {
+		let ret: userProfile[] = structuredClone(userList);
+
+		for (let i = 0; i < ret.length; i++) {
+			if (!ret[i].id || ret[i].id === currentUser.id)
+				ret.splice(i, 1);
 		}
-		setUserList(usersStatusList);
+		return (ret);
+	}
+
+	const getAllUsersTab = () => {
 		let allUsers: allUsers[] = [];
-		for (let user of usersStatusList) {
+		let userListWithoutCurrentUserArr = userListWithoutCurrentUser();
+
+		for (let user of userListWithoutCurrentUserArr) {
 			const tmp: allUsers = {
 				id: user.id,
 				User: user.username,
@@ -82,7 +81,7 @@ export default function Dashboard() {
 			}
 			allUsers.push(tmp);
 		}
-		setAllUsersTab(allUsers);
+		return (allUsers);
 	}
 
 	const isFriend = (id: number) => {
@@ -95,7 +94,6 @@ export default function Dashboard() {
 		return false;
 	}
 
-    usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (userStatusList: userProfile[]) => socketUpdateUsersStatus(userStatusList));
 	return (
 		<div>
 			<div className="dashboard">
@@ -108,14 +106,14 @@ export default function Dashboard() {
 									<Typography sx={{ color: 'text.primary', fontWeight: 'bold' }}>
 										Friends:
 									</Typography>
-									<FriendSection data={userList.filter((user) => isFriend(user.id))}/>
+									<FriendSection data={userListWithoutCurrentUser().filter((user) => isFriend(user.id))}/>
 								</div>
 							: null}
 					</div>
 				</div>
 				<div className="userContentContainer">
 					<div className="contentCol">
-							<div className="connectedUsers"><ConnectedUsers allUsersTab={allUsersTab} navigate={navigate} /></div>
+							<div className="connectedUsers"><ConnectedUsers allUsersTab={getAllUsersTab()} navigate={navigate} /></div>
 					</div>
 				</div>
 			</div>

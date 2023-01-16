@@ -85,13 +85,13 @@ export function sortChannels(chans: Channel[]) {
     return (false);
   }
 
-  export function getDmUser(state: ChatState, chan: any) {
+  export function getDmUser(userList: userProfile[], state: ChatState, chan: any) {
     if (!chan || chan.type !== 'dm')
       return undefined;
     if (state.actualUser.user.id === chan.members[0].id)
-      return getProfile(state.userList, chan.members[1].id);
+      return getProfile(userList, chan.members[1].id);
     else
-      return getProfile(state.userList, chan.members[0].id);
+      return getProfile(userList, chan.members[0].id);
   }
 
   export const StyledBadge = styled(Badge)(({ theme }) => ({

@@ -14,7 +14,7 @@ import { selectCurrentUser } from '../../Hooks/authSlice'
 import { selectCurrentToken } from '../../Hooks/authSlice'
 import { useSelector } from "react-redux"
 import SearchBar from "./channel/searchBar"
-import { usersStatusSocket } from "../../App/App";
+import { usersStatusSocket } from "../../Router/Router";
 import { useSearchParams } from 'react-router-dom';
 
 function ChatWithHook(component: any) {
@@ -51,7 +51,6 @@ class Chat extends React.Component<Props, ChatState> {
       },
       joinedChans: [],
       notJoinedChans: [],
-      userList: [],
       mobile: window.innerWidth < 600 ? true : false,
     };
 
@@ -190,13 +189,6 @@ class Chat extends React.Component<Props, ChatState> {
     this.setState(ChatData);
   }
 
-  socketUpdateUsersStatus(userList: any) {
-    let ChatData: ChatState = structuredClone(this.state);
-
-    ChatData.userList = userList;
-    this.setState(ChatData);
-  }
-
   /** RESPONSIVE **/
   setMobile(state: ChatState) {
     let change: boolean = false;
@@ -219,7 +211,6 @@ class Chat extends React.Component<Props, ChatState> {
     this.socket.off('newChanFromServer').on('newChanFromServer', (chan) => this.socketNewChan(chan));
     this.socket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.socketNewMsg(msg));
     this.socket.off('updateUserFromServer').on('updateUserFromServer', () => this.socketUpdateUser(this.state));
-    usersStatusSocket.off('updateStatusFromServer').on('updateStatusFromServer', (profilesList) => this.socketUpdateUsersStatus(profilesList));
 
     window.addEventListener('resize', () => this.setMobile(this.state));
 

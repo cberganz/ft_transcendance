@@ -142,6 +142,8 @@ export class ChannelController {
 	async newDMChannel (
 		@Body() channelData: { user1: string, user2: string }
 	): Promise<ChannelMode1> {
+		if (!channelData.user1 || !channelData.user1 || channelData.user1 == channelData.user2)
+			throw new ForbiddenException();
 		let newChan = await this.channelService.createChannel({
 			type: "dm",
 			members: { connect: [{ id: Number(channelData.user1) }, { id: Number(channelData.user2) }] },

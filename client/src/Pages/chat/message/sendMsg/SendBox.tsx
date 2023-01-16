@@ -4,9 +4,12 @@ import axios from 'axios';
 import ChatCommands from '../../chatCommands'
 import useAlert from "../../../../Hooks/useAlert";
 import { getChan } from '../../utils';
-  
+import { useSelector } from "react-redux"
+import { selectUserlist } from '../../../../Hooks/userListSlice'
+
 export default function SendBox(props: any) {
   const { setAlert } = useAlert();
+	const userList 		= useSelector(selectUserlist).userList
 
   const newMessage = async (value: String) => {
       const chan = getChan(props.state.actualUser.openedConvID, props.state)
@@ -22,7 +25,7 @@ export default function SendBox(props: any) {
   }
 
   const chatCmd = async (value: string) => {
-    let errorLog: string | undefined = await ChatCommands(value, props.state, props.socket, 
+    let errorLog: string | undefined = await ChatCommands(value, props.state, userList, props.socket, 
       {chanId: props.state.actualUser.openedConvID, openConvHandler: props.openConvHandler})
     if (!errorLog)
       return ;

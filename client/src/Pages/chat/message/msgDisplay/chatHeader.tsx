@@ -5,6 +5,8 @@ import * as chatIcons from './chatIcons'
 import { useNavigate } from "react-router-dom";
 import '../../chat.css'
 import { ChatState, User } from "../../stateInterface";
+import { useSelector } from "react-redux"
+import { selectUserlist } from '../../../../Hooks/userListSlice'
 
 function RightDmHeader(props: {state: ChatState, dmUser: User, chatCmd: any}) {
   return (
@@ -69,9 +71,10 @@ function LeftChanHeader(props: {chan: any, state: ChatState}) {
 }
 
 export default function ChatHeader(props: any) {
-  const { setAlert } = useAlert();
-  const chan = getChan(props.state.actualUser.openedConvID, props.state); 
-  let   dmUser: any = getDmUser(props.state, chan);
+  const { setAlert }  = useAlert();
+  const chan          = getChan(props.state.actualUser.openedConvID, props.state); 
+	const userList 		  = useSelector(selectUserlist).userList;
+  let   dmUser: any   = getDmUser(userList, props.state, chan);
   
   if (chan === undefined) return <div></div>;
 
@@ -79,6 +82,7 @@ export default function ChatHeader(props: any) {
     let errorLog: string | undefined = await ChatCommands(
       cmd,
       props.state,
+      userList,
       props.socket,
       { chanId: chan.id, openConvHandler: props.openConvHandler }
     );

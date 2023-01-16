@@ -1,4 +1,4 @@
-import { ChatState } from './stateInterface'
+import { ChatState, userProfile } from './stateInterface'
 import axios from 'axios'
 import { getChan } from './utils';
 
@@ -25,14 +25,14 @@ function getId(userList: any[], username: string): number {
 }
 
 // handler
-export default async function ChatCommands(input: string, state: ChatState, socket: any, params: any)
+export default async function ChatCommands(input: string, state: ChatState, userList: userProfile[], socket: any, params: any)
     : Promise<string | undefined> 
 {
     let inputs = input.split(' ', 3);
     let func = commands.get(inputs[0])
 
     if (func !== undefined) {
-        let errorLog: string = await func(inputs, state, socket, params)
+        let errorLog: string = await func(inputs, state, userList, socket, params)
             .then((response) => response)
         if (errorLog === "")
             return undefined;
@@ -43,7 +43,7 @@ export default async function ChatCommands(input: string, state: ChatState, sock
 
 /** CHAT COMMANDS */
 
-async function JoinChan(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
+async function JoinChan(inputs: string[], state: ChatState, userList: userProfile[], socket: any, params: any) : Promise<string> {
     socket.emit('joinChatRoom', params.chanId);
     const chan = getChan(params.chanId, state);
     
@@ -63,7 +63,7 @@ async function JoinChan(inputs: string[], state: ChatState, socket: any, params:
     return "Chan joined.";
 }
 
-async function LeaveChan(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
+async function LeaveChan(inputs: string[], state: ChatState, userList: userProfile[], socket: any, params: any) : Promise<string> {
     socket.emit('leaveChatRoom', params.chanId)
     const chan = getChan(params.chanId, state);
     if (chan?.type === 'dm')
@@ -89,7 +89,7 @@ async function LeaveChan(inputs: string[], state: ChatState, socket: any, params
     return "Chan left.";
 }
 
-async function SetPwd(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
+async function SetPwd(inputs: string[], state: ChatState, userList: userProfile[], socket: any, params: any) : Promise<string> {
     const chan = getChan(params.chanId, state);
     if (chan?.type === 'dm' || inputs.length === 1)
         return "";
@@ -104,7 +104,7 @@ async function SetPwd(inputs: string[], state: ChatState, socket: any, params: a
     return "Password successfully set.";
 }
 
-async function RmPwd(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
+async function RmPwd(inputs: string[], state: ChatState, userList: userProfile[], socket: any, params: any) : Promise<string> {
     const chan = getChan(params.chanId, state);
     if (chan?.type === 'dm')
         return "";
@@ -119,12 +119,12 @@ async function RmPwd(inputs: string[], state: ChatState, socket: any, params: an
     return "Password successfully removed.";
 }
 
-async function AddAdmin(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
+async function AddAdmin(inputs: string[], state: ChatState, userList: userProfile[], socket: any, params: any) : Promise<string> {
     const chan = getChan(params.chanId, state);
     if (chan?.type === 'dm' || inputs.length === 1 || chan === undefined)
         return "";
 
-    let adminId = getId(state.userList, inputs[1]);
+    let adminId = getId(userList, inputs[1]);
     for (let user of chan?.members) {
         if (user.id === adminId) {
             adminId = user.id;
@@ -144,7 +144,7 @@ async function AddAdmin(inputs: string[], state: ChatState, socket: any, params:
     return "User " + inputs[1] + " successfully added as administrator.";
 }
 
-async function Block(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
+async function Block(inputs: string[], state: ChatState, userList: userProfile[], socket: any, params: any) : Promise<string> {
     const chan = getChan(params.chanId, state);
     if (chan === undefined)
         return "";
@@ -154,7 +154,7 @@ async function Block(inputs: string[], state: ChatState, socket: any, params: an
         else
            inputs = [inputs[0], chan.members[0].username.valueOf()]
     }
-    let blockedId = getId(state.userList, inputs[1]);
+    let blockedId = getId(userList, inputs[1]);
     for (let user of chan?.members) {
         if (user.id === blockedId) {
             blockedId = user.id;
@@ -176,7 +176,7 @@ async function Block(inputs: string[], state: ChatState, socket: any, params: an
     return "User successfully blocked.";
 }
 
-async function Unblock(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
+async function Unblock(inputs: string[], state: ChatState, userList: userProfile[], socket: any, params: any) : Promise<string> {
     const   chan = getChan(params.chanId, state);
     let     blacklistId = -1;
     
@@ -189,7 +189,7 @@ async function Unblock(inputs: string[], state: ChatState, socket: any, params: 
         inputs = [inputs[0], chan.members[0].username.valueOf()]
     }
 
-    let     blockedId = getId(state.userList, inputs[1]);
+    let     blockedId = getId(userList, inputs[1]);
     for (let user of chan?.members) {
         if (user.id === blockedId) {
             blockedId = user.id;
@@ -214,13 +214,13 @@ async function Unblock(inputs: string[], state: ChatState, socket: any, params: 
     return "User successfully unblocked.";
 }
 
-async function Ban(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
+async function Ban(inputs: string[], state: ChatState, userList: userProfile[], socket: any, params: any) : Promise<string> {
     const chan = getChan(params.chanId, state);
     if (inputs.length === 2)
         inputs = [inputs[0], inputs[1], "0"];
     if (inputs.length < 3 || chan === undefined || isNaN(Number(inputs[2])))
         return "";
-    let blockedId = getId(state.userList, inputs[1]);;
+    let blockedId = getId(userList, inputs[1]);;
     let blockedLogin;
     for (let user of chan?.members) {
         if (user.id === blockedId) {
@@ -258,11 +258,11 @@ async function Ban(inputs: string[], state: ChatState, socket: any, params: any)
     return "User " + inputs[1] + " successfully banned for " + inputs[2] + " minutes.";
 }
 
-async function Mute(inputs: string[], state: ChatState, socket: any, params: any) : Promise<string> {
+async function Mute(inputs: string[], state: ChatState, userList: userProfile[], socket: any, params: any) : Promise<string> {
     const chan = getChan(params.chanId, state);
     if (inputs.length < 3 || chan === undefined || isNaN(Number(inputs[2])))
         return "";
-    let blockedId = getId(state.userList, inputs[1]);
+    let blockedId = getId(userList, inputs[1]);
     for (let user of chan?.members) {
         if (user.id === blockedId) {
             blockedId = user.id;

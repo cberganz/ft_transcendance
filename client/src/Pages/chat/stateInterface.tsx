@@ -2,7 +2,6 @@ export interface ChatState {
     actualUser: actualUser,
     joinedChans: Channel[],
     notJoinedChans: Channel[],
-    userList: userProfile[],
     mobile: boolean,
 }
 

@@ -3,10 +3,12 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import { Player } from '@lottiefiles/react-lottie-player';
 import '../../chat.css'
-import { Message, User, Channel, ChatState } from '../../stateInterface'
+import { Message, User, Channel, ChatState, userProfile } from '../../stateInterface'
 import { getChan, isBlocked, getProfile, dateToString } from '../../utils'
 import Tooltip from '@mui/material/Tooltip';
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux"
+import { selectUserlist } from '../../../../Hooks/userListSlice'
 
 function MessageContent(props: {type: any, msg: Message, author: any}) {
   let date: Date              = new Date(props.msg.date);
@@ -26,11 +28,11 @@ function MessageContent(props: {type: any, msg: Message, author: any}) {
   );
 }
 
-function MessageItemReceiver(msg: Message, chan: Channel | undefined, actualUser: User, state: ChatState) {
+function MessageItemReceiver(msg: Message, chan: Channel | undefined, actualUser: User, userList: userProfile[]) {
   if (!chan || (isBlocked(actualUser, msg.author) && chan.type !== 'dm'))
       return (<div></div>);
-  let     author              = getProfile(state.userList, msg.author.id);
-
+  let     author    = getProfile(userList, msg.author.id);
+  
   return (
     <div className="leftChat">
         <div className="leftChatAvatar">
@@ -44,8 +46,8 @@ function MessageItemReceiver(msg: Message, chan: Channel | undefined, actualUser
 }
 
 
-function MessageItemSender(msg: Message, state: ChatState) {
-  let     author              = getProfile(state.userList, msg.author.id);
+function MessageItemSender(msg: Message, userList: userProfile[]) {
+  let     author              = getProfile(userList, msg.author.id);
     
   return (
     <div className="rightChat">
@@ -60,7 +62,8 @@ function MessageItemSender(msg: Message, state: ChatState) {
 }
 
 export default function MessageDisplay(props: any) {
-  let chan = getChan(props.state.actualUser.openedConvID, props.state);
+  let chan          = getChan(props.state.actualUser.openedConvID, props.state);
+  const userList 		= useSelector(selectUserlist).userList;
 
   if (props.state.actualUser.openedConvID === -1 || !chan?.Message)
     return (
@@ -79,8 +82,8 @@ export default function MessageDisplay(props: any) {
       <Stack sx={{ width: '100%' }} spacing={2}>
           {chan.Message.map((msg: Message) => (
             <div key={msg.id}>
-              {msg.author.id === props.state.actualUser.user.id ? MessageItemSender(msg, props.state) : 
-                MessageItemReceiver(msg, chan, props.state.actualUser.user, props.state)}
+              {msg.author.id === props.state.actualUser.user.id ? MessageItemSender(msg, userList) : 
+                MessageItemReceiver(msg, chan, props.state.actualUser.user, userList)}
             </div>
           ))}
       </Stack>

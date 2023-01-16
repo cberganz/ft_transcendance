@@ -1,10 +1,13 @@
 import React from 'react';
-import { ChatState } from '../stateInterface'
+import { ChatState, userProfile } from '../stateInterface'
 import axios from 'axios';
 import useAlert from "../../../Hooks/useAlert";
+import { useSelector } from "react-redux"
+import { selectUserlist } from '../../../Hooks/userListSlice'
 
-function getUserListWithoutDm(state: ChatState) {
-  let userList = structuredClone(state.userList);
+
+function getUserListWithoutDm(state: ChatState, usersList: userProfile[]) {
+  let userList = structuredClone(usersList);
   let dmList = [];
 
   for (let chan of state.joinedChans) {
@@ -16,10 +19,11 @@ function getUserListWithoutDm(state: ChatState) {
     }
   }
   for (let i = userList.length - 1; i >= 0; i--) {
+    if (userList[i].id === state.actualUser.user.id)
+      userList.splice(i, 1);
     for (let dmUser of dmList) {
-      if (userList[i] && dmUser.id === userList[i].id) {
+      if (userList[i] && (dmUser.id === userList[i].id)) 
         userList.splice(i, 1);
-      }
     }
   }
   return (userList);
@@ -45,7 +49,7 @@ async function createChan(newChan: {user1: number, user2: number}, props: any) {
 
 export default function SearchBar(props: any) {
     const { setAlert }  = useAlert();
-    let   userList      = getUserListWithoutDm(props.state);
+    let   userList      = getUserListWithoutDm(props.state, useSelector(selectUserlist).userList);
     
     const newDM = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()

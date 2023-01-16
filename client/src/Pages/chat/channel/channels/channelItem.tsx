@@ -13,18 +13,21 @@ import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
 import { StyledBadge, getProfile, getDmUser, getLastMsg } from '../../utils';
-import { Channel, ChatState } from '../../stateInterface';
+import { Channel, ChatState, userProfile } from '../../stateInterface';
 import ChatCommands from '../../chatCommands';
 import useAlert from "../../../../Hooks/useAlert";
+import { useSelector } from "react-redux"
+import { selectUserlist } from '../../../../Hooks/userListSlice'
 
-function getChanName(state: ChatState, chan: Channel) {
+function getChanName(userList: userProfile[], state: ChatState, chan: Channel) {
   if (chan.type !== 'dm')
     return (chan.title);
-  return (getDmUser(state, chan)?.username);
+  return (getDmUser(userList, state, chan)?.username);
 }
 
 function ItemContent(props: {chan: any, lastMsg: any, state: ChatState}) {
-  const chanName = getChanName(props.state, props.chan);
+	const userList 		= useSelector(selectUserlist).userList
+  const chanName    = getChanName(userList, props.state, props.chan);
 
   return (
     <>
@@ -38,7 +41,7 @@ function ItemContent(props: {chan: any, lastMsg: any, state: ChatState}) {
                   variant="body2"
                   color="text.primary"
                 >
-                 {getProfile(props.state.userList, props.lastMsg?.author?.id)?.username}
+                 {getProfile(useSelector(selectUserlist).userList, props.lastMsg?.author?.id)?.username}
                 </Typography>
                 <span> </span>
                   {props.lastMsg?.content?.substring(0, 15)}
@@ -53,8 +56,9 @@ function ItemContent(props: {chan: any, lastMsg: any, state: ChatState}) {
 }
 
 function DmItemAvatar(props: {state: ChatState, chan: any}) {
-  let dmUser = getDmUser(props.state, props.chan);
-  let isConnected = getProfile(props.state.userList, dmUser?.id)?.status === 'online' ? true : false;
+	const userList 		= useSelector(selectUserlist).userList
+  let dmUser        = getDmUser(userList, props.state, props.chan);
+  let isConnected   = getProfile(useSelector(selectUserlist).userList, dmUser?.id)?.status === 'online' ? true : false;
   
   return (
       <>
@@ -101,9 +105,10 @@ export function ChannelItem(chan: Channel, props: any) {
 }
 
 export function NotJoinedChanItem(props: any) {
-  const lastMsg = props.chan?.Message?.slice(-1);
-  const { setAlert } = useAlert();
+  const lastMsg         = props.chan?.Message?.slice(-1);
+  const { setAlert }    = useAlert();
   const [open, setOpen] = React.useState(false);
+	const userList 		    = useSelector(selectUserlist).userList;
   
   const handleClickOpen = () => {
     setOpen(true);
@@ -120,7 +125,7 @@ export function NotJoinedChanItem(props: any) {
     if (e.target.password)
       pwd = e.target.password.value;
     
-    let errorLog: string | undefined = await ChatCommands("/join " + pwd, props.props.state, props.props.socket, 
+    let errorLog: string | undefined = await ChatCommands("/join " + pwd, props.props.state, userList, props.props.socket, 
       {chanId: props.chan.id, openConvHandler: props.props.openConvHandler});
     if (!errorLog)
       return ;

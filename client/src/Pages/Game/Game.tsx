@@ -10,7 +10,7 @@ import LeaveButton from "./components/LeaveButton/LeaveButton";
 import { FormControlLabel, FormGroup } from "@mui/material";
 import Switch from "@mui/material/Switch";
 import axios from "axios";
-import { usersStatusSocket } from "../../App/App";
+import { usersStatusSocket } from "../../Router/Router";
 import useSocket from "./gameSocket";
 import { useNavigate } from "react-router-dom";
 

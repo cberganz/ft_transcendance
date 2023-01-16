@@ -15,6 +15,8 @@ import Avatar from '@mui/material/Avatar';
 import { Icon } from '@iconify/react';
 import useAlert from "../../../Hooks/useAlert";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux"
+import { selectCurrentUser } from '../../../Hooks/authSlice'
 
 function titleAlreadyExists(title: string, notJoinedChans: Channel[], joinedChans: Channel[]) : boolean {
   for (let chan of joinedChans) {
@@ -108,12 +110,14 @@ function CreateChannelButton(props: any) {
 }
 
 export default function HeaderChannels(props: ChatProps) {
+	const   user 		            = useSelector(selectCurrentUser);
   const   navigate            = useNavigate();
-  let     avatar              = getProfile(props.state.userList, props.state.actualUser.user.id)?.avatar;
-  const   profileLink: string = "/profile?userId=" + props.state.actualUser.user.id.toString();
+  let     avatar              = user.avatar;
+  const   profileLink: string = "/profile?userId=" + user.id.toString();
+
   return (
     <div className='ChannelHeader'>
-        <Tooltip title={getProfile(props.state.userList, props.state.actualUser.user.id)?.username}>
+        <Tooltip title={user.username}>
                  <Avatar 
           alt={avatar?.toString()} 
           src={avatar?.toString()}
