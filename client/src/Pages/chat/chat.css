@@ -4,6 +4,7 @@
   top: 64px;
   bottom: 0px;
   width: 100%;
+  background-color: #f6f6f7;
 }
  
   .ChannelMenu {
@@ -42,11 +43,23 @@
     overflow: hidden;
   }
   .ChatHeader { 
+    display: grid;
+    grid-template-columns: auto 80px;
     background: #dde3eb;
     font-weight: bold;
     padding: 8px;
     padding-top: 15px;
     height: 50px;
+    color: "black";
+    grid-template-rows: "1fr";
+    grid-auto-rows: "1fr";
+    gap: "0px 0px";
+    grid-auto-flow: "row";
+  }
+  .leftChatHeader {
+    text-align: left; 
+    margin-left: 5px; 
+    display: flex;
   }
   
   .MessageDisplay { 

@@ -103,7 +103,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage("connection")
   handleInitTable(socket: Socket, data: userProfile) {
     if (this.usersProfiles.find(userProfile => userProfile.id === data.id) === undefined)
-      socket.emit("firstConnectionFromServer");
+        socket.emit("firstConnectionFromServer");
     this.usersSockets.set(socket, data.id);
     this.setProfile(data);
     this.server.emit("updateStatusFromServer", this.usersProfiles);
@@ -115,6 +115,8 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /** update to anything: online, offline, in game... */
   @SubscribeMessage("updateStatus")
   handleUpdateStatus(socket: Socket, status: string) {
+    if (!this.usersSockets.get(socket))
+      return ;
     this.setProfile({ id: this.usersSockets.get(socket), status: status });
     this.server.emit("updateStatusFromServer", this.usersProfiles);
     this.server.emit("updateSearchBarUserList", this.usersProfiles);
@@ -122,12 +124,16 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("updateUsername")
   handleUpdateUsername(socket: Socket, username: string) {
+    if (!this.usersSockets.get(socket))
+      return ;
     this.setProfile({ id: this.usersSockets.get(socket), username: username });
     this.server.emit("updateStatusFromServer", this.usersProfiles);
     this.server.emit("updateSearchBarUserList", this.usersProfiles);
   }
   @SubscribeMessage("updateAvatar")
   handleUpdateAvatar(socket: Socket, avatar: string) {
+    if (!this.usersSockets.get(socket))
+      return ;
     this.setProfile({ id: this.usersSockets.get(socket), avatar: avatar });
     this.server.emit("updateStatusFromServer", this.usersProfiles);
     this.server.emit("updateSearchBarUserList", this.usersProfiles);
@@ -193,6 +199,5 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.setProfile({ id: userId, status: "offline" });
     this.server.emit("updateStatusFromServer", this.usersProfiles);
     this.server.emit("updateSearchBarUserList", this.usersProfiles);
-    this.usersSockets.delete(socket);
   }
 }

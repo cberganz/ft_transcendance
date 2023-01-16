@@ -1,48 +1,14 @@
-import { ChannelItem, DialogChannelItem } from './channelItem';
-import { getProfile } from '../../utils';
+import { ChannelItem, NotJoinedChanItem } from './channelItem';
 import '../../chat.css'
 
-export function DMChannels(props: any) {
-  return (
-    <span>
-    {
-        props.state.joinedChans?.map((chan: any) => (
-              <div key={chan.id}>
-              {chan.type === 'dm' && chan.members[0].id === props.state.actualUser.user.id ? 
-                ChannelItem(chan, String(getProfile(props.state.userList, chan.members[1].id)?.username), String(getProfile(props.state.userList, chan.members[1].id)?.avatar), props) 
-                : null}
-              {chan.type === 'dm' && chan.members[1].id === props.state.actualUser.user.id ? 
-                ChannelItem(chan, String(getProfile(props.state.userList, chan.members[0].id)?.username), String(getProfile(props.state.userList, chan.members[0].id)?.avatar), props) : null}
-              </div>
-      ))
-    }
-    </span>
-  );
-}
-
-export function JoinedChannels(props: any) {
-  return (
-    <span>
-    {
-        props.state.joinedChans?.map((chan: any) => (
-              <div key={chan.id}>
-              {chan.type === 'dm' ? null : ChannelItem(chan, chan.title, "", props)}
-              </div>
-      ))
-    }
-    </span>
-  );
-}
-
-export function AllChannels(props: any) {
-
+function getAllChans(props: any, chanArray: any, joined: boolean) {
   return (
     <div>
     {
-        props.state.notJoinedChans?.map((chan: any) => (
+        chanArray.map((chan: any) => (
           <div key={chan.id}>
-              <DialogChannelItem chan={chan} chanName={chan.title} props={props} />
-           </div>
+            {joined ? ChannelItem(chan, props): <NotJoinedChanItem chan={chan} props={props} />}
+          </div>
       ))
     }
     </div>
@@ -52,11 +18,11 @@ export function AllChannels(props: any) {
 export default function showChannelItems(type: String, props: any) {    
   switch (type) {
     case 'dm' :
-      return DMChannels(props)
+      return getAllChans(props, props.state.joinedChans.filter((chan: any) => chan.type === 'dm'), true);
     case 'joined' :
-      return JoinedChannels(props)
+      return getAllChans(props, props.state.joinedChans.filter((chan: any) => chan.type !== 'dm'), true);
     case 'all' :
-      return AllChannels(props)
+      return getAllChans(props, props.state.notJoinedChans, false);
     default :
       return
   }
