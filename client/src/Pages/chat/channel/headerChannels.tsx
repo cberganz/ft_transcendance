@@ -10,7 +10,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
 import { Channel } from '../stateInterface'
-import { getProfile } from '../utils'
 import Avatar from '@mui/material/Avatar';
 import { Icon } from '@iconify/react';
 import useAlert from "../../../Hooks/useAlert";
@@ -18,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux"
 import { selectCurrentUser } from '../../../Hooks/authSlice'
 import { chatSocket } from '../chat'
+import { selectCurrentToken } from '../../../Hooks/authSlice'
 
 function titleAlreadyExists(title: string, notJoinedChans: Channel[], joinedChans: Channel[]) : boolean {
   for (let chan of joinedChans) {
@@ -33,7 +33,9 @@ function titleAlreadyExists(title: string, notJoinedChans: Channel[], joinedChan
 
 function CreateChannelButton(props: any) {
     const [open, setOpen] = React.useState(false);
-    const { setAlert } = useAlert();
+    const user            = useSelector(selectCurrentUser);
+    const token           = useSelector(selectCurrentToken);
+    const { setAlert }    = useAlert();
   
     const handleClickOpen = () => {
       setOpen(true);
@@ -55,10 +57,10 @@ function CreateChannelButton(props: any) {
         type:      e.target.password.value === "" ? "public" : "private",
         password:  e.target.password.value,
         title:     title,
-        ownerId:   props.props.state.actualUser.user.id,
+        ownerId:   user.id,
       }
       axios.post('http://localhost:3000/channel/newChan/', newChan, 
-        {withCredentials: true, headers: {Authorization: `Bearer ${props.props.state.actualUser.token}`}})
+        {withCredentials: true, headers: {Authorization: `Bearer ${token}`}})
         .then(response => {
           chatSocket.emit("newChanFromClient", response.data);
           setAlert("Channel successfully created.", "success");

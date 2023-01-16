@@ -25,7 +25,7 @@ import { SearchIconWrapper, Search, StyledInputBase } from "./topBarStyle";
 import { useCookies } from "react-cookie";
 import { useLogoutMutation } from "../Api/Auth/authApiSlice";
 import { logOut } from "../Hooks/authSlice";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useAlert from "../Hooks/useAlert";
 import KeyIcon from "@mui/icons-material/Key";
 import { useNavigate } from "react-router-dom";

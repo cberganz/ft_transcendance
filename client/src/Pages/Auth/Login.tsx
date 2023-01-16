@@ -32,6 +32,7 @@ function Login() {
 	async function loginUser(credentials: Credentials) {
 		const userData = await login(credentials).unwrap()
 
+		console.log(userData.user);
 		dispatch(setCredentials({ user: userData.user, accessToken: userData.jwt_token }))
 		return (userData)
 	}

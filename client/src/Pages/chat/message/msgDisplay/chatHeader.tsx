@@ -7,18 +7,19 @@ import '../../chat.css'
 import { ChatState, User } from "../../stateInterface";
 import { useSelector } from "react-redux"
 import { selectUserlist } from '../../../../Hooks/userListSlice'
-import { chatSocket } from "../../chat";
+import { selectCurrentToken, selectCurrentUser } from '../../../../Hooks/authSlice'
 
 function RightDmHeader(props: {state: ChatState, dmUser: User, chatCmd: any}) {
+  const user = useSelector(selectCurrentUser);
   return (
     <>
     {
-      isBlocked(props.state.actualUser.user, props.dmUser) ? 
+      isBlocked(user, props.dmUser) ? 
         <chatIcons.ChatUnblockIcon chatCmd={props.chatCmd} user={props.dmUser.username} />
         : (
             <>
               {
-                isBlacklisted(props.dmUser?.id, props.state.actualUser.user) ? null :
+                isBlacklisted(props.dmUser?.id, user) ? null :
                   <chatIcons.ChatGameIcon id={props.dmUser?.id} />
               }
               <chatIcons.ChatBlockIcon chatCmd={props.chatCmd} user={props.dmUser.username} />
@@ -52,6 +53,8 @@ function LeftDmHeader(props: {dmUser: any, state: ChatState}) {
 }
 
 function LeftChanHeader(props: {chan: any, state: ChatState}) {
+  const user = useSelector(selectCurrentUser);
+  
   return (
   <>
       <div style={{ marginLeft: "10px" }}>
@@ -60,11 +63,11 @@ function LeftChanHeader(props: {chan: any, state: ChatState}) {
         </span>{" "}
       </div>
       {
-        props.chan?.ownerId === props.state.actualUser.user.id ?
+        props.chan?.ownerId === user.id ?
           <chatIcons.ChatOwnerIcon /> : null
       }
       {
-        isAdmin(props.state.actualUser.user.id, props.chan) ?
+        isAdmin(user.id, props.chan) ?
           <chatIcons.ChatAdminIcon /> : null
       }
   </>
@@ -73,9 +76,11 @@ function LeftChanHeader(props: {chan: any, state: ChatState}) {
 
 export default function ChatHeader(props: any) {
   const { setAlert }  = useAlert();
-  const chan          = getChan(props.state.actualUser.openedConvID, props.state); 
+  const chan          = getChan(props.state.openedConvID, props.state); 
 	const userList 		  = useSelector(selectUserlist).userList;
-  let   dmUser: any   = getDmUser(userList, props.state, chan);
+  const user          = useSelector(selectCurrentUser);
+  const token         = useSelector(selectCurrentToken);
+  let   dmUser: any   = getDmUser(userList, chan, user);
   
   if (chan === undefined) return <div></div>;
 
@@ -84,7 +89,9 @@ export default function ChatHeader(props: any) {
       cmd,
       props.state,
       userList,
-      { chanId: chan.id, openConvHandler: props.openConvHandler }
+      { chanId: chan.id, openConvHandler: props.openConvHandler },
+      token,
+      user
     );
 
     if (errorLog)
