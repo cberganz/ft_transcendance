@@ -21,12 +21,10 @@ import MoreIcon from "@mui/icons-material/MoreVert";
 import { Stack } from "@mui/system";
 import SettingsDialog from "./SettingsDialog";
 import { selectCurrentUser } from "../Hooks/authSlice";
-import { useSelector } from "react-redux";
 import { SearchIconWrapper, Search, StyledInputBase } from "./topBarStyle";
 import { useCookies } from "react-cookie";
 import { useLogoutMutation } from "../Api/Auth/authApiSlice";
 import { logOut } from "../Hooks/authSlice";
-import { usersStatusSocket } from "../Router/Router";
 import { useEffect, useState } from "react";
 import useAlert from "../Hooks/useAlert";
 import KeyIcon from "@mui/icons-material/Key";
@@ -35,6 +33,9 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import Button from "@mui/material/Button";
+import { selectUserlist } from '../Hooks/userListSlice'
+import { useSelector } from "react-redux"
+import { usersStatusSocket } from "../Router/Router";
 
 interface PropsUsername {
   username: string;
@@ -177,12 +178,9 @@ function ProfileBox() {
 }
 
 function SearchBar() {
-  const [userList, setUserList] = useState<any[]>([]);
-  const { setAlert } = useAlert();
-  const navigate = useNavigate();
-  useEffect(() => {
-    usersStatusSocket.emit("updateStatus", "online");
-  }, []);
+	const userList 		  = useSelector(selectUserlist).userList
+  const { setAlert }  = useAlert();
+  const navigate      = useNavigate();
 
   const getProfile = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -199,20 +197,6 @@ function SearchBar() {
     e.currentTarget.reset();
   };
 
-  const setUserListSocket = (userListUpdate: any) => {
-    for (let user of userListUpdate) {
-      delete user.login;
-      delete user.status;
-      delete user.avatar;
-    }
-    setUserList(userListUpdate);
-  };
-
-  usersStatusSocket
-    .off("updateSearchBarUserList")
-    .on("updateSearchBarUserList", (userList: any[]) =>
-      setUserListSocket(userList)
-    );
   return (
     <Box
       sx={{
