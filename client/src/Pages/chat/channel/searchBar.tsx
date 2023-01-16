@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChatState, User } from '../stateInterface'
+import { ChatState } from '../stateInterface'
 import axios from 'axios';
 import useAlert from "../../../Hooks/useAlert";
 

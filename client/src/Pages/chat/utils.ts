@@ -86,7 +86,7 @@ export function sortChannels(chans: Channel[]) {
   }
 
   export function getDmUser(state: ChatState, chan: any) {
-    if (!chan || chan.type != 'dm')
+    if (!chan || chan.type !== 'dm')
       return undefined;
     if (state.actualUser.user.id === chan.members[0].id)
       return getProfile(state.userList, chan.members[1].id);
