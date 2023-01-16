@@ -94,19 +94,23 @@ export default function ConnectedUsers(props: any) {
   ];
   
   return (
-    <div>
-      <Stack>
-        <Box className="data-grid">
-          <DataGrid
-            className="grid"
-            rows={props.allUsersTab}
-            columns={columns}
-            disableSelectionOnClick
-            experimentalFeatures={{ newEditingApi: true }}
-            getRowId={(row: any) => row.id}
-          />
-        </Box>
-      </Stack>
-    </div>
+    <Box sx={{paddingTop: "100px", backgroundColor: "white", borderBlockColor: "#F9FAFB", borderBlockStartColor: "#F9FAFB"}}>
+      <div>
+        <Stack>
+          <Box className="data-grid">
+            <DataGrid
+              className="grid"
+              // sx={{borderBlockColor: "#F9FAFB", borderBlockStartColor: "#F9FAFB"}}
+              rows={props.allUsersTab}
+              columns={columns}
+              disableSelectionOnClick
+              experimentalFeatures={{ newEditingApi: true }}
+              getRowId={(row: any) => row.id}
+            />
+          </Box>
+        </Stack>
+      </div>
+    </Box>
   );
 }
+
