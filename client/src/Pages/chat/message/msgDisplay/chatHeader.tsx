@@ -7,6 +7,7 @@ import '../../chat.css'
 import { ChatState, User } from "../../stateInterface";
 import { useSelector } from "react-redux"
 import { selectUserlist } from '../../../../Hooks/userListSlice'
+import { chatSocket } from "../../chat";
 
 function RightDmHeader(props: {state: ChatState, dmUser: User, chatCmd: any}) {
   return (
@@ -83,7 +84,6 @@ export default function ChatHeader(props: any) {
       cmd,
       props.state,
       userList,
-      props.socket,
       { chanId: chan.id, openConvHandler: props.openConvHandler }
     );
 

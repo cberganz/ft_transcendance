@@ -19,12 +19,6 @@ export interface actualUser {
     token: any,
 }
 
-export interface ChatProps {
-    state: ChatState,
-    socket: any,
-}
-
-
 export interface User {
     id:          number,
     avatar?:      String,

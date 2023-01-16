@@ -6,6 +6,7 @@ import useAlert from "../../../../Hooks/useAlert";
 import { getChan } from '../../utils';
 import { useSelector } from "react-redux"
 import { selectUserlist } from '../../../../Hooks/userListSlice'
+import { chatSocket } from '../../chat';
 
 export default function SendBox(props: any) {
   const { setAlert } = useAlert();
@@ -20,12 +21,12 @@ export default function SendBox(props: any) {
       }
       axios.post("http://localhost:3000/message", newMsg, 
         {withCredentials: true, headers: {Authorization: `Bearer ${props.state.actualUser.token}`}})
-        .then(response => props.socket.emit("newMsgFromClient", {room: "chat" + chan?.id, message: response.data}))
+        .then(response => chatSocket.emit("newMsgFromClient", {room: "chat" + chan?.id, message: response.data}))
         .catch(error => setAlert("You've been blocked or mute.", "error")) 
   }
 
   const chatCmd = async (value: string) => {
-    let errorLog: string | undefined = await ChatCommands(value, props.state, userList, props.socket, 
+    let errorLog: string | undefined = await ChatCommands(value, props.state, userList,  
       {chanId: props.state.actualUser.openedConvID, openConvHandler: props.openConvHandler})
     if (!errorLog)
       return ;

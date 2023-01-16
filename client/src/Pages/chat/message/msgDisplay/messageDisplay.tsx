@@ -28,9 +28,7 @@ function MessageContent(props: {type: any, msg: Message, author: any}) {
   );
 }
 
-function MessageItemReceiver(msg: Message, chan: Channel | undefined, actualUser: User, userList: userProfile[]) {
-  if (!chan || (isBlocked(actualUser, msg.author) && chan.type !== 'dm'))
-      return (<div></div>);
+function MessageItemReceiver(msg: Message, userList: userProfile[]) {
   let     author    = getProfile(userList, msg.author.id);
   
   return (
@@ -81,10 +79,14 @@ export default function MessageDisplay(props: any) {
   return (
       <Stack sx={{ width: '100%' }} spacing={2}>
           {chan.Message.map((msg: Message) => (
-            <div key={msg.id}>
-              {msg.author.id === props.state.actualUser.user.id ? MessageItemSender(msg, userList) : 
-                MessageItemReceiver(msg, chan, props.state.actualUser.user, userList)}
-            </div>
+            isBlocked(props.state.actualUser.user, msg.author) ? null :
+              <div key={msg.id}>
+                {
+                  msg.author.id === props.state.actualUser.user.id ? 
+                      MessageItemSender(msg, userList) 
+                    : MessageItemReceiver(msg, userList)
+                }
+              </div>
           ))}
       </Stack>
   	);

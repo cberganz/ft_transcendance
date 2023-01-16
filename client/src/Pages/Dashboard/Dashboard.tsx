@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux"
-import { selectUserlist } from '../../Hooks/userListSlice'
 import { selectCurrentUser } from '../../Hooks/authSlice'
+import { selectUserlist } from '../../Hooks/userListSlice'
 import ConnectedUsers from './ConnectedUsers';
 import {
 	Avatar,

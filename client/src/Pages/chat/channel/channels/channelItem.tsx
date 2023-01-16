@@ -18,6 +18,7 @@ import ChatCommands from '../../chatCommands';
 import useAlert from "../../../../Hooks/useAlert";
 import { useSelector } from "react-redux"
 import { selectUserlist } from '../../../../Hooks/userListSlice'
+import { chatSocket } from '../../chat';
 
 function getChanName(userList: userProfile[], state: ChatState, chan: Channel) {
   if (chan.type !== 'dm')
@@ -125,7 +126,7 @@ export function NotJoinedChanItem(props: any) {
     if (e.target.password)
       pwd = e.target.password.value;
     
-    let errorLog: string | undefined = await ChatCommands("/join " + pwd, props.props.state, userList, props.props.socket, 
+    let errorLog: string | undefined = await ChatCommands("/join " + pwd, props.props.state, userList,  
       {chanId: props.chan.id, openConvHandler: props.props.openConvHandler});
     if (!errorLog)
       return ;
@@ -139,7 +140,6 @@ export function NotJoinedChanItem(props: any) {
             <Avatar alt={props.chan.title} src="-" />
           </ListItemAvatar>
           <ItemContent chan={props.chan} lastMsg={lastMsg} state={props.props.state} />
-          {props.chan.type === 'private' ? <span> <LockIcon sx={{ padding: '5%', marginTop:'10px'}} /></span> : null}
       </ListItem>
 
       <form  onSubmit={(e) => {joinChan(e)}}>

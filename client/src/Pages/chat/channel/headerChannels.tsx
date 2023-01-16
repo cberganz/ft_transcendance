@@ -9,7 +9,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
-import { ChatProps, Channel } from '../stateInterface'
+import { Channel } from '../stateInterface'
 import { getProfile } from '../utils'
 import Avatar from '@mui/material/Avatar';
 import { Icon } from '@iconify/react';
@@ -17,6 +17,7 @@ import useAlert from "../../../Hooks/useAlert";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux"
 import { selectCurrentUser } from '../../../Hooks/authSlice'
+import { chatSocket } from '../chat'
 
 function titleAlreadyExists(title: string, notJoinedChans: Channel[], joinedChans: Channel[]) : boolean {
   for (let chan of joinedChans) {
@@ -59,7 +60,7 @@ function CreateChannelButton(props: any) {
       axios.post('http://localhost:3000/channel/newChan/', newChan, 
         {withCredentials: true, headers: {Authorization: `Bearer ${props.props.state.actualUser.token}`}})
         .then(response => {
-          props.props.socket.emit("newChanFromClient", response.data);
+          chatSocket.emit("newChanFromClient", response.data);
           setAlert("Channel successfully created.", "success");
         })
         .catch(error => setAlert("Error creating channel.", "error"))
@@ -109,7 +110,7 @@ function CreateChannelButton(props: any) {
     );
 }
 
-export default function HeaderChannels(props: ChatProps) {
+export default function HeaderChannels(props: any) {
 	const   user 		            = useSelector(selectCurrentUser);
   const   navigate            = useNavigate();
   let     avatar              = user.avatar;

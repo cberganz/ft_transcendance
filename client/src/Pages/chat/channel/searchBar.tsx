@@ -4,6 +4,7 @@ import axios from 'axios';
 import useAlert from "../../../Hooks/useAlert";
 import { useSelector } from "react-redux"
 import { selectUserlist } from '../../../Hooks/userListSlice'
+import { chatSocket } from '../chat';
 
 
 function getUserListWithoutDm(state: ChatState, usersList: userProfile[]) {
@@ -41,7 +42,7 @@ async function createChan(newChan: {user1: number, user2: number}, props: any) {
   axios.post('http://localhost:3000/channel/newDM/', newChan, 
   {withCredentials: true, headers: {Authorization: `Bearer ${props.state.actualUser.token}`}})
   .then(response => {
-    props.socket.emit("newChanFromClient", response.data); 
+    chatSocket.emit("newChanFromClient", response.data); 
     props.openConvHandler(response.data.id);
     })
   .catch(error => alert("Error sending DM.")) 
