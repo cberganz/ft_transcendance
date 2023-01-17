@@ -9,11 +9,11 @@ import {
 	Typography
 } from '@mui/material';
 
-import './Dashboard.css'
 import { userProfile } from '../chat/stateInterface';
 import { useNavigate } from "react-router-dom";
 import { styled, alpha } from '@mui/material/styles';
 import FriendSection from "./FriendList";
+import './Dashboard.css'
 
 interface allUsers {
 	id: number,
@@ -67,7 +67,6 @@ export default function Dashboard() {
 		}
 		return (ret);
 	}
-
 	const getAllUsersTab = () => {
 		let allUsers: allUsers[] = [];
 		let userListWithoutCurrentUserArr = userListWithoutCurrentUser();

@@ -17,7 +17,7 @@ import { FtStrategy } from './passeport-42.strategy';
 		PassportModule,
 		JwtModule.register({
 			secret: jwtConstants.secret,
-			signOptions: { expiresIn: '15m' },
+			signOptions: { expiresIn: '10s' },
 		}),
 	  
 	],

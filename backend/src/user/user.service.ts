@@ -51,6 +51,41 @@ export class UserService {
 		return user
 	}
 
+	async userWithTfa(
+		userWhereUniqueInput: Prisma.UserWhereUniqueInput
+	): Promise<User | null> {
+		return this.prisma.user.findUnique({
+			where: userWhereUniqueInput,
+			include: {
+				blacklist: {
+					include: {
+						target: true,
+						creator: true,
+					},
+				},
+				blacklisted: {
+					include: {
+						target: true,
+						creator: true,
+					},
+				},
+				friends: true,
+				p1_games: {
+					include: {
+						player1: true,
+						player2: true,
+					},
+				},
+				p2_games: {
+					include: {
+						player1: true,
+						player2: true,
+					},
+				},
+			}
+		});
+	}
+	
 	async getOtpAuthUrl(
 		userWhereUniqueInput: Prisma.UserWhereUniqueInput
 	): Promise<string | null> {

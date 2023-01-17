@@ -53,9 +53,8 @@ export class AuthService {
 			jwtData = jwt_decode(req?.cookies["jwt"])
 		else
 			jwtData = jwt_decode(req.headers.authorization?.substring(7, req.headers.authorization.length));
-		return await this.userService.user({ id: Number(jwtData.sub) });
+		return await this.userService.userWithTfa({ id: Number(jwtData.sub) });
 	}
-
 
 	isTwoFactorAuthenticationCodeValid(TFACode: string, user: UserMode1) {
 		return authenticator.verify({

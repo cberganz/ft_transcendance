@@ -3,6 +3,7 @@ import axios from "axios"
 import { selectCurrentUser, selectCurrentToken, setCredentials } from '../../Hooks/authSlice'
 import { useSelector, useDispatch } from "react-redux"
 import useAlert from "../../Hooks/useAlert";
+import axiosPrivate from '../../Api/Axios'
 import {
 	Box,
 	Stack,
@@ -20,7 +21,7 @@ const TfaQrCode = (Props: Props) => {
 	const [qrCodeContent, setContent] = React.useState(<></>)
 
 	React.useEffect(() => {
-		axios({
+		axiosPrivate({
 			withCredentials: true,
 			url: `http://localhost:3000/user/tfa/${Props.currentUser.id}`,
 			method: "GET",
@@ -50,7 +51,7 @@ const TfaSwitchItem = (dispatch: any,
 			...currentUser,
 			isTFAEnabled: e.target.checked
 		}
-		axios({
+		axiosPrivate({
 			withCredentials: true,
 			url: `http://localhost:3000/user/tfa/${currentUser.id}`,
 			method: "put",

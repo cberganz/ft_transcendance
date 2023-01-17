@@ -1,6 +1,6 @@
 import * as React from 'react'
 import CssBaseline from '@mui/material/CssBaseline'
-import { Grid, Container } from '@mui/material'
+import { Grid, Container, Box } from '@mui/material'
 import PlayerInfos from './components/PlayerInfos'
 import PlayedGames from './components/PlayedGames'
 import axios from "axios"
@@ -55,58 +55,60 @@ class Profile extends React.Component<{ token: string, userId: string }, {}> {
 		return (
 			<React.Fragment>
 				<CssBaseline />
-				<div>
-					<Container maxWidth="lg" sx={{ mt: 6 }}>
-						<Grid container spacing={3}>
-							<Grid item xs={12} sm={12} md={12}>
-								<PlayerInfos
-									username={this.state.data.username}
-									avatar={this.state.data.avatar}
-									userId={this.state.userId}
-								/>
+				<div >
+					<Box sx={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+						<Container maxWidth="lg" sx={{ mt: 6, margin: "0px" }}>
+							<Grid container spacing={3}>
+								<Grid item xs={12} sm={12} md={12}>
+									<PlayerInfos
+										username={this.state.data.username}
+										avatar={this.state.data.avatar}
+										userId={this.state.userId}
+									/>
+								</Grid>
+								<Grid item xs={12} sm={6} md={3}>
+									<StatCard
+										title="Games played"
+										total={String(this.state.data.playedGames)}
+										icon={'ant-design:check-circle-filled'}
+										sx={{ borderRadius: "10px" }}
+									/>
+								</Grid>
+								<Grid item xs={12} sm={6} md={3}>
+									<StatCard
+										title="Games won"
+										total={String(this.state.data.gamesWon)}
+										color="success"
+										icon={'ant-design:trophy-filled'}
+										sx={{ borderRadius: "10px" }}
+									/>
+								</Grid>
+								<Grid item xs={12} sm={6} md={3}>
+									<StatCard
+										title="Games lost"
+										total={String(this.state.data.gamesLost)}
+										color="error"
+										icon={'ant-design:frown-filled'}
+										sx={{ borderRadius: "10px" }}
+									/>
+								</Grid>
+								<Grid item xs={12} sm={6} md={3}>
+									<StatCard
+										title="Win rate"
+										total={this.state.data.winRate !== -1 ? String(this.state.data.winRate) + "%" : "N/A"}
+										color="warning"
+										icon={'ant-design:fund-filled'}
+										sx={{ borderRadius: "10px" }}
+									/>
+								</Grid>
+								<Grid item xs={12} md={18} lg={18}>
+									<PlayedGames
+										games={this.state.data.games}
+									/>
+								</Grid>
 							</Grid>
-							<Grid item xs={12} sm={6} md={3}>
-								<StatCard
-									title="Games played"
-									total={String(this.state.data.playedGames)}
-									icon={'ant-design:check-circle-filled'}
-									sx={{ borderRadius: "10px" }}
-								/>
-							</Grid>
-							<Grid item xs={12} sm={6} md={3}>
-								<StatCard
-									title="Games won"
-									total={String(this.state.data.gamesWon)}
-									color="success"
-									icon={'ant-design:trophy-filled'}
-									sx={{ borderRadius: "10px" }}
-								/>
-							</Grid>
-							<Grid item xs={12} sm={6} md={3}>
-								<StatCard
-									title="Games lost"
-									total={String(this.state.data.gamesLost)}
-									color="error"
-									icon={'ant-design:frown-filled'}
-									sx={{ borderRadius: "10px" }}
-								/>
-							</Grid>
-							<Grid item xs={12} sm={6} md={3}>
-								<StatCard
-									title="Win rate"
-									total={this.state.data.winRate !== -1 ? String(this.state.data.winRate) + "%" : "N/A"}
-									color="warning"
-									icon={'ant-design:fund-filled'}
-									sx={{ borderRadius: "10px" }}
-								/>
-							</Grid>
-							<Grid item xs={12} md={18} lg={18}>
-								<PlayedGames
-									games={this.state.data.games}
-								/>
-							</Grid>
-						</Grid>
-					</Container>
+						</Container>
+					</Box>
 				</div>
     		</React.Fragment>
 		);
