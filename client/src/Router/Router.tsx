@@ -51,7 +51,7 @@ function	PrivateRoutes() {
 
 	useEffect(() => {
 		connectGlobalSocket(user);
-		}, []);
+		}, [user]);
 
 	usersStatusSocket
 		.off('updateStatusFromServer')

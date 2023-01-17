@@ -84,7 +84,7 @@ export function InfoDialog() {
                             <TableCell
                             key={column.id}
                             align={column.align}
-                            style={{ minWidth: column.minWidth, backgroundColor: '#e1e9f5' }}
+                            style={{ minWidth: column.minWidth, backgroundColor: '#fafafa' }}
                             >
                             <b>{column.label}</b>
                             </TableCell>

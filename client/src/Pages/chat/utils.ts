@@ -30,11 +30,11 @@ export function userIsInChan(chan: Channel, userId: number) {
     return (false)
 }
 
-export function getLastMsg(state: ChatState, chan: Channel) {
+export function getLastMsg(state: ChatState, chan: Channel, user: any) {
   if (!chan.Message)
     return undefined ;
   for (let i = chan.Message.length - 1; i >= 0; i--) {
-    if (!isBlocked(state.actualUser.user, chan?.Message[i].author)) {
+    if (!isBlocked(user, chan?.Message[i].author)) {
       return chan?.Message[i];
     }
   }
@@ -85,10 +85,10 @@ export function sortChannels(chans: Channel[]) {
     return (false);
   }
 
-  export function getDmUser(userList: userProfile[], state: ChatState, chan: any) {
+  export function getDmUser(userList: userProfile[], chan: any, user: any) {
     if (!chan || chan.type !== 'dm')
       return undefined;
-    if (state.actualUser.user.id === chan.members[0].id)
+    if (user.id === chan.members[0].id)
       return getProfile(userList, chan.members[1].id);
     else
       return getProfile(userList, chan.members[0].id);

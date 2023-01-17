@@ -7,18 +7,20 @@ import '../../chat.css'
 import { ChatState, User } from "../../stateInterface";
 import { useSelector } from "react-redux"
 import { selectUserlist } from '../../../../Hooks/userListSlice'
-import { chatSocket } from "../../chat";
+import { selectCurrentToken, selectCurrentUser } from '../../../../Hooks/authSlice'
+import { Avatar } from "@mui/material";
 
 function RightDmHeader(props: {state: ChatState, dmUser: User, chatCmd: any}) {
+  const user = useSelector(selectCurrentUser);
   return (
     <>
     {
-      isBlocked(props.state.actualUser.user, props.dmUser) ? 
+      isBlocked(user, props.dmUser) ? 
         <chatIcons.ChatUnblockIcon chatCmd={props.chatCmd} user={props.dmUser.username} />
         : (
             <>
               {
-                isBlacklisted(props.dmUser?.id, props.state.actualUser.user) ? null :
+                isBlacklisted(props.dmUser?.id, user) ? null :
                   <chatIcons.ChatGameIcon id={props.dmUser?.id} />
               }
               <chatIcons.ChatBlockIcon chatCmd={props.chatCmd} user={props.dmUser.username} />
@@ -42,40 +44,50 @@ function LeftDmHeader(props: {dmUser: any, state: ChatState}) {
   let profileLink = "/profile?userId=" + props.dmUser?.id.toString();
 
   return (
-    <div style={{ marginLeft: "10px" }}>
-        <span onClick={() => navigate(profileLink)} style={{ cursor: "pointer", marginRight: "10px" }}>
-            {props.dmUser.username}
-        </span>
-        {" "}
-    </div>
+    <>
+        <Avatar src={props.dmUser.avatar} alt={props.dmUser.username} 
+                sx={{ width: 26, height: 26, marginLeft: '10px' }} />
+        <div style={{ marginLeft: "15px", marginTop: '3px' }}>
+            <span onClick={() => navigate(profileLink)} style={{ cursor: "pointer", marginRight: "10px" }}>
+                {props.dmUser.username}
+            </span>
+            {" "}
+        </div>
+    </>
   )
 }
 
 function LeftChanHeader(props: {chan: any, state: ChatState}) {
+  const user = useSelector(selectCurrentUser);
+  
   return (
   <>
-      <div style={{ marginLeft: "10px" }}>
+      <div style={{ marginLeft: "15px", marginTop: '3px' }}>
         <span style={{ marginRight: "10px" }}>
           {props.chan.title}
         </span>{" "}
       </div>
-      {
-        props.chan?.ownerId === props.state.actualUser.user.id ?
-          <chatIcons.ChatOwnerIcon /> : null
-      }
-      {
-        isAdmin(props.state.actualUser.user.id, props.chan) ?
-          <chatIcons.ChatAdminIcon /> : null
-      }
+      <div style={{ marginTop: '3px' }}>
+        {
+          props.chan?.ownerId === user.id ?
+            <chatIcons.ChatOwnerIcon /> : null
+        }
+        {
+          isAdmin(user.id, props.chan) ?
+            <chatIcons.ChatAdminIcon /> : null
+        }
+      </div>
   </>
   );
 }
 
 export default function ChatHeader(props: any) {
   const { setAlert }  = useAlert();
-  const chan          = getChan(props.state.actualUser.openedConvID, props.state); 
+  const chan          = getChan(props.state.openedConvID, props.state); 
 	const userList 		  = useSelector(selectUserlist).userList;
-  let   dmUser: any   = getDmUser(userList, props.state, chan);
+  const user          = useSelector(selectCurrentUser);
+  const token         = useSelector(selectCurrentToken);
+  let   dmUser: any   = getDmUser(userList, chan, user);
   
   if (chan === undefined) return <div></div>;
 
@@ -84,7 +96,9 @@ export default function ChatHeader(props: any) {
       cmd,
       props.state,
       userList,
-      { chanId: chan.id, openConvHandler: props.openConvHandler }
+      { chanId: chan.id, openConvHandler: props.openConvHandler },
+      token,
+      user
     );
 
     if (errorLog)
@@ -95,6 +109,7 @@ export default function ChatHeader(props: any) {
     <div className="ChatHeader">
         <div className="leftChatHeader">
             { props.state.mobile && <chatIcons.ChatGobackIcon openConvHandler={props.openConvHandler} /> }    
+            
             {
                 chan.type === 'dm' ?
                 <LeftDmHeader dmUser={dmUser} state={props.state} />

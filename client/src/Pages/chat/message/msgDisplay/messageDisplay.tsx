@@ -3,12 +3,13 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import { Player } from '@lottiefiles/react-lottie-player';
 import '../../chat.css'
-import { Message, User, Channel, ChatState, userProfile } from '../../stateInterface'
+import { Message, userProfile } from '../../stateInterface'
 import { getChan, isBlocked, getProfile, dateToString } from '../../utils'
 import Tooltip from '@mui/material/Tooltip';
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux"
 import { selectUserlist } from '../../../../Hooks/userListSlice'
+import { selectCurrentUser } from "../../../../Hooks/authSlice";
 
 function MessageContent(props: {type: any, msg: Message, author: any}) {
   let date: Date              = new Date(props.msg.date);
@@ -60,10 +61,11 @@ function MessageItemSender(msg: Message, userList: userProfile[]) {
 }
 
 export default function MessageDisplay(props: any) {
-  let chan          = getChan(props.state.actualUser.openedConvID, props.state);
+  let chan          = getChan(props.state.openedConvID, props.state);
   const userList 		= useSelector(selectUserlist).userList;
+  const user        = useSelector(selectCurrentUser);
 
-  if (props.state.actualUser.openedConvID === -1 || !chan?.Message)
+  if (props.state.openedConvID === -1 || !chan?.Message)
     return (
         <div>
           <Player
@@ -79,10 +81,10 @@ export default function MessageDisplay(props: any) {
   return (
       <Stack sx={{ width: '100%' }} spacing={2}>
           {chan.Message.map((msg: Message) => (
-            isBlocked(props.state.actualUser.user, msg.author) ? null :
+            isBlocked(user, msg.author) ? null :
               <div key={msg.id}>
                 {
-                  msg.author.id === props.state.actualUser.user.id ? 
+                  msg.author.id === user.id ? 
                       MessageItemSender(msg, userList) 
                     : MessageItemReceiver(msg, userList)
                 }
