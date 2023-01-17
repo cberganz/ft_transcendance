@@ -8,6 +8,7 @@ import { ChatState, User } from "../../stateInterface";
 import { useSelector } from "react-redux"
 import { selectUserlist } from '../../../../Hooks/userListSlice'
 import { selectCurrentToken, selectCurrentUser } from '../../../../Hooks/authSlice'
+import { Avatar } from "@mui/material";
 
 function RightDmHeader(props: {state: ChatState, dmUser: User, chatCmd: any}) {
   const user = useSelector(selectCurrentUser);
@@ -43,12 +44,16 @@ function LeftDmHeader(props: {dmUser: any, state: ChatState}) {
   let profileLink = "/profile?userId=" + props.dmUser?.id.toString();
 
   return (
-    <div style={{ marginLeft: "10px" }}>
-        <span onClick={() => navigate(profileLink)} style={{ cursor: "pointer", marginRight: "10px" }}>
-            {props.dmUser.username}
-        </span>
-        {" "}
-    </div>
+    <>
+        <Avatar src={props.dmUser.avatar} alt={props.dmUser.username} 
+                sx={{ width: 26, height: 26, marginLeft: '10px' }} />
+        <div style={{ marginLeft: "15px", marginTop: '3px' }}>
+            <span onClick={() => navigate(profileLink)} style={{ cursor: "pointer", marginRight: "10px" }}>
+                {props.dmUser.username}
+            </span>
+            {" "}
+        </div>
+    </>
   )
 }
 
@@ -57,19 +62,21 @@ function LeftChanHeader(props: {chan: any, state: ChatState}) {
   
   return (
   <>
-      <div style={{ marginLeft: "10px" }}>
+      <div style={{ marginLeft: "15px", marginTop: '3px' }}>
         <span style={{ marginRight: "10px" }}>
           {props.chan.title}
         </span>{" "}
       </div>
-      {
-        props.chan?.ownerId === user.id ?
-          <chatIcons.ChatOwnerIcon /> : null
-      }
-      {
-        isAdmin(user.id, props.chan) ?
-          <chatIcons.ChatAdminIcon /> : null
-      }
+      <div style={{ marginTop: '3px' }}>
+        {
+          props.chan?.ownerId === user.id ?
+            <chatIcons.ChatOwnerIcon /> : null
+        }
+        {
+          isAdmin(user.id, props.chan) ?
+            <chatIcons.ChatAdminIcon /> : null
+        }
+      </div>
   </>
   );
 }
@@ -102,6 +109,7 @@ export default function ChatHeader(props: any) {
     <div className="ChatHeader">
         <div className="leftChatHeader">
             { props.state.mobile && <chatIcons.ChatGobackIcon openConvHandler={props.openConvHandler} /> }    
+            
             {
                 chan.type === 'dm' ?
                 <LeftDmHeader dmUser={dmUser} state={props.state} />

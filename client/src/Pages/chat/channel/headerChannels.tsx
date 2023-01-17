@@ -10,14 +10,13 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
 import { Channel } from '../stateInterface'
-import Avatar from '@mui/material/Avatar';
 import { Icon } from '@iconify/react';
 import useAlert from "../../../Hooks/useAlert";
-import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux"
 import { selectCurrentUser } from '../../../Hooks/authSlice'
 import { chatSocket } from '../chat'
 import { selectCurrentToken } from '../../../Hooks/authSlice'
+import SearchBar from './searchBar';
 
 function titleAlreadyExists(title: string, notJoinedChans: Channel[], joinedChans: Channel[]) : boolean {
   for (let chan of joinedChans) {
@@ -71,10 +70,10 @@ function CreateChannelButton(props: any) {
     return (
       <div>
         <Tooltip title="Create channel">
-          <Icon icon="jam:write"
+          <Icon icon="material-symbols:add-circle"
             onClick={handleClickOpen}
             fontSize='medium'
-            style={{color: 'black', cursor: 'pointer', marginTop: '14px', marginLeft: '75%'}}
+            style={{color: '#577bb5', cursor: 'pointer', marginTop: '14px'}}
             width="23" height="23" />
           </Tooltip>
         <form  onSubmit={(e) => {createChannel(e)}}>
@@ -113,20 +112,9 @@ function CreateChannelButton(props: any) {
 }
 
 export default function HeaderChannels(props: any) {
-	const   user 		            = useSelector(selectCurrentUser);
-  const   navigate            = useNavigate();
-  let     avatar              = user.avatar;
-  const   profileLink: string = "/profile?userId=" + user.id.toString();
-
   return (
     <div className='ChannelHeader'>
-        <Tooltip title={user.username}>
-                 <Avatar 
-          alt={avatar?.toString()} 
-          src={avatar?.toString()}
-          sx={{ width: 30, height: 30, marginTop: '10px', marginLeft: '25%', cursor: 'pointer' }}
-          onClick={() => navigate(profileLink)} />
-        </Tooltip>
+        <SearchBar state={props.state} openConvHandler={props.openConvHandler}  />
         <CreateChannelButton props={props} />
     </div>
   )

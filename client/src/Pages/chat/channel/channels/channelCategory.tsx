@@ -10,7 +10,7 @@ function getAllChans(props: any, chanArray: any, joined: boolean, hooks: any) {
     {
         chanArray.map((chan: any) => (
           <div key={chan.id}>
-            {joined ? ChannelItem(chan, props, hooks): <NotJoinedChanItem chan={chan} props={props} />}
+            {joined ? ChannelItem(chan, props, hooks): <NotJoinedChanItem chan={chan} props={props} hooks={hooks} />}
           </div>
       ))
     }

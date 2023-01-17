@@ -187,8 +187,7 @@ class Chat extends React.Component<Props, ChatState> {
       
       {!this.state.mobile || (this.state.mobile && this.state.openedConvID === -1) ?
         <div className="ChannelMenu">
-            <HeaderChannels state={this.state} />
-            <SearchBar state={this.state} openConvHandler={this.openConvHandler}  />
+            <HeaderChannels state={this.state} openConvHandler={this.openConvHandler} />
             <ChannelDisplay state={this.state} openConvHandler={this.openConvHandler} />
             <InfoDialog />
         </div> : null}

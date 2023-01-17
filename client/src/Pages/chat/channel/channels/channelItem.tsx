@@ -44,7 +44,7 @@ function ItemContent(props: {chan: any, lastMsg: any, state: ChatState, hooks: a
                 </Typography>
                 <span> </span>
                   {props.lastMsg?.content?.substring(0, 15)}
-                  {props.lastMsg?.content?.length && props.lastMsg?.content?.length > 15 ? <span>...</span> : null}
+                  {props.lastMsg?.content?.length && props.lastMsg?.content?.length > 15 ? <>...</> : <span>&nbsp;</span>}
                 
               </React.Fragment>
             }
@@ -66,7 +66,6 @@ function DmItemAvatar(props: {chan: any, user: any, userList: any}) {
                 overlap="circular"
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 variant="dot"
-                sx={{ marginRight: '10px', marginBottom: '10px' }}
               >
                   <Avatar alt={dmUser?.username?.valueOf()} src={dmUser?.avatar.valueOf()} /> 
               </StyledBadge>
@@ -79,15 +78,15 @@ function DmItemAvatar(props: {chan: any, user: any, userList: any}) {
 
 export function ChannelItem(chan: Channel, props: any, hooks: any) {
   let lastMsg       = getLastMsg(props.state, chan, hooks.user);
-  let bckgColor     = props.state.openedConvID === chan.id ? '#f5f5f5' : 'white';
+  let bckgColor     = props.state.openedConvID === chan.id ? '#ebf2fa' : 'white';
 
   return (
     <>
       <ListItem 
         onClick={event => {props.openConvHandler(chan.id)}} 
-        alignItems="flex-start" className="ChannelItem" 
-        sx={{backgroundColor: bckgColor, 
-        cursor: 'pointer'}}>
+        alignItems="flex-start" 
+        className="ChannelItem"
+        sx={{backgroundColor: bckgColor, width: '94%'}}>
           <ListItemAvatar>
             {
               chan.type === 'dm' ? 
@@ -131,7 +130,10 @@ export function NotJoinedChanItem(props: any) {
 
   return (
   <div>
-      <ListItem onClick={handleClickOpen} alignItems="flex-start" className="ChannelItem" sx={{backgroundColor: 'white', cursor: 'pointer'}}>
+      <ListItem onClick={handleClickOpen} 
+        alignItems="flex-start" 
+        className="ChannelItem" 
+        sx={{width: '94%'}}>
           <ListItemAvatar>
             <Avatar alt={props.chan.title} src="-" />
           </ListItemAvatar>
