@@ -129,7 +129,7 @@ export class UserController {
       ...userData,
       avatar:
         "https://profile.intra.42.fr/assets/42_logo_black-684989d43d629b3c0ff6fd7e1157ee04db9bb7a73fba8ec4e01543d650a1c607.png",
-      email: "robi@gmail.com",
+      email: "ugo@gmail.com",
     };
     return this.userService.createUser(newUser);
   }
@@ -161,24 +161,30 @@ export class UserController {
     });
   }
 
-  @Put('/addFriend/:id/:target')
+  @Put("/addFriend/:id/:target")
   @UseGuards(OwnGuard)
   @UseGuards(JwtAuthGuard)
   async userAddFriend(
-  	@Param('id') user1: string,
-  	@Param('target') user2: string
+    @Param("id") user1: string,
+    @Param("target") user2: string
   ): Promise<UserMode1> {
-  	return await this.userService.addFriendship({ id: Number(user1) }, { id: Number(user2) });
+    return await this.userService.addFriendship(
+      { id: Number(user1) },
+      { id: Number(user2) }
+    );
   }
-  
-  @Put('/removeFriend/:id/:target')
+
+  @Put("/removeFriend/:id/:target")
   @UseGuards(OwnGuard)
   @UseGuards(JwtAuthGuard)
   async userRemoveFriend(
-  	@Param('id') user1: string,
-  	@Param('target') user2: string
+    @Param("id") user1: string,
+    @Param("target") user2: string
   ): Promise<UserMode1> {
-  	return await this.userService.removeFriendship({ id: Number(user1) }, { id: Number(user2) });
+    return await this.userService.removeFriendship(
+      { id: Number(user1) },
+      { id: Number(user2) }
+    );
   }
 
   @Put(":id")
@@ -189,23 +195,22 @@ export class UserController {
     @Param("id") id: string,
     @Body() body: updateUserDto
   ): Promise<UserMode1> {
-		if (body.username.indexOf(" ") !== -1)
-			throw new BadRequestException()
-		const user = await this.userService.user({ id: Number(id) });
-		console.log("-----------------------------------------")
-		const userWithSameUsername = await this.userService.user({
-			username: String(body.username),
-		});
-		if (userWithSameUsername && userWithSameUsername.id !== Number(id))
-			throw new UnprocessableEntityException();
-		user.username = body.username;
-		return this.userService.updateUser({
-		where: {
-			id: Number(id),
-		},
-		data: {
-			username: user.username,
-		},
+    if (body.username.indexOf(" ") !== -1) throw new BadRequestException();
+    const user = await this.userService.user({ id: Number(id) });
+    console.log("-----------------------------------------");
+    const userWithSameUsername = await this.userService.user({
+      username: String(body.username),
+    });
+    if (userWithSameUsername && userWithSameUsername.id !== Number(id))
+      throw new UnprocessableEntityException();
+    user.username = body.username;
+    return this.userService.updateUser({
+      where: {
+        id: Number(id),
+      },
+      data: {
+        username: user.username,
+      },
     });
   }
 
@@ -213,17 +218,14 @@ export class UserController {
   @UseGuards(OwnGuard)
   @UseGuards(JwtAuthGuard)
   async getTfaQrCode(@Param("id") id: string) {
-    const otpauthUrl = await this.userService.getOtpAuthUrl({ id: Number(id) })
+    const otpauthUrl = await this.userService.getOtpAuthUrl({ id: Number(id) });
     return this.userService.generateQrCodeDataURL(otpauthUrl);
   }
 
   @Put("/tfa/:id")
   @UseGuards(OwnGuard)
   @UseGuards(JwtAuthGuard)
-  async updateTfa(
-    @Param("id") id: string,
-    @Body() body: any
-  ) {
+  async updateTfa(@Param("id") id: string, @Body() body: any) {
     this.userService.updateUser({
       where: {
         id: Number(id),
