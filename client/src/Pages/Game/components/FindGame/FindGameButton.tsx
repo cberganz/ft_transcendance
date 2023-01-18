@@ -1,5 +1,6 @@
 import { LoadingButton } from "@mui/lab";
 import { Socket } from "socket.io-client";
+import { usersStatusSocket } from "../../../../Router/Router";
 import "../../game.css";
 
 function FindGameButton({
@@ -15,6 +16,7 @@ function FindGameButton({
 }) {
   const updateStartClient = () => {
     setStart(true);
+    usersStatusSocket.emit("updateStatus", "in game");
   };
 
   socket.off("updateStartClient").on("updateStartClient", updateStartClient);

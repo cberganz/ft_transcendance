@@ -21,6 +21,7 @@ interface Room {
   ballDirection: number[];
   score: number[];
   custom: boolean[];
+  start: boolean[];
   reload: boolean;
   finish: boolean;
 }
@@ -40,6 +41,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
+    if (this.findRoomIndex(client) === -1) {
+      return;
+    }
+    if (this.isPlayerOne(client)) {
+      this.rooms[this.findRoomIndex(client)].pause[0] = true;
+    } else if (this.isPlayerTwo(client)) {
+      this.rooms[this.findRoomIndex(client)].pause[1] = true;
+    }
   }
 
   @SubscribeMessage("debug")
@@ -253,6 +262,34 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  @SubscribeMessage("invitationGameServer")
+  handleInvitationGame(client: Socket, id: string): void {
+    if (this.findRoomById(id) === -1) {
+      this.createRoom(id);
+      this.rooms[this.findRoomById(id)].players[0] = this.users.get(client);
+    } else {
+      this.rooms[this.findRoomById(id)].players[1] = this.users.get(client);
+    }
+    client.join(this.roomId(client));
+    this.logRoom();
+  }
+
+  @SubscribeMessage("spectateGameServer")
+  handleSpectateGame(client: Socket, id: string): void {
+    let roomToSpectate = "";
+
+    for (const room of this.rooms) {
+      if (room.players[0] === id || room.players[1] === id) {
+        roomToSpectate = room.roomId;
+      }
+    }
+    this.rooms[this.findRoomById(roomToSpectate)].spectators.push(
+      this.users.get(client)
+    );
+    client.join(roomToSpectate);
+    this.logRoom();
+  }
+
   reconnectRoom(client: Socket): boolean {
     if (this.findRoomIndex(client) === -1) {
       return false;
@@ -268,10 +305,18 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       param.ready = true;
     } else if (this.isPlayerTwo(client) && this.roomReady(client)[1]) {
       param.ready = true;
+    } else if (this.isSpectator(client)) {
+      param.ready = true;
     }
 
+    this.reconnectGame(client);
     if (this.roomIsFull(client)) {
       param.start = true;
+      if (this.isPlayerOne(client)) {
+        this.rooms[this.findRoomIndex(client)].start[0] = true;
+      } else if (this.isPlayerTwo(client)) {
+        this.rooms[this.findRoomIndex(client)].start[1] = true;
+      }
     }
 
     if (this.isPlayerOne(client) && this.roomCustom(client)[0]) {
@@ -281,6 +326,42 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     this.server.to(client.id).emit("reconnectClient", param);
     return true;
+  }
+
+  reconnectGame(client: Socket) {
+    if (!this.roomBallPosition(client)[0]) {
+      return;
+    }
+    const playerPosition: Array<number> = [...this.roomPlayerPosition(client)];
+    const ballPosition: Array<number> = [...this.roomBallPosition(client)];
+    const ballDirection: Array<number> = [...this.roomBallDirection(client)];
+    const score: Array<number> = [...this.roomScore(client)];
+
+    if (this.isPlayerOne(client)) {
+      this.findRoom(client).pause[0] = false;
+    } else if (this.isPlayerTwo(client)) {
+      this.findRoom(client).pause[1] = false;
+    }
+
+    this.server
+      .to(client.id)
+      .emit("updatePlayerPosClient", { pos: playerPosition[0], id: 1 });
+    this.server
+      .to(client.id)
+      .emit("updatePlayerPosClient", { pos: playerPosition[1], id: 2 });
+    this.server.to(client.id).emit("updateBallPosClient", {
+      posX: ballPosition[0],
+      posY: ballPosition[1],
+    });
+    this.server.to(client.id).emit("updateBallDirClient", ballDirection);
+    this.server
+      .to(client.id)
+      .emit("updateScoreClient", { playerNumber: 1, score: score[0] });
+    this.server
+      .to(client.id)
+      .emit("updateScoreClient", { playerNumber: 2, score: score[1] });
+    this.server.to(client.id).emit("updateAlreadyStarted");
+    this.server.to(client.id).emit("reconnectStatusClient");
   }
 
   leaveRoom(client: Socket): void {
@@ -319,6 +400,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       ballDirection: [],
       score: [0, 0],
       custom: [false, false],
+      start: [false, false],
       reload: false,
       finish: false,
     };
@@ -335,6 +417,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   Spectators: ${room.spectators}`
       );
     }
+  }
+
+  findRoomById(id: string): number {
+    for (const room of this.rooms) {
+      if (room.roomId === id) {
+        return this.rooms.indexOf(room);
+      }
+    }
+    return -1;
   }
 
   findAvailableRoom(): number {
@@ -454,5 +545,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return true;
     }
     return false;
+  }
+
+  roomStart(client: Socket): Array<boolean> {
+    return this.findRoom(client).start;
   }
 }

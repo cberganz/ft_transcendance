@@ -176,6 +176,25 @@ function Game() {
     startRef.current = true;
   };
 
+  const handleInvitationGame = (id: string) => {
+    socket.emit("endGameServer");
+    socket.emit("invitationGameServer", id);
+    // setReady(true);
+    // setStart(true);
+    usersStatusSocket.emit("deleteInvitation");
+  };
+
+  const handleSpectateGame = (userToSpectateId: string) => {
+    setReady(true);
+    setStart(true);
+    setSpectator(true);
+    socket.emit("spectateGameServer", userToSpectateId);
+  };
+
+  const handleReconnectStatus = () => {
+    usersStatusSocket.emit("updateStatus", "in game");
+  };
+
   if (!spectator) {
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
@@ -194,6 +213,15 @@ function Game() {
   socket
     .off("updateAlreadyStarted")
     .on("updateAlreadyStarted", updateAlreadyStarted);
+  socket
+    .off("reconnectStatusClient")
+    .on("reconnectStatusClient", handleReconnectStatus);
+  usersStatusSocket
+    .off("invitationGameClient")
+    .on("invitationGameClient", handleInvitationGame);
+  usersStatusSocket
+    .off("spectateGameClient")
+    .on("spectateGameClient", handleSpectateGame);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -266,6 +294,14 @@ function Game() {
     ]);
     ball.setX(widthRef.current * ball.getRelativePosition()[0]);
     ball.setY(heightRef.current * ball.getRelativePosition()[1]);
+    socket.emit("updatePlayerPosServer", {
+      pos: (p1.getY() - heightRef.current / p1.getSpeed()) / heightRef.current,
+      id: p1.id,
+    });
+    socket.emit("updatePlayerPosServer", {
+      pos: (p2.getY() - heightRef.current / p2.getSpeed()) / heightRef.current,
+      id: p2.id,
+    });
     // if (startButton) {
     //   updateReady(true);
     // }
@@ -490,7 +526,6 @@ function Game() {
       p2.setScore(0);
       return;
     }
-    console.log(param);
     gameInfo.player1Id = param.p1Id;
     gameInfo.player2Id = param.p2Id;
     gameInfo.player1_score = p1.getScore();
@@ -543,6 +578,9 @@ function Game() {
         window.removeEventListener("keyup", handleKeyUp);
         window.removeEventListener("blur", handleBlur);
       }
+      if (start) {
+        socket.emit("endGameServer");
+      }
     };
   });
 
@@ -563,9 +601,10 @@ function Game() {
               // className={`${!start && "display-none"}`}
               ref={canvasRef}
             ></canvas>
-            <LeaveButton endGame={endGame} socket={socket} />
+            {/* <LeaveButton endGame={endGame} socket={socket} /> */}
           </>
         )}
+        {ready && <LeaveButton endGame={endGame} socket={socket} />}
       </div>
     </div>
   );
