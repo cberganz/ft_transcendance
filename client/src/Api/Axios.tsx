@@ -1,9 +1,8 @@
 import axios, {AxiosResponse} from 'axios'
 import { store } from "../Store/store"
 import { setCredentials, logOut } from '../Hooks/authSlice'
- 
 
-const AxiosPrivate = async (...params: any) => {
+const axiosPrivate = async (...params: any) => {
 	let result: void | AxiosResponse<any, any>
 
 	try {
@@ -11,7 +10,7 @@ const AxiosPrivate = async (...params: any) => {
 	}
 	catch (error: any){
 		if (error.response.status === 401) {
-			refreshTokenAndExecuteRequestAgain(params[0])
+			result = await refreshTokenAndExecuteRequestAgain(params[0])
 		}
 	}
 	return result
@@ -20,23 +19,21 @@ const AxiosPrivate = async (...params: any) => {
 const refreshTokenAndExecuteRequestAgain = async (params: any) => {
 	let result: void | AxiosResponse<any, any>
 
-	const refreshResult = await RefreshRequest()
+	const refreshResult = await refreshRequest()
 	if (refreshResult?.data) {
 		await store.dispatch(setCredentials({
 			user: refreshResult.data.user,
 			accessToken: refreshResult.data.jwt_token
 		}))
-		params = getParamsWithUpdatedAuthorization(params[0])
-		result = await axios(params[0])
-	} else {
-		store.dispatch(logOut(store.getState()))
+		params = getParamsWithUpdatedAuthorization(params)
+		result = await axios(params)
 	}
 	return result
 }
 
-const RefreshRequest = async () => {
+const refreshRequest = async () => {
 	const response = await axios({
-		withCredentials: true,
+		// withCredentials: true,
 		url: "http://localhost:3000/auth/refresh",
 		method: "GET"
 	})
@@ -53,4 +50,4 @@ const getParamsWithUpdatedAuthorization = (...params: any) => {
 	return params[0]
 }
 
-export default AxiosPrivate
+export default axiosPrivate
