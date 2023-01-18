@@ -2,6 +2,8 @@ import { ChatState, userProfile } from './stateInterface'
 import axios from 'axios'
 import { getChan } from './utils';
 import { chatSocket } from './chat';
+import { store } from '../../Store/store';
+import { setCredentials } from '../../Hooks/authSlice';
 
 const commands = new Map([
     ["/join", JoinChan],
@@ -145,6 +147,13 @@ async function AddAdmin(inputs: string[], state: ChatState, userList: userProfil
     return "User " + inputs[1] + " successfully added as administrator.";
 }
 
+function addBlacklistRedux(user: any, token: any, data: any) {
+    let newUser = structuredClone(user);
+
+    newUser.blacklist.push(data);
+    store.dispatch(setCredentials({user: newUser, accessToken: token}));
+}
+
 async function Block(inputs: string[], state: ChatState, userList: userProfile[], params: any, token: any, user: any) : Promise<string> {
     const chan = getChan(params.chanId, state);
     if (chan === undefined)
@@ -169,12 +178,25 @@ async function Block(inputs: string[], state: ChatState, userList: userProfile[]
     let ret = await axios.post("http://localhost:3000/blacklist", 
         {target_id: blockedId, type: "block", channelId: params.chanId, creatorId: user.id}, 
         {withCredentials: true, headers: {Authorization: `Bearer ${token}`}})
-        .then()
+        .then(response => response.data)
         .catch(error => "error");
     if (ret === "error")
         return "Error: User already blocked.";
-    chatSocket.emit('updateUserFromClient');
+    addBlacklistRedux(user, token, ret);
+    chatSocket.emit('blockFromClient', ret);
     return "User successfully blocked.";
+}
+
+function removeBlacklistRedux(user: any, token: any, id: number) {
+    let newUser = structuredClone(user);
+
+    for (let i = 0; i < newUser.blacklist.length; i++) {
+        if (newUser.blacklist[i].id === id) {
+            newUser.blacklist.splice(i, 1);
+            break ;
+        }
+    }
+    store.dispatch(setCredentials({user: newUser, accessToken: token}));
 }
 
 async function Unblock(inputs: string[], state: ChatState, userList: userProfile[], params: any, token: any, user: any) : Promise<string> {
@@ -207,11 +229,12 @@ async function Unblock(inputs: string[], state: ChatState, userList: userProfile
         return "Error: User not blocked.";
     let ret = await axios.delete("http://localhost:3000/blacklist/" + blacklistId, 
         {withCredentials: true, headers: {Authorization: `Bearer ${token}`}})
-        .then()
+        .then(response => response.data)
         .catch(error => "error");
     if (ret === "error")
         return "Error: User not blocked.";
-    chatSocket.emit('updateUserFromClient');
+    removeBlacklistRedux(user, token, ret.id);
+    chatSocket.emit('unblockFromClient', ret);
     return "User successfully unblocked.";
 }
 
@@ -222,11 +245,9 @@ async function Ban(inputs: string[], state: ChatState, userList: userProfile[], 
     if (inputs.length < 3 || chan === undefined || isNaN(Number(inputs[2])))
         return "";
     let blockedId = getId(userList, inputs[1]);;
-    let blockedLogin;
     for (let user of chan?.members) {
         if (user.id === blockedId) {
             blockedId = user.id;
-            blockedLogin = user.login;
             break ;
         }
     }
@@ -255,7 +276,7 @@ async function Ban(inputs: string[], state: ChatState, userList: userProfile[], 
         })
         .then(response => chatSocket.emit('updateChanFromClient', response.data))
         .catch(error => alert(error.status + ": " + error.message)) 
-    chatSocket.emit('banFromClient', {bannedLogin: blockedLogin, chanId: params.chanId});
+    chatSocket.emit('banFromClient', {bannedId: blockedId, chanId: params.chanId});
     return "User " + inputs[1] + " successfully banned for " + inputs[2] + " minutes.";
 }
 

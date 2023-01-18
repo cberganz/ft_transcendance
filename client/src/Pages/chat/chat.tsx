@@ -10,11 +10,12 @@ import io from "socket.io-client";
 import axios from "axios"
 import { getChan, userIsInChan, sortChannels } from './utils'
 import { InfoDialog } from "./channel/infoDialog"
-import { selectCurrentUser } from '../../Hooks/authSlice'
+import { selectCurrentUser, setCredentials } from '../../Hooks/authSlice'
 import { selectCurrentToken } from '../../Hooks/authSlice'
 import { useSelector } from "react-redux"
 import { usersStatusSocket } from "../../Router/Router";
 import { useSearchParams } from 'react-router-dom';
+import { store } from "../../Store/store";
 
 export const chatSocket = io("http://localhost:3000/chat"); 
 
@@ -60,7 +61,7 @@ class Chat extends React.Component<Props, ChatState> {
       chatSocket.emit('joinChatRoom', chan.id)
     this.emitNewChan();
     usersStatusSocket.emit("updateStatus", "online");
-    chatSocket.emit('initTable', this.props.user.login)
+    chatSocket.emit('initTable', this.props.user.id)
   }
 
   async getJoinedChans(): Promise<Channel[]> {
@@ -157,6 +158,25 @@ class Chat extends React.Component<Props, ChatState> {
     this.setState(ChatData)
   }
 
+  socketBlockFromServer(data: any) {
+    let newUser = structuredClone(this.props.user);
+
+    newUser.blacklisted.push(data);
+    store.dispatch(setCredentials({user: newUser, accessToken: this.props.token}));
+  }
+
+  socketUnblockFromServer(id: number) {
+    let newUser = structuredClone(this.props.user);
+
+    for (let i = 0; i < newUser.blacklisted.length; i++) {
+        if (newUser.blacklisted[i].id === id) {
+            newUser.blacklisted.splice(i, 1);
+            break ;
+        }
+    }
+    store.dispatch(setCredentials({user: newUser, accessToken: this.props.token}));
+  }
+
   /** RESPONSIVE **/
   setMobile(state: ChatState) {
     let change: boolean = false;
@@ -178,6 +198,8 @@ class Chat extends React.Component<Props, ChatState> {
     chatSocket.off('updateChanFromServer').on('updateChanFromServer', (chan) => this.socketUpdateChan(chan));
     chatSocket.off('newChanFromServer').on('newChanFromServer', (chan) => this.socketNewChan(chan));
     chatSocket.off('newMsgFromServer').on('newMsgFromServer', (msg) => this.socketNewMsg(msg));
+    chatSocket.off('blockFromServer').on('blockFromServer', (msg) => this.socketBlockFromServer(msg));
+    chatSocket.off('unblockFromServer').on('unblockFromServer', (msg) => this.socketUnblockFromServer(msg));
 
     window.addEventListener('resize', () => this.setMobile(this.state));
 
