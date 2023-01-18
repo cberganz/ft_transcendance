@@ -13,7 +13,6 @@ import { InfoDialog } from "./channel/infoDialog"
 import { selectCurrentUser } from '../../Hooks/authSlice'
 import { selectCurrentToken } from '../../Hooks/authSlice'
 import { useSelector } from "react-redux"
-import SearchBar from "./channel/searchBar"
 import { usersStatusSocket } from "../../Router/Router";
 import { useSearchParams } from 'react-router-dom';
 
