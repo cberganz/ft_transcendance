@@ -1,11 +1,38 @@
-import axios from 'axios'
+import axios, {AxiosResponse} from 'axios'
 import { store } from "../Store/store"
-import 
-{ selectCurrentUser, selectCurrentToken, setCredentials, logOut }
-from '../Hooks/authSlice'
-import { useSelector, useDispatch } from "react-redux"
-import { useLogoutMutation } from "../Api/Auth/authApiSlice";
+import { setCredentials, logOut } from '../Hooks/authSlice'
  
+
+const AxiosPrivate = async (...params: any) => {
+	let result: void | AxiosResponse<any, any>
+
+	try {
+		result = await axios(params[0])
+	}
+	catch (error: any){
+		if (error.response.status === 401) {
+			refreshTokenAndExecuteRequestAgain(params[0])
+		}
+	}
+	return result
+}
+
+const refreshTokenAndExecuteRequestAgain = async (params: any) => {
+	let result: void | AxiosResponse<any, any>
+
+	const refreshResult = await RefreshRequest()
+	if (refreshResult?.data) {
+		await store.dispatch(setCredentials({
+			user: refreshResult.data.user,
+			accessToken: refreshResult.data.jwt_token
+		}))
+		params = getParamsWithUpdatedAuthorization(params[0])
+		result = await axios(params[0])
+	} else {
+		store.dispatch(logOut(store.getState()))
+	}
+	return result
+}
 
 const RefreshRequest = async () => {
 	const response = await axios({
@@ -15,28 +42,15 @@ const RefreshRequest = async () => {
 	})
 	.then((response: any) => response)
 	.catch((error: any) => {
-		// logoutUser({});
-		// logOut({});
-		// window.location.replace("/login");
-		return ;
+		window.location.replace("/login");
 	})
-	store.dispatch(setCredentials({
-		user: response.data.user,
-		accessToken: response.data.jwt_token
-	}))
 	return response
 }
 
-const AxiosPrivate = async (...params: any) => {
-
-	let data = await axios(params[0])
-	.catch((error: any) => {
-		if (error.response.status === 401) {
-			let data = RefreshRequest()
-			// .then((response: Response) => dispatch())
-		}
-	})	
-	return data
+const getParamsWithUpdatedAuthorization = (...params: any) => {
+	if (params[0]?.headers?.Authorization)
+		params[0].headers.Authorization = `Bearer ${store.getState().auth.token}`
+	return params[0]
 }
 
 export default AxiosPrivate

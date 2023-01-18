@@ -20,7 +20,7 @@ const PersistLogin = () => {
 				})
 			}
 			catch (e) {
-				logOut({})
+				logOut({})	
 			}
 			finally {
 				setIsLoading(false);

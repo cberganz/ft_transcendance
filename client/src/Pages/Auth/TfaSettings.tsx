@@ -1,9 +1,8 @@
 import * as React from "react"
-import axios from "axios"
 import { selectCurrentUser, selectCurrentToken, setCredentials } from '../../Hooks/authSlice'
 import { useSelector, useDispatch } from "react-redux"
 import useAlert from "../../Hooks/useAlert";
-import axiosPrivate from '../../Api/Axios'
+import axios from '../../Api/Axios'
 import {
 	Box,
 	Stack,
@@ -21,7 +20,7 @@ const TfaQrCode = (Props: Props) => {
 	const [qrCodeContent, setContent] = React.useState(<></>)
 
 	React.useEffect(() => {
-		axiosPrivate({
+		axios({
 			withCredentials: true,
 			url: `http://localhost:3000/user/tfa/${Props.currentUser.id}`,
 			method: "GET",
@@ -36,7 +35,7 @@ const TfaQrCode = (Props: Props) => {
 			)
 		})
 		.catch(() => Props.setAlert("Failed fetch QRcode", "error"))	
-	  }, [Props]);
+	  }, []);
 
 	return qrCodeContent
 }
@@ -51,7 +50,7 @@ const TfaSwitchItem = (dispatch: any,
 			...currentUser,
 			isTFAEnabled: e.target.checked
 		}
-		axiosPrivate({
+		axios({
 			withCredentials: true,
 			url: `http://localhost:3000/user/tfa/${currentUser.id}`,
 			method: "put",
