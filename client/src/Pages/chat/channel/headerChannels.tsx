@@ -9,12 +9,14 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
-import { ChatProps, Channel } from '../stateInterface'
-import { getProfile } from '../utils'
-import Avatar from '@mui/material/Avatar';
+import { Channel } from '../stateInterface'
 import { Icon } from '@iconify/react';
 import useAlert from "../../../Hooks/useAlert";
-import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux"
+import { selectCurrentUser } from '../../../Hooks/authSlice'
+import { chatSocket } from '../chat'
+import { selectCurrentToken } from '../../../Hooks/authSlice'
+import SearchBar from './searchBar';
 
 function titleAlreadyExists(title: string, notJoinedChans: Channel[], joinedChans: Channel[]) : boolean {
   for (let chan of joinedChans) {
@@ -30,7 +32,9 @@ function titleAlreadyExists(title: string, notJoinedChans: Channel[], joinedChan
 
 function CreateChannelButton(props: any) {
     const [open, setOpen] = React.useState(false);
-    const { setAlert } = useAlert();
+    const user            = useSelector(selectCurrentUser);
+    const token           = useSelector(selectCurrentToken);
+    const { setAlert }    = useAlert();
   
     const handleClickOpen = () => {
       setOpen(true);
@@ -44,24 +48,20 @@ function CreateChannelButton(props: any) {
       e.preventDefault();
       var title = e.target.name.value.trim();
       if (title === "")
-        return (alert("Please a channel title."))
+        return (alert("Please enter a channel title."))
       if (titleAlreadyExists(title, props.props.state.notJoinedChans, props.props.state.joinedChans))
         return (setOpen(true), alert("Title already exists."))
-      let chanType
-      if (e.target.password.value === "")
-        chanType = "public"
-      else
-        chanType = "private"
+      
       const newChan = {
-        type:      chanType,
+        type:      e.target.password.value === "" ? "public" : "private",
         password:  e.target.password.value,
         title:     title,
-        ownerId:   props.props.state.actualUser.user.id,
+        ownerId:   user.id,
       }
       axios.post('http://localhost:3000/channel/newChan/', newChan, 
-        {withCredentials: true, headers: {Authorization: `Bearer ${props.props.state.actualUser.token}`}})
+        {withCredentials: true, headers: {Authorization: `Bearer ${token}`}})
         .then(response => {
-          props.props.socket.emit("newChanFromClient", response.data);
+          chatSocket.emit("newChanFromClient", response.data);
           setAlert("Channel successfully created.", "success");
         })
         .catch(error => setAlert("Error creating channel.", "error"))
@@ -70,10 +70,10 @@ function CreateChannelButton(props: any) {
     return (
       <div>
         <Tooltip title="Create channel">
-          <Icon icon="jam:write"
+          <Icon icon="material-symbols:add-circle"
             onClick={handleClickOpen}
             fontSize='medium'
-            style={{color: 'black', cursor: 'pointer', marginTop: '14px', marginLeft: '75%'}}
+            style={{color: '#577bb5', cursor: 'pointer', marginTop: '14px'}}
             width="23" height="23" />
           </Tooltip>
         <form  onSubmit={(e) => {createChannel(e)}}>
@@ -111,21 +111,10 @@ function CreateChannelButton(props: any) {
     );
 }
 
-export default function HeaderChannels(props: ChatProps) {
-  const navigate = useNavigate();
-  let avatar = getProfile(props.state.userList, props.state.actualUser.user.id)?.avatar;
-  if (!avatar)
-    avatar = "";
-  const   profileLink: string = "/profile?userId=" + props.state.actualUser.user.id.toString();
+export default function HeaderChannels(props: any) {
   return (
     <div className='ChannelHeader'>
-        <Tooltip title={getProfile(props.state.userList, props.state.actualUser.user.id)?.username}>
-                 <Avatar 
-          alt={avatar.toString()} 
-          src={avatar.toString()}
-          sx={{ width: 30, height: 30, marginTop: '10px', marginLeft: '25%', cursor: 'pointer' }}
-          onClick={() => navigate(profileLink)} />
-        </Tooltip>
+        <SearchBar state={props.state} openConvHandler={props.openConvHandler}  />
         <CreateChannelButton props={props} />
     </div>
   )

@@ -10,24 +10,31 @@ import Signup from "../Pages/Auth/SignUp";
 import TfaAuth from "../Pages/Auth/TfaAuth";
 import TfaSettings from "../Pages/Auth/TfaSettings";
 import PersistLogin from "../Hooks/persistLogin";
-import { selectCurrentUser } from "../Hooks/authSlice";
 import { selectCurrentToken } from "../Hooks/authSlice";
-import { useSelector } from "react-redux";
-import io from "socket.io-client";
 import AlertPopup from "../Components/AlertPopup";
+import { selectCurrentUser } from "../Hooks/authSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { io } from "socket.io-client";
+import { userProfile } from "../Pages/chat/stateInterface";
+import { setUserlist } from "../Hooks/userListSlice";
+import { useEffect } from "react";
 
 export const usersStatusSocket = io("http://localhost:3000/app");
 
-function OutletRoute() {
-  const user = useSelector(selectCurrentUser);
+function connectGlobalSocket(user: any) {
   const userData = {
-    id: user.id,
-    login: user.login,
-    username: user.username,
+    id: user?.id,
+    login: user?.login,
+    username: user?.username,
     status: "online",
-    avatar: user.avatar,
+    avatar: user?.avatar,
   };
-  usersStatusSocket.emit("connection", userData);
+  if (user) {
+    usersStatusSocket.emit("connection", userData);
+  }
+}
+
+function OutletRoute() {
   return (
     <div>
       <PrimarySearchAppBar />
@@ -41,6 +48,18 @@ function PrivateRoutes() {
   const isTokenValidated = useSelector(selectCurrentToken)
     ? "valid"
     : "invalid"; //useToken();
+  const user = useSelector(selectCurrentUser);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    connectGlobalSocket(user);
+  }, [user]);
+
+  usersStatusSocket
+    .off("updateStatusFromServer")
+    .on("updateStatusFromServer", (userList: userProfile[]) => {
+      dispatch(setUserlist(userList));
+    });
   return isTokenValidated === "valid" ? (
     <OutletRoute />
   ) : (

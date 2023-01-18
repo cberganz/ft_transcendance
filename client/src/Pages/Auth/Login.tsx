@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
@@ -9,12 +8,11 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-
 import { setCredentials } from '../../Hooks/authSlice'
 import { useNavigate } from "react-router-dom"
 import { useDispatch } from "react-redux"
 import { useLoginMutation } from "../../Api/Auth/authApiSlice"
+import './Login.css'
 
 
 type Credentials = {
@@ -22,7 +20,6 @@ type Credentials = {
 	password: FormDataEntryValue | null,
 }
 
-const theme = createTheme();
 
 function Login() {
 	const [login, { isLoading }] = useLoginMutation()
@@ -32,6 +29,7 @@ function Login() {
 	async function loginUser(credentials: Credentials) {
 		const userData = await login(credentials).unwrap()
 
+		console.log(userData.user);
 		dispatch(setCredentials({ user: userData.user, accessToken: userData.jwt_token }))
 		return (userData)
 	}
@@ -53,26 +51,23 @@ function Login() {
 	}
 
 	const content = isLoading ? <h1>Loading...</h1> : (
-			<ThemeProvider theme={theme}>
+			<div className="loginPage">
 				<Container component="main" maxWidth="xs">
-					<CssBaseline />
 					<Box
 					sx={{
-						marginTop: 8,
 						display: 'flex',
 						flexDirection: 'column',
 						alignItems: 'center',
+						backgroundColor: '#f5f3f2',
+						padding: '40px',
+						borderRadius: '30px',
 					}}
 					>
-					<Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-						<LockOutlinedIcon />
-					</Avatar>
-					<Typography component="h1" variant="h5">
-						Sign in
-					</Typography>
-					<Button variant="contained" href='http://localhost:3000/auth/42'>
+					<h1>TRANSCENDENCE</h1>
+					<Button variant="contained" href='http://localhost:3000/auth/42' style={{marginTop: '20px'}}>
 						42 Login
 					</Button>
+
 					<Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
 						<TextField
 						margin="normal"
@@ -108,10 +103,10 @@ function Login() {
 								</Link>
 							</Grid>
 						</Grid>
-					</Box>
+					</Box> 
 					</Box>
 				</Container>
-			</ThemeProvider>
+			</div>
 		)
 
   return content

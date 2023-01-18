@@ -1,10 +1,7 @@
-import Socket from "socket.io-client"
-
 export interface ChatState {
-    actualUser: actualUser,
+    openedConvID: number,
     joinedChans: Channel[],
     notJoinedChans: Channel[],
-    userList: userProfile[],
     mobile: boolean,
 }
 
@@ -15,18 +12,6 @@ export interface userProfile {
     status: string,
     avatar: string,
   }
-
-export interface actualUser {
-    user: User,
-    openedConvID: number,
-    token: any,
-}
-
-export interface ChatProps {
-    state: ChatState,
-    socket: any,
-}
-
 
 export interface User {
     id:          number,

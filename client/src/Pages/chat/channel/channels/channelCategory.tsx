@@ -1,62 +1,37 @@
-import { ChannelItem, DialogChannelItem } from './channelItem';
-import { getProfile } from '../../utils';
+import { ChannelItem, NotJoinedChanItem } from './channelItem';
 import '../../chat.css'
+import { useSelector } from 'react-redux';
+import { selectCurrentToken, selectCurrentUser } from '../../../../Hooks/authSlice';
+import { selectUserlist } from '../../../../Hooks/userListSlice';
 
-export function DMChannels(props: any) {
-  return (
-    <span>
-    {
-        props.state.joinedChans?.map((chan: any) => (
-              <div key={chan.id}>
-              {chan.type === 'dm' && chan.members[0].id === props.state.actualUser.user.id ? 
-                ChannelItem(chan, String(getProfile(props.state.userList, chan.members[1].id)?.username), String(getProfile(props.state.userList, chan.members[1].id)?.avatar), props) 
-                : null}
-              {chan.type === 'dm' && chan.members[1].id === props.state.actualUser.user.id ? 
-                ChannelItem(chan, String(getProfile(props.state.userList, chan.members[0].id)?.username), String(getProfile(props.state.userList, chan.members[0].id)?.avatar), props) : null}
-              </div>
-      ))
-    }
-    </span>
-  );
-}
-
-export function JoinedChannels(props: any) {
-  return (
-    <span>
-    {
-        props.state.joinedChans?.map((chan: any) => (
-              <div key={chan.id}>
-              {chan.type === 'dm' ? null : ChannelItem(chan, chan.title, "", props)}
-              </div>
-      ))
-    }
-    </span>
-  );
-}
-
-export function AllChannels(props: any) {
-
+function getAllChans(props: any, chanArray: any, joined: boolean, hooks: any) {
   return (
     <div>
     {
-        props.state.notJoinedChans?.map((chan: any) => (
+        chanArray.map((chan: any) => (
           <div key={chan.id}>
-              <DialogChannelItem chan={chan} chanName={chan.title} props={props} />
-           </div>
+            {joined ? ChannelItem(chan, props, hooks): <NotJoinedChanItem chan={chan} props={props} hooks={hooks} />}
+          </div>
       ))
     }
     </div>
   );
 }
 
-export default function showChannelItems(type: String, props: any) {    
+export default function ShowChannelItems(type: String, props: any) {    
+  const hooks = {
+    userList: useSelector(selectUserlist).userList,
+    user: useSelector(selectCurrentUser),
+    token: useSelector(selectCurrentToken),
+  }
+
   switch (type) {
     case 'dm' :
-      return DMChannels(props)
+      return getAllChans(props, props.state.joinedChans.filter((chan: any) => chan.type === 'dm'), true, hooks);
     case 'joined' :
-      return JoinedChannels(props)
+      return getAllChans(props, props.state.joinedChans.filter((chan: any) => chan.type !== 'dm'), true, hooks);
     case 'all' :
-      return AllChannels(props)
+      return getAllChans(props, props.state.notJoinedChans, false, hooks);
     default :
       return
   }

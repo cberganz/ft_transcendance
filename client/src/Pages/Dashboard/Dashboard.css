@@ -11,8 +11,22 @@
         }
 }
     
-    .userCol { 
-        display: grid;
+    .userCol {
+        width: 300px;
+        height: 80vh;
+        background-image: linear-gradient(lightgray 33%, rgba(255,255,255,0) 0%);
+        background-position: right;
+        background-size: 1px 3px;
+        background-repeat: repeat-y;
+        padding-top: 30px;
+    }
+
+    .userContentContainer {
+        display: flex;
+        margin-top: 8vh;
+        justify-content: center;
+        width: 280px;
+        width: 100%;
     }
 
     .contentCol { 
@@ -21,7 +35,7 @@
         grid-column-start: 2;
         grid-column-end: 2;
         grid-template-rows: 6vw auto;
-        width: 100%;
+        width: 60%;
     }
 
     .homeHeader {
@@ -37,3 +51,5 @@
         align-items: center;
         justify-content: center;
     }
+
+

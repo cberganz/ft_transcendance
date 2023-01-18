@@ -1,5 +1,5 @@
 import * as React from 'react';
-import showChannelItems from './channelCategory';
+import ShowChannelItems from './channelCategory';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
@@ -78,9 +78,9 @@ export default function ChannelDisplay(props: any) {
         <div className="channelsDisplay">
 				{channelCategories.map((category) => (
           <TabPanel value={value} index={category.index} key={category.index}>
-            {category.type === 'dm' ? showChannelItems('dm', props) : null}
-            {category.type === 'joined' ? showChannelItems('joined', props) : null}
-            {category.type === 'all' ? showChannelItems('all', props) : null}
+            {category.type === 'dm' ? ShowChannelItems('dm', props) : null}
+            {category.type === 'joined' ? ShowChannelItems('joined', props) : null}
+            {category.type === 'all' ? ShowChannelItems('all', props) : null}
           </TabPanel>
 				))}
         </div>
