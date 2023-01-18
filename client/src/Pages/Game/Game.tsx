@@ -10,6 +10,7 @@ import LeaveButton from "./components/LeaveButton/LeaveButton";
 import { usersStatusSocket } from "../../Router/Router";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FormControlLabel, FormGroup, Switch } from "@mui/material";
 
 interface gameInfo {
   player1Id?: number;
@@ -35,6 +36,7 @@ function Game() {
   const ballSizeRef = useRef(heightRef.current / 50);
   let startRef = useRef(false);
   let timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  let statusRef = useRef<string>("online");
   const userId: number = useSelector(selectCurrentUser).id;
   const p1Ref = useRef(
     new Player(
@@ -163,9 +165,11 @@ function Game() {
   }) => {
     if (!ready && param.ready) {
       setReady(true);
+      usersStatusSocket.emit("updateStatus", "waiting for game");
     }
     if (!start && param.start) {
       setStart(true);
+      usersStatusSocket.emit("updateStatus", "in game");
     }
     if (!customGame && param.custom) {
       setCustomGame(true);
@@ -176,11 +180,18 @@ function Game() {
     startRef.current = true;
   };
 
+  const handleHasInvited = () => {
+    setReady(true);
+  };
+
   const handleInvitationGame = (id: string) => {
-    socket.emit("endGameServer");
+    setReady(true);
     socket.emit("invitationGameServer", id);
-    // setReady(true);
-    // setStart(true);
+    usersStatusSocket.emit("deleteInvitation");
+  };
+
+  const handleDeclineInvitation = () => {
+    socket.emit("endGameServer");
     usersStatusSocket.emit("deleteInvitation");
   };
 
@@ -193,6 +204,10 @@ function Game() {
 
   const handleReconnectStatus = () => {
     usersStatusSocket.emit("updateStatus", "in game");
+  };
+
+  const handleUpdateStatus = (status: string) => {
+    statusRef.current = status;
   };
 
   if (!spectator) {
@@ -217,11 +232,21 @@ function Game() {
     .off("reconnectStatusClient")
     .on("reconnectStatusClient", handleReconnectStatus);
   usersStatusSocket
+    .off("hasInvitedClient")
+    .on("hasInvitedClient", handleHasInvited);
+  usersStatusSocket
     .off("invitationGameClient")
     .on("invitationGameClient", handleInvitationGame);
   usersStatusSocket
+    .off("declineInvitationClient")
+    .on("declineInvitationClient", handleDeclineInvitation);
+
+  usersStatusSocket
     .off("spectateGameClient")
     .on("spectateGameClient", handleSpectateGame);
+  usersStatusSocket
+    .off("updateStatusGame")
+    .on("updateStatusGame", handleUpdateStatus);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -302,9 +327,16 @@ function Game() {
       pos: (p2.getY() - heightRef.current / p2.getSpeed()) / heightRef.current,
       id: p2.id,
     });
-    // if (startButton) {
-    //   updateReady(true);
-    // }
+    socket.emit("updateBallPosServer", {
+      posX:
+        (ball.getX() +
+          (ball.getDirectionX() * widthRef.current) / ball.getSpeed()) /
+        widthRef.current,
+      posY:
+        (ball.getY() +
+          (ball.getDirectionY() * heightRef.current) / ball.getSpeed()) /
+        heightRef.current,
+    });
   }
 
   function updatePlayerPosition(player: Player): void {
@@ -530,6 +562,7 @@ function Game() {
     gameInfo.player2Id = param.p2Id;
     gameInfo.player1_score = p1.getScore();
     gameInfo.player2_score = p2.getScore();
+    console.log(gameInfo);
     p1.setScore(0);
     p2.setScore(0);
     socket.emit("updateScoreServer", {
@@ -588,12 +621,31 @@ function Game() {
     <div className={"gameContainer"}>
       <div className={"gameWidth"}>
         {!start && (
-          <FindGameButton
-            ready={ready}
-            setReady={setReady}
-            setStart={setStart}
-            socket={socket}
-          />
+          <>
+            <FindGameButton
+              statusRef={statusRef}
+              ready={ready}
+              setReady={setReady}
+              setStart={setStart}
+              socket={socket}
+            />
+            <div className="customButton">
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={customGame}
+                      onChange={() => {
+                        socket.emit("updateCustomServer", !customGame);
+                        setCustomGame(!customGame);
+                      }}
+                    />
+                  }
+                  label="Custom Game"
+                />
+              </FormGroup>
+            </div>
+          </>
         )}
         {start && (
           <>

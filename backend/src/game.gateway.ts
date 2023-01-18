@@ -267,11 +267,17 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (this.findRoomById(id) === -1) {
       this.createRoom(id);
       this.rooms[this.findRoomById(id)].players[0] = this.users.get(client);
+      this.roomReady(client)[0] = true;
     } else {
       this.rooms[this.findRoomById(id)].players[1] = this.users.get(client);
     }
     client.join(this.roomId(client));
     this.logRoom();
+    if (this.roomIsFull(client)) {
+      this.server.to(this.roomId(client)).emit("updateStartClient");
+      this.roomReady(client)[0] = true;
+      this.roomReady(client)[1] = true;
+    }
   }
 
   @SubscribeMessage("spectateGameServer")
@@ -309,14 +315,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       param.ready = true;
     }
 
-    this.reconnectGame(client);
     if (this.roomIsFull(client)) {
       param.start = true;
-      if (this.isPlayerOne(client)) {
-        this.rooms[this.findRoomIndex(client)].start[0] = true;
-      } else if (this.isPlayerTwo(client)) {
-        this.rooms[this.findRoomIndex(client)].start[1] = true;
-      }
+      this.server.to(client.id).emit("updateAlreadyStarted");
     }
 
     if (this.isPlayerOne(client) && this.roomCustom(client)[0]) {
@@ -325,6 +326,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       param.custom = true;
     }
     this.server.to(client.id).emit("reconnectClient", param);
+    this.reconnectGame(client);
     return true;
   }
 
@@ -360,7 +362,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server
       .to(client.id)
       .emit("updateScoreClient", { playerNumber: 2, score: score[1] });
-    this.server.to(client.id).emit("updateAlreadyStarted");
     this.server.to(client.id).emit("reconnectStatusClient");
   }
 
