@@ -231,7 +231,6 @@ export default function PrimarySearchAppBar() {
   const [invitation, setInvitation] = useState(false);
 
   const handleInvitePlayer = () => {
-    console.log(`socket id: ${usersStatusSocket.id}`);
     setInvitation(true);
   };
 
