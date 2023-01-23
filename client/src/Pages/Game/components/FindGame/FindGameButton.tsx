@@ -4,21 +4,22 @@ import { usersStatusSocket } from "../../../../Router/Router";
 import "../../game.css";
 
 function FindGameButton({
-  statusRef,
   ready,
   setReady,
   setStart,
   socket,
+  customGame,
 }: {
-  statusRef: React.MutableRefObject<string>;
   ready: boolean;
   setReady: (value: boolean) => void;
   setStart: (value: boolean) => void;
   socket: Socket;
+  customGame: boolean;
 }) {
   const updateStartClient = () => {
     setStart(true);
     usersStatusSocket.emit("updateStatus", "in game");
+    socket.emit("updateCustomServer", customGame);
   };
 
   socket.off("updateStartClient").on("updateStartClient", updateStartClient);

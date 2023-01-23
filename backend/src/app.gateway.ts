@@ -59,6 +59,13 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleConnection(socket: Socket) {}
 
+  isAlreadyConnected(userId: number): Socket {
+    for (let [socket, id] of this.usersSockets) {
+      if (id === userId) return socket;
+    }
+    return null;
+  }
+
   /** Profiles */
   getProfile(id: number): userProfile {
     for (let profile of this.usersProfiles) {
@@ -102,15 +109,18 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /** Connection */
   @SubscribeMessage("connection")
   handleInitTable(socket: Socket, data: userProfile) {
+    const alreadyConnectedSocket = this.isAlreadyConnected(data.id);
+
+    if (alreadyConnectedSocket)
+      this.usersSockets.delete(alreadyConnectedSocket);
+    this.usersSockets.set(socket, data.id);
     if (
       this.usersProfiles.find((userProfile) => userProfile.id === data.id) ===
       undefined
     )
       socket.emit("firstConnectionFromServer");
-    this.usersSockets.set(socket, data.id);
-    let status = this.getProfile(this.usersSockets.get(socket)).status; 
-    if (status !== "offline")
-      data.status = status;
+    let status = this.getProfile(this.usersSockets.get(socket)).status;
+    if (status !== "offline") data.status = status;
     this.setProfile(data);
     this.server.emit("updateStatusFromServer", this.usersProfiles);
     this.server.emit("updateSearchBarUserList", this.usersProfiles);
@@ -226,5 +236,6 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.setProfile({ id: userId, status: "offline" });
     this.server.emit("updateStatusFromServer", this.usersProfiles);
     this.server.emit("updateSearchBarUserList", this.usersProfiles);
+    this.usersSockets.delete(socket);
   }
 }
