@@ -1,5 +1,5 @@
 export interface ChatState {
-    actualUser: actualUser,
+    openedConvID: number,
     joinedChans: Channel[],
     notJoinedChans: Channel[],
     mobile: boolean,
@@ -12,12 +12,6 @@ export interface userProfile {
     status: string,
     avatar: string,
   }
-
-export interface actualUser {
-    user: User,
-    openedConvID: number,
-    token: any,
-}
 
 export interface User {
     id:          number,

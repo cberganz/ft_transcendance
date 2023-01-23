@@ -108,11 +108,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
     socket.leave("chat" + chanID);
   }
 
-  @SubscribeMessage('updateUserFromClient')
-  updateUser(socket: Socket): void {
-    this.server.emit('updateUserFromServer');
-  }
-
   @SubscribeMessage('banFromClient')
   banUser(socket: Socket, data: {bannedLogin: string, chanId: number}): void {
     for (let [userSocket, login] of this.userSockets) {

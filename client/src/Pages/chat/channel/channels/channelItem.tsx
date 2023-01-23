@@ -18,17 +18,15 @@ import ChatCommands from '../../chatCommands';
 import useAlert from "../../../../Hooks/useAlert";
 import { useSelector } from "react-redux"
 import { selectUserlist } from '../../../../Hooks/userListSlice'
-import { chatSocket } from '../../chat';
 
-function getChanName(userList: userProfile[], state: ChatState, chan: Channel) {
+function getChanName(userList: userProfile[], chan: Channel, user: any) {
   if (chan.type !== 'dm')
     return (chan.title);
-  return (getDmUser(userList, state, chan)?.username);
+  return (getDmUser(userList, chan, user)?.username);
 }
 
-function ItemContent(props: {chan: any, lastMsg: any, state: ChatState}) {
-	const userList 		= useSelector(selectUserlist).userList
-  const chanName    = getChanName(userList, props.state, props.chan);
+function ItemContent(props: {chan: any, lastMsg: any, state: ChatState, hooks: any}) {
+  const chanName    = getChanName(props.hooks.userList, props.chan, props.hooks.user);
 
   return (
     <>
@@ -46,7 +44,7 @@ function ItemContent(props: {chan: any, lastMsg: any, state: ChatState}) {
                 </Typography>
                 <span> </span>
                   {props.lastMsg?.content?.substring(0, 15)}
-                  {props.lastMsg?.content?.length && props.lastMsg?.content?.length > 15 ? <span>...</span> : null}
+                  {props.lastMsg?.content?.length && props.lastMsg?.content?.length > 15 ? <>...</> : <span>&nbsp;</span>}
                 
               </React.Fragment>
             }
@@ -56,9 +54,8 @@ function ItemContent(props: {chan: any, lastMsg: any, state: ChatState}) {
   );
 }
 
-function DmItemAvatar(props: {state: ChatState, chan: any}) {
-	const userList 		= useSelector(selectUserlist).userList
-  let dmUser        = getDmUser(userList, props.state, props.chan);
+function DmItemAvatar(props: {chan: any, user: any, userList: any}) {
+  let dmUser        = getDmUser(props.userList, props.chan, props.user);
   let isConnected   = getProfile(useSelector(selectUserlist).userList, dmUser?.id)?.status === 'online' ? true : false;
   
   return (
@@ -69,7 +66,6 @@ function DmItemAvatar(props: {state: ChatState, chan: any}) {
                 overlap="circular"
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 variant="dot"
-                sx={{ marginRight: '10px', marginBottom: '10px' }}
               >
                   <Avatar alt={dmUser?.username?.valueOf()} src={dmUser?.avatar.valueOf()} /> 
               </StyledBadge>
@@ -80,25 +76,25 @@ function DmItemAvatar(props: {state: ChatState, chan: any}) {
 }
 
 
-export function ChannelItem(chan: Channel, props: any) {
-  let lastMsg = getLastMsg(props.state, chan);
-  let bckgColor = props.state.actualUser.openedConvID === chan.id ? '#f5f5f5' : 'white';
+export function ChannelItem(chan: Channel, props: any, hooks: any) {
+  let lastMsg       = getLastMsg(props.state, chan, hooks.user);
+  let bckgColor     = props.state.openedConvID === chan.id ? '#ebf2fa' : 'white';
 
   return (
     <>
       <ListItem 
         onClick={event => {props.openConvHandler(chan.id)}} 
-        alignItems="flex-start" className="ChannelItem" 
-        sx={{backgroundColor: bckgColor, 
-        cursor: 'pointer'}}>
+        alignItems="flex-start" 
+        className="ChannelItem"
+        sx={{backgroundColor: bckgColor, width: '94%'}}>
           <ListItemAvatar>
             {
               chan.type === 'dm' ? 
-                <DmItemAvatar state={props.state} chan={chan} />
+                <DmItemAvatar chan={chan} user={hooks.user} userList={hooks.userList} />
               : <Avatar alt={chan.title.valueOf()} src="-" />
             }
           </ListItemAvatar>
-          <ItemContent chan={chan} lastMsg={lastMsg} state={props.state} />
+          <ItemContent chan={chan} lastMsg={lastMsg} state={props.state} hooks={hooks} />
       </ListItem>
           
     </>
@@ -109,7 +105,6 @@ export function NotJoinedChanItem(props: any) {
   const lastMsg         = props.chan?.Message?.slice(-1);
   const { setAlert }    = useAlert();
   const [open, setOpen] = React.useState(false);
-	const userList 		    = useSelector(selectUserlist).userList;
   
   const handleClickOpen = () => {
     setOpen(true);
@@ -126,8 +121,8 @@ export function NotJoinedChanItem(props: any) {
     if (e.target.password)
       pwd = e.target.password.value;
     
-    let errorLog: string | undefined = await ChatCommands("/join " + pwd, props.props.state, userList,  
-      {chanId: props.chan.id, openConvHandler: props.props.openConvHandler});
+    let errorLog: string | undefined = await ChatCommands("/join " + pwd, props.props.state, props.hooks.userList,  
+      {chanId: props.chan.id, openConvHandler: props.props.openConvHandler}, props.hooks.token, props.hooks.user);
     if (!errorLog)
       return ;
     errorLog.substring(0, 5) === "Error" ? setAlert(errorLog, "error") : setAlert(errorLog, "success");
@@ -135,11 +130,14 @@ export function NotJoinedChanItem(props: any) {
 
   return (
   <div>
-      <ListItem onClick={handleClickOpen} alignItems="flex-start" className="ChannelItem" sx={{backgroundColor: 'white', cursor: 'pointer'}}>
+      <ListItem onClick={handleClickOpen} 
+        alignItems="flex-start" 
+        className="ChannelItem" 
+        sx={{width: '94%'}}>
           <ListItemAvatar>
             <Avatar alt={props.chan.title} src="-" />
           </ListItemAvatar>
-          <ItemContent chan={props.chan} lastMsg={lastMsg} state={props.props.state} />
+          <ItemContent chan={props.chan} lastMsg={lastMsg} state={props.props.state} hooks={props.hooks} />
       </ListItem>
 
       <form  onSubmit={(e) => {joinChan(e)}}>

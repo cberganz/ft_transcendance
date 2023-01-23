@@ -21,206 +21,107 @@ interface Room {
   ballDirection: number[];
   score: number[];
   custom: boolean[];
+  start: boolean[];
   reload: boolean;
   finish: boolean;
 }
-
 @WebSocketGateway({
   namespace: "/game",
   cors: {
     origin: "*",
   },
 })
-export class GameGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger("GameGateway");
   private rooms: Array<Room> = [];
-  private clientList: Map<string, Socket> = new Map<string, Socket>();
-  private players: Array<string> = [];
+  private users: Map<Socket, string> = new Map<Socket, string>();
 
-  afterInit(server: Server) {
-    this.logger.log("Init");
-  }
-
-  handleClient(client: Socket) {
-    if (this.clientList.get(client.handshake.auth.id.toString())) {
-      this.server
-        .to(this.clientList.get(client.handshake.auth.id.toString()).id)
-        .disconnectSockets();
-      this.clientList.delete(client.handshake.auth.id.toString());
-    }
-    this.clientList.set(client.handshake.auth.id.toString(), client);
-  }
-
-  async handleConnection(client: Socket, ...args: any[]) {
-    this.logger.log(
-      `Client connected: ID ${client.handshake.auth.id.toString()}`
-    );
-    if (!this.players.includes(client.handshake.auth.id.toString())) {
-      this.players.push(client.handshake.auth.id.toString());
-    }
-    // this.handleClient(client);
-    this.reconnectRoom(client);
-    if (this.findCurrentRoom(client) === -1) {
-      return;
-    }
-    if (this.isPlayerOne(client)) {
-      this.rooms[this.findCurrentRoom(client)].pause[0] = false;
-    } else if (this.isPlayerTwo(client)) {
-      this.rooms[this.findCurrentRoom(client)].pause[1] = false;
-    }
-    this.rejoinGame(client);
-  }
+  handleConnection(client: Socket, ...args: any[]) {}
 
   handleDisconnect(client: Socket) {
-    this.logger.log(
-      `Client disconnected: ID ${client.handshake.auth.id.toString()}`
-    );
-    if (this.findCurrentRoom(client) === -1) {
+    this.logger.log(`Client disconnected: ${client.id}`);
+    if (this.findRoomIndex(client) === -1) {
       return;
     }
-    this.logRoom();
     if (this.isPlayerOne(client)) {
-      this.rooms[this.findCurrentRoom(client)].pause[0] = true;
+      this.rooms[this.findRoomIndex(client)].pause[0] = true;
     } else if (this.isPlayerTwo(client)) {
-      this.rooms[this.findCurrentRoom(client)].pause[1] = true;
-    }
-    if (!this.rooms[this.findCurrentRoom(client)].finish) {
-      this.handleConnection(client);
+      this.rooms[this.findRoomIndex(client)].pause[1] = true;
     }
   }
 
-  joinRoom(client: Socket): void {
-    if (this.reconnectRoom(client)) {
-      return;
+  @SubscribeMessage("debug")
+  handleDebug(client: Socket, message: any) {
+    console.log(`DEBUG: ${message}`);
+  }
+
+  @SubscribeMessage("firstConnect")
+  handleFirstConnect(client: Socket, userId: number) {
+    // const sockets = await this.server.fetchSockets();
+    // console.log(sockets.length);
+
+    // if (this.users.has(client)) {
+    //   return;
+    // }
+    if (this.isAlreadyConnected(userId)) {
+      this.users.delete(this.isAlreadyConnected(userId));
     }
+    this.users.set(client, userId.toString());
+    this.reconnectRoom(client);
+
+    this.logger.log(`Client connected: ${this.users.get(client)}`);
+  }
+
+  @SubscribeMessage("updateReadyServer")
+  handleReady(client: Socket) {
     if (this.rooms.length === 0 || this.findAvailableRoom() === -1) {
       this.createRoom();
-      this.rooms[this.rooms.length - 1].players[0] =
-        client.handshake.auth.id.toString();
+      this.rooms[this.rooms.length - 1].players[0] = this.users.get(client);
+      this.roomReady(client)[0] = true;
     } else if (this.rooms[this.findAvailableRoom()].players[0] === "") {
-      this.rooms[this.findAvailableRoom()].players[0] =
-        client.handshake.auth.id.toString();
+      this.rooms[this.findAvailableRoom()].players[0] = this.users.get(client);
+      this.roomReady(client)[0] = true;
     } else if (this.rooms[this.findAvailableRoom()].players[1] === "") {
-      this.rooms[this.findAvailableRoom()].players[1] =
-        client.handshake.auth.id.toString();
+      this.rooms[this.findAvailableRoom()].players[1] = this.users.get(client);
+      this.roomReady(client)[1] = true;
     }
     client.join(this.roomId(client));
     this.logRoom();
+    if (this.roomIsFull(client)) {
+      this.server.to(this.roomId(client)).emit("updateStartClient");
+    }
   }
 
-  reconnectRoom(client: Socket): boolean {
-    if (this.findCurrentRoom(client) !== -1) {
-      this.logRoom();
-      client.join(this.roomId(client));
-      if (!this.roomIsFull(client)) {
-        this.server.to(this.roomId(client)).emit("reconnectQueueClient");
-      } else if (this.isPlayerOne(client)) {
-        if (this.roomReady(client)[0] && this.roomReady(client)[1]) {
-          this.server.to(client.id).emit("reconnectReadyClient");
-        } else if (this.roomReady(client)[0]) {
-          this.server.to(client.id).emit("reconnectStartClient");
-        } else {
-          this.server.to(client.id).emit("reconnectNotStartClient");
-        }
-        this.server
-          .to(client.id)
-          .emit("reconnectCustomClient", this.roomCustom(client)[0]);
-      } else if (this.isPlayerTwo(client)) {
-        if (this.roomReady(client)[0] && this.roomReady(client)[1]) {
-          this.server.to(client.id).emit("reconnectReadyClient");
-        } else if (this.roomReady(client)[1]) {
-          this.server.to(client.id).emit("reconnectStartClient");
-        } else {
-          this.server.to(client.id).emit("reconnectNotStartClient");
-        }
-        this.server
-          .to(client.id)
-          .emit("reconnectCustomClient", this.roomCustom(client)[1]);
-      }
-      return true;
-    }
-    return false;
-  }
-
-  rejoinGame(client: Socket): void {
-    if (this.findCurrentRoom(client) === -1) {
+  @SubscribeMessage("endGameServer")
+  handleEndGame(client: Socket): void {
+    if (this.findRoomIndex(client) === -1) {
+      this.server.to(client.id).emit("endGameClient");
       return;
     }
-    const playerPosition: Array<number> = [...this.roomPlayerPosition(client)];
-    const ballPosition: Array<number> = [...this.roomBallPosition(client)];
-    const ballDirection: Array<number> = [...this.roomBallDirection(client)];
-    const score: Array<number> = [...this.roomScore(client)];
-    if (ballPosition[0] === undefined) {
-      return;
-    }
-    if (playerPosition[0] !== undefined) {
-      this.server
-        .to(this.roomId(client))
-        .emit("updatePlayerPosClient", { pos: playerPosition[0], id: 1 });
-    }
-    if (playerPosition[1] !== undefined) {
-      this.server
-        .to(this.roomId(client))
-        .emit("updatePlayerPosClient", { pos: playerPosition[1], id: 2 });
-    }
-    this.server.to(this.roomId(client)).emit("updateBallPosClient", {
-      posX: ballPosition[0],
-      posY: ballPosition[1],
-    });
-    this.server
-      .to(this.roomId(client))
-      .emit("updateBallDirClient", ballDirection);
-    this.server
-      .to(this.roomId(client))
-      .emit("updateScoreClient", { playerNumber: 1, score: score[0] });
-    this.server
-      .to(this.roomId(client))
-      .emit("updateScoreClient", { playerNumber: 2, score: score[1] });
-    this.server.to(this.roomId(client)).emit("updateAlreadyStarted");
-  }
-
-  leaveRoom(client: Socket): void {
-    if (this.findCurrentRoom(client) === -1) {
-      return;
-    }
-    client.leave(this.roomId(client));
     if (this.isSpectator(client)) {
-      for (const room of this.rooms) {
-        if (room.spectators.includes(client.handshake.auth.id.toString())) {
-          room.spectators.splice(
-            room.spectators.indexOf(client.handshake.auth.id.toString(), 1)
-          );
-        }
-      }
-    } else {
-      for (const room of this.rooms) {
-        if (
-          (room.players[0] === client.handshake.auth.id.toString() ||
-            room.players[1] === client.handshake.auth.id.toString()) &&
-          this.isPlayerOne(client)
-        ) {
-          this.rooms.splice(this.rooms.indexOf(room), 1);
-        }
-      }
+      this.server.to(client.id).emit("endGameClient");
+      this.leaveRoom(client);
+      return;
     }
-    this.logRoom();
+    const param = {
+      p1Id: +this.roomPlayers(client)[0],
+      p2Id: +this.roomPlayers(client)[1],
+      playerId: Number(this.users.get(client)),
+    };
+    this.server.to(this.roomId(client)).emit("endGameClient", param);
+    this.leaveRoom(client);
   }
 
   @SubscribeMessage("updateDirectionServer")
   handleMessage(client: Socket, message: string): void {
-    if (this.findCurrentRoom(client) === -1) {
+    if (this.findRoomIndex(client) === -1) {
       return;
     }
     if (this.roomPause(client)) {
       return;
     }
-    if (
-      this.rooms[this.findCurrentRoom(client)].players[0] ===
-      client.handshake.auth.id.toString()
-    ) {
+    if (this.isPlayerOne(client)) {
       switch (message) {
         case "u": {
           this.server
@@ -241,7 +142,7 @@ export class GameGateway
           break;
         }
       }
-    } else {
+    } else if (this.isPlayerTwo(client)) {
       switch (message) {
         case "u": {
           this.server
@@ -270,7 +171,7 @@ export class GameGateway
     client: Socket,
     param: { pos: number; id: number }
   ): void {
-    if (this.findCurrentRoom(client) === -1) {
+    if (this.findRoomIndex(client) === -1) {
       return;
     }
     if (this.roomPause(client)) {
@@ -291,7 +192,7 @@ export class GameGateway
     client: Socket,
     param: { posX: number; posY: number }
   ): void {
-    if (this.findCurrentRoom(client) === -1) {
+    if (this.findRoomIndex(client) === -1) {
       return;
     }
     if (this.roomPause(client)) {
@@ -309,7 +210,7 @@ export class GameGateway
 
   @SubscribeMessage("updateBallDirServer")
   handleUpdateBallDirection(client: Socket, param: Array<number>): void {
-    if (this.findCurrentRoom(client) === -1) {
+    if (this.findRoomIndex(client) === -1) {
       return;
     }
     if (this.roomPause(client)) {
@@ -330,7 +231,7 @@ export class GameGateway
     client: Socket,
     param: { playerNumber: number; score: number }
   ): void {
-    if (this.findCurrentRoom(client) === -1) {
+    if (this.findRoomIndex(client) === -1) {
       return;
     }
     if (this.roomPause(client)) {
@@ -349,108 +250,34 @@ export class GameGateway
     }
   }
 
-  @SubscribeMessage("updateReadyServer")
-  handleUpdateReady(client: Socket, ready: boolean): void {
-    if (this.findCurrentRoom(client) === -1) {
-      return;
-    }
-    if (this.isSpectator(client)) {
-      return;
-    }
-    if (this.isPlayerOne(client)) {
-      this.rooms[this.findCurrentRoom(client)].ready[0] = ready;
-    } else if (this.isPlayerTwo(client)) {
-      this.rooms[this.findCurrentRoom(client)].ready[1] = ready;
-    }
-    if (
-      this.rooms[this.findCurrentRoom(client)].ready[0] &&
-      this.rooms[this.findCurrentRoom(client)].ready[1]
-    ) {
-      this.server.to(this.roomId(client)).emit("updateReadyClient", true);
-      if (!this.rooms[this.findCurrentRoom(client)].reload) {
-        this.rooms[this.findCurrentRoom(client)].reload = true;
-        this.server.to(this.roomId(client)).emit("reloadClient");
-      }
-    } else {
-      this.server.to(this.roomId(client)).emit("updateReadyClient", false);
-    }
-  }
-
-  @SubscribeMessage("updateQueueServer")
-  handleUpdateQueue(client: Socket, queueStatus: boolean): void {
-    if (queueStatus === true) {
-      this.joinRoom(client);
-      if (this.roomIsFull(client)) {
-        this.server.to(this.roomId(client)).emit("updateQueueClient");
-      }
-    } else {
-      if (this.findCurrentRoom(client) === -1) {
-        return;
-      }
-      this.server.to(this.roomId(client)).emit("updateQueueClient");
-    }
-  }
-
   @SubscribeMessage("updateCustomServer")
   handleUpdateCustom(client: Socket, customStatus: boolean): void {
     if (this.isSpectator(client)) {
       return;
     }
     if (this.isPlayerOne(client)) {
-      this.rooms[this.findCurrentRoom(client)].custom[0] = customStatus;
+      this.roomCustom(client)[0] = customStatus;
     } else if (this.isPlayerTwo(client)) {
-      this.rooms[this.findCurrentRoom(client)].custom[1] = customStatus;
+      this.roomCustom(client)[1] = customStatus;
     }
-  }
-
-  @SubscribeMessage("endGameServer")
-  handleEndGame(client: Socket): void {
-    if (this.isSpectator(client)) {
-      return;
-    }
-    if (this.findCurrentRoom(client) === -1) {
-      return;
-    }
-    this.rooms[this.findCurrentRoom(client)].finish = true;
-    if (!this.isPlayerOne(client)) {
-      const param = {
-        p1Id: 0,
-        p2Id: 0,
-        isp1: false,
-        finish: false,
-      };
-      this.server.to(client.id).emit("endGameClient", param);
-      this.leaveRoom(client);
-      return;
-    }
-    // if (this.roomPlayers(client) === undefined) {
-    //   return;
-    // }
-    const param = {
-      p1Id: +this.roomPlayers(client)[0],
-      p2Id: +this.roomPlayers(client)[1],
-      isp1: false,
-      finish: true,
-    };
-    if (this.isPlayerOne(client)) {
-      param.isp1 = true;
-    }
-    this.server.to(client.id).emit("endGameClient", param);
-    this.leaveRoom(client);
   }
 
   @SubscribeMessage("invitationGameServer")
   handleInvitationGame(client: Socket, id: string): void {
     if (this.findRoomById(id) === -1) {
       this.createRoom(id);
-      this.rooms[this.findRoomById(id)].players[0] =
-        client.handshake.auth.id.toString();
+      this.rooms[this.findRoomById(id)].players[0] = this.users.get(client);
+      this.roomReady(client)[0] = true;
     } else {
-      this.rooms[this.findRoomById(id)].players[1] =
-        client.handshake.auth.id.toString();
+      this.rooms[this.findRoomById(id)].players[1] = this.users.get(client);
     }
     client.join(this.roomId(client));
     this.logRoom();
+    if (this.roomIsFull(client)) {
+      this.server.to(this.roomId(client)).emit("updateStartClient");
+      this.roomReady(client)[0] = true;
+      this.roomReady(client)[1] = true;
+    }
   }
 
   @SubscribeMessage("spectateGameServer")
@@ -463,34 +290,134 @@ export class GameGateway
       }
     }
     this.rooms[this.findRoomById(roomToSpectate)].spectators.push(
-      client.handshake.auth.id.toString()
+      this.users.get(client)
     );
     client.join(roomToSpectate);
     this.logRoom();
   }
 
-  @SubscribeMessage("updateSpectatorServer")
-  handleUpdateSpectator(client: Socket, status: boolean): void {
-    if (status === true) {
+  reconnectRoom(client: Socket): boolean {
+    if (this.findRoomIndex(client) === -1) {
+      return false;
+    }
+    let param = {
+      ready: false,
+      start: false,
+      custom: false,
+    };
+    client.join(this.roomId(client));
+
+    if (this.isPlayerOne(client) && this.roomReady(client)[0]) {
+      param.ready = true;
+    } else if (this.isPlayerTwo(client) && this.roomReady(client)[1]) {
+      param.ready = true;
+    } else if (this.isSpectator(client)) {
+      param.ready = true;
+    }
+
+    if (this.roomIsFull(client)) {
+      param.start = true;
+      this.server.to(client.id).emit("updateAlreadyStarted");
+    }
+
+    if (this.isPlayerOne(client) && this.roomCustom(client)[0]) {
+      param.custom = true;
+    } else if (this.isPlayerTwo(client) && this.roomCustom(client)[1]) {
+      param.custom = true;
+    }
+    this.server.to(client.id).emit("reconnectClient", param);
+    this.reconnectGame(client);
+    return true;
+  }
+
+  reconnectGame(client: Socket) {
+    if (!this.roomBallPosition(client)[0]) {
       return;
-      this.joinRoom(client);
-      if (this.roomIsFull(client)) {
-        this.server.to(this.roomId(client)).emit("updateQueueClient");
+    }
+    const playerPosition: Array<number> = [...this.roomPlayerPosition(client)];
+    const ballPosition: Array<number> = [...this.roomBallPosition(client)];
+    const ballDirection: Array<number> = [...this.roomBallDirection(client)];
+    const score: Array<number> = [...this.roomScore(client)];
+
+    if (this.isPlayerOne(client)) {
+      this.findRoom(client).pause[0] = false;
+    } else if (this.isPlayerTwo(client)) {
+      this.findRoom(client).pause[1] = false;
+    }
+
+    this.server
+      .to(client.id)
+      .emit("updatePlayerPosClient", { pos: playerPosition[0], id: 1 });
+    this.server
+      .to(client.id)
+      .emit("updatePlayerPosClient", { pos: playerPosition[1], id: 2 });
+    this.server.to(client.id).emit("updateBallPosClient", {
+      posX: ballPosition[0],
+      posY: ballPosition[1],
+    });
+    this.server.to(client.id).emit("updateBallDirClient", ballDirection);
+    this.server
+      .to(client.id)
+      .emit("updateScoreClient", { playerNumber: 1, score: score[0] });
+    this.server
+      .to(client.id)
+      .emit("updateScoreClient", { playerNumber: 2, score: score[1] });
+    this.server.to(client.id).emit("reconnectStatusClient");
+  }
+
+  leaveRoom(client: Socket): void {
+    if (this.findRoomIndex(client) === -1) {
+      return;
+    }
+    client.leave(this.roomId(client));
+    if (this.isSpectator(client)) {
+      for (const room of this.rooms) {
+        if (room.spectators.includes(this.users.get(client))) {
+          room.spectators.splice(
+            room.spectators.indexOf(this.users.get(client), 1)
+          );
+        }
       }
     } else {
-      this.server.to(client.id).emit("updateSpectatorClient");
-      this.leaveRoom(client);
+      for (const room of this.rooms) {
+        if (room.players.includes(this.users.get(client))) {
+          this.rooms.splice(this.rooms.indexOf(room), 1);
+        }
+      }
     }
+    //voir si enlever le user du tableau de users
+    this.logRoom();
   }
 
-  @SubscribeMessage("testServer")
-  handleTest(client: Socket) {
-    this.server.to(client.id).emit("testClient");
+  createRoom(id?: string): void {
+    const newRoom: Room = {
+      roomId: id ? id : randomUUID(),
+      players: ["", ""],
+      spectators: [],
+      ready: [false, false],
+      pause: [false, false],
+      playerPosition: [],
+      ballPosition: [],
+      ballDirection: [],
+      score: [0, 0],
+      custom: [false, false],
+      start: [false, false],
+      reload: false,
+      finish: false,
+    };
+    this.rooms.push(newRoom);
   }
 
-  @SubscribeMessage("debug")
-  handleDebug(client: Socket, message: any) {
-    console.log(`DEBUG: ${message}`);
+  logRoom(): void {
+    for (const room of this.rooms) {
+      this.logger.log(
+        `Rooms status:
+  room ID: ${room.roomId}
+  P1: ${room.players[0]}
+  P2: ${room.players[1]}
+  Spectators: ${room.spectators}`
+      );
+    }
   }
 
   findRoomById(id: string): number {
@@ -511,16 +438,16 @@ export class GameGateway
     return -1;
   }
 
-  findCurrentRoom(client: Socket): number {
+  findRoomIndex(client: Socket): number {
     for (const room of this.rooms) {
       if (
-        room.players[0] === client.handshake.auth.id.toString() ||
-        room.players[1] === client.handshake.auth.id.toString()
+        room.players[0] === this.users.get(client) ||
+        room.players[1] === this.users.get(client)
       ) {
         return this.rooms.indexOf(room);
       }
       for (const spectator of room.spectators) {
-        if (spectator === client.handshake.auth.id.toString()) {
+        if (spectator === this.users.get(client)) {
           return this.rooms.indexOf(room);
         }
       }
@@ -528,40 +455,43 @@ export class GameGateway
     return -1;
   }
 
-  createRoom(id?: string): void {
-    const newRoom: Room = {
-      roomId: id ? id : randomUUID(),
-      players: ["", ""],
-      spectators: [],
-      ready: [false, false],
-      pause: [false, false],
-      playerPosition: [],
-      ballPosition: [],
-      ballDirection: [],
-      score: [0, 0],
-      custom: [false, false],
-      reload: false,
-      finish: false,
-    };
-    this.rooms.push(newRoom);
+  findRoom(client: Socket): Room {
+    return this.rooms[this.findRoomIndex(client)];
   }
 
-  logRoom(): void {
-    for (const room of this.rooms) {
-      this.logger.log(
-        `Rooms status:
-  room ID: ${room.roomId}
-  P1 ID: ${room.players[0]}
-  P2 ID: ${room.players[1]}
-  Spectators: ${room.spectators}`
-      );
+  isAlreadyConnected(userId: number): Socket {
+    for (const user of this.users) {
+      if (user[1] === userId.toString()) {
+        return user[0];
+      }
     }
+    return null;
+  }
+
+  isPlayerOne(client: Socket): boolean {
+    if (this.findRoomIndex(client) === -1) {
+      return;
+    }
+    if (this.findRoom(client).players[0] === this.users.get(client)) {
+      return true;
+    }
+    return false;
+  }
+
+  isPlayerTwo(client: Socket): boolean {
+    if (this.findRoomIndex(client) === -1) {
+      return;
+    }
+    if (this.findRoom(client).players[1] === this.users.get(client)) {
+      return true;
+    }
+    return false;
   }
 
   isSpectator(client: Socket): boolean {
     for (const room of this.rooms) {
       for (const spectator of room.spectators) {
-        if (spectator === client.handshake.auth.id.toString()) {
+        if (spectator === this.users.get(client)) {
           return true;
         }
       }
@@ -569,33 +499,10 @@ export class GameGateway
     return false;
   }
 
-  isPlayerOne(client: Socket): boolean {
-    if (this.findCurrentRoom(client) === -1) {
-      return;
-    }
-    if (
-      this.rooms[this.findCurrentRoom(client)].players[0] ===
-      client.handshake.auth.id.toString()
-    ) {
-      return true;
-    }
-    return false;
-  }
-
-  isPlayerTwo(client: Socket): boolean {
-    if (
-      this.rooms[this.findCurrentRoom(client)].players[1] ===
-      client.handshake.auth.id.toString()
-    ) {
-      return true;
-    }
-    return false;
-  }
-
   roomIsFull(client: Socket): boolean {
     if (
-      this.rooms[this.findCurrentRoom(client)].players[0] !== "" &&
-      this.rooms[this.findCurrentRoom(client)].players[1] !== ""
+      this.roomPlayers(client)[0] !== "" &&
+      this.roomPlayers(client)[1] !== ""
     ) {
       return true;
     }
@@ -603,47 +510,45 @@ export class GameGateway
   }
 
   roomId(client: Socket): string {
-    return this.rooms[this.findCurrentRoom(client)].roomId;
+    return this.findRoom(client).roomId;
   }
 
   roomPlayers(client: Socket): Array<string> {
-    if (!this.rooms[this.findCurrentRoom(client)]) {
-      return undefined;
-    }
-    return this.rooms[this.findCurrentRoom(client)].players;
+    return this.findRoom(client).players;
   }
 
   roomReady(client: Socket): Array<boolean> {
-    return this.rooms[this.findCurrentRoom(client)].ready;
+    return this.findRoom(client).ready;
+  }
+
+  roomPlayerPosition(client: Socket): Array<number> {
+    return this.findRoom(client).playerPosition;
+  }
+
+  roomBallPosition(client: Socket): Array<number> {
+    return this.findRoom(client).ballPosition;
+  }
+
+  roomBallDirection(client: Socket): Array<number> {
+    return this.findRoom(client).ballDirection;
+  }
+
+  roomScore(client: Socket): Array<number> {
+    return this.findRoom(client).score;
+  }
+
+  roomCustom(client: Socket): Array<boolean> {
+    return this.findRoom(client).custom;
   }
 
   roomPause(client: Socket): boolean {
-    if (
-      this.rooms[this.findCurrentRoom(client)].pause[0] ||
-      this.rooms[this.findCurrentRoom(client)].pause[1]
-    ) {
+    if (this.findRoom(client).pause[0] || this.findRoom(client).pause[1]) {
       return true;
     }
     return false;
   }
 
-  roomPlayerPosition(client: Socket): Array<number> {
-    return this.rooms[this.findCurrentRoom(client)].playerPosition;
-  }
-
-  roomBallPosition(client: Socket): Array<number> {
-    return this.rooms[this.findCurrentRoom(client)].ballPosition;
-  }
-
-  roomBallDirection(client: Socket): Array<number> {
-    return this.rooms[this.findCurrentRoom(client)].ballDirection;
-  }
-
-  roomScore(client: Socket): Array<number> {
-    return this.rooms[this.findCurrentRoom(client)].score;
-  }
-
-  roomCustom(client: Socket): Array<boolean> {
-    return this.rooms[this.findCurrentRoom(client)].custom;
+  roomStart(client: Socket): Array<boolean> {
+    return this.findRoom(client).start;
   }
 }

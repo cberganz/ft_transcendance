@@ -32,12 +32,14 @@ export class AuthController {
 			avatar: req.user.avatar,
 			id: req.user.id,
 			friends: req.user.friends,
+			blacklist: req.user.blacklist,
+			blacklisted: req.user.blacklisted,
 		}
 		response.cookie(
 			'jwt',
 			jwt_tokens.refresh_token,
 			{
-				maxAge: 3600000,
+				maxAge: 18000000,
 				httpOnly: true,
 				sameSite: 'none',
 				secure: true
@@ -57,6 +59,8 @@ export class AuthController {
 			id: user.id,
 			isTFAEnabled: user.isTFAEnabled,
 			friends: user.friends,
+			blacklist: req.user.blacklist,
+			blacklisted: req.user.blacklisted,
 		}
 		const jwt_tokens = await this.authService.refreshTokens(user)
 		return { user: userDataResp, jwt_token: jwt_tokens.access_token };

@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 export function ChatGobackIcon(props: any) {
     return (
-        <div style={{ cursor: "pointer" }}>
+        <div style={{ cursor: "pointer", marginTop: '2px' }}>
             <Icon
               onClick={() => props.openConvHandler(-1)}
               icon="material-symbols:arrow-back-ios-rounded"

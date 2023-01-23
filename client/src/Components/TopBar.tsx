@@ -25,7 +25,7 @@ import { SearchIconWrapper, Search, StyledInputBase } from "./topBarStyle";
 import { useCookies } from "react-cookie";
 import { useLogoutMutation } from "../Api/Auth/authApiSlice";
 import { logOut } from "../Hooks/authSlice";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useAlert from "../Hooks/useAlert";
 import KeyIcon from "@mui/icons-material/Key";
 import { useNavigate } from "react-router-dom";
@@ -33,8 +33,8 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import Button from "@mui/material/Button";
-import { selectUserlist } from '../Hooks/userListSlice'
-import { useSelector } from "react-redux"
+import { selectUserlist } from "../Hooks/userListSlice";
+import { useSelector } from "react-redux";
 import { usersStatusSocket } from "../Router/Router";
 
 interface PropsUsername {
@@ -45,8 +45,8 @@ function LogoutButton() {
   const [logoutUser] = useLogoutMutation();
   const [token, setCookie, removeCookie] = useCookies();
 
-  void token
-  void setCookie
+  void token;
+  void setCookie;
   const handleLogout = (e: any) => {
     removeCookie("jwt", { path: "/" });
     logoutUser({});
@@ -254,6 +254,7 @@ export default function PrimarySearchAppBar() {
   const handleDecline = () => {
     setInvitation(false);
     setOpen(false);
+    usersStatusSocket.emit("declineInvitationServer");
   };
 
   return (

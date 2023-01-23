@@ -1,6 +1,6 @@
 import axios, {AxiosResponse} from 'axios'
 import { store } from "../Store/store"
-import { setCredentials, logOut } from '../Hooks/authSlice'
+import { setCredentials } from '../Hooks/authSlice'
 
 const axiosPrivate = async (...params: any) => {
 	let result: void | AxiosResponse<any, any>
@@ -33,7 +33,7 @@ const refreshTokenAndExecuteRequestAgain = async (params: any) => {
 
 const refreshRequest = async () => {
 	const response = await axios({
-		// withCredentials: true,
+		withCredentials: true,
 		url: "http://localhost:3000/auth/refresh",
 		method: "GET"
 	})

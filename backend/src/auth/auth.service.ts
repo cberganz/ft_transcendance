@@ -37,7 +37,7 @@ export class AuthService {
 				payload,
 				{
 					secret: jwtRefreshConstants.secret,
-					expiresIn: '60m',
+					expiresIn: '5h',
 				}
 			)
 		return {

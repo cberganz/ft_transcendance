@@ -1,64 +1,26 @@
+import { Button } from "@mui/material";
 import { Socket } from "socket.io-client";
-import { useEffect } from "react";
-import Button from "@mui/material/Button";
-import "../../game.css";
-import { useNavigate } from "react-router-dom";
 
 function LeaveButton({
-  setEnterQueue,
-  setQueueStatus,
-  setStartButton,
-  setReady,
-  setWin,
   socket,
-  resetGame,
-  spectator,
+  endGame,
 }: {
-  setEnterQueue: (value: boolean) => void;
-  setQueueStatus: (value: boolean) => void;
-  setStartButton: (value: boolean) => void;
-  setReady: (value: boolean) => void;
-  setWin: (value: number) => void;
   socket: Socket;
-  resetGame: () => void;
-  spectator: boolean;
+  endGame: (param?: { p1Id: number; p2Id: number; playerId: number }) => void;
 }) {
-  const navigate = useNavigate();
-  useEffect(() => {
-    const updateQueue = () => {
-      setEnterQueue(false);
-      setQueueStatus(false);
-      setStartButton(false);
-      setReady(false);
-      setWin(0);
-      resetGame();
-    };
+  const handleEndGame = (param?: {
+    p1Id: number;
+    p2Id: number;
+    playerId: number;
+  }) => {
+    endGame(param);
+  };
 
-    const updateSpectator = () => {
-      setEnterQueue(false);
-      setQueueStatus(false);
-      setStartButton(false);
-      setReady(false);
-      navigate("/");
-      window.location.reload();
-    };
+  socket.off("endGameClient").on("endGameClient", handleEndGame);
 
-    socket.on("updateQueueClient", updateQueue);
-    socket.on("updateSpectatorClient", updateSpectator);
-
-    return () => {
-      socket.off("updateQueueClient", updateQueue);
-      socket.off("updateSpectatorClient", updateSpectator);
-    };
-  });
-
-  function handleClickPlayer() {
-    socket.emit("updateQueueServer", false);
-  }
-
-  function handleClickSpectator() {
-    socket.emit("updateSpectatorServer", false);
-  }
+  const handleClick = () => {
+    socket.emit("endGameServer");
+  };
 
   return (
     <div className="button">
@@ -66,7 +28,7 @@ function LeaveButton({
         variant="contained"
         size="large"
         color="error"
-        onClick={spectator ? handleClickSpectator : handleClickPlayer}
+        onClick={handleClick}
       >
         LEAVE
       </Button>

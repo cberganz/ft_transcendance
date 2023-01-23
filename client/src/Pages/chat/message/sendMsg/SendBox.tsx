@@ -7,27 +7,30 @@ import { getChan } from '../../utils';
 import { useSelector } from "react-redux"
 import { selectUserlist } from '../../../../Hooks/userListSlice'
 import { chatSocket } from '../../chat';
+import { selectCurrentToken, selectCurrentUser } from '../../../../Hooks/authSlice';
 
 export default function SendBox(props: any) {
-  const { setAlert } = useAlert();
-	const userList 		= useSelector(selectUserlist).userList
+  const { setAlert }  = useAlert();
+	const userList 		  = useSelector(selectUserlist).userList;
+  const user          = useSelector(selectCurrentUser);
+  const token         = useSelector(selectCurrentToken);
 
   const newMessage = async (value: String) => {
-      const chan = getChan(props.state.actualUser.openedConvID, props.state)
+      const chan = getChan(props.state.openedConvID, props.state)
       const newMsg = {
         channelId: chan?.id,
-        authorId:  props.state.actualUser.user.id,
+        authorId:  user.id,
         content:   value,
       }
       axios.post("http://localhost:3000/message", newMsg, 
-        {withCredentials: true, headers: {Authorization: `Bearer ${props.state.actualUser.token}`}})
+        {withCredentials: true, headers: {Authorization: `Bearer ${token}`}})
         .then(response => chatSocket.emit("newMsgFromClient", {room: "chat" + chan?.id, message: response.data}))
         .catch(error => setAlert("You've been blocked or mute.", "error")) 
   }
 
   const chatCmd = async (value: string) => {
     let errorLog: string | undefined = await ChatCommands(value, props.state, userList,  
-      {chanId: props.state.actualUser.openedConvID, openConvHandler: props.openConvHandler})
+      {chanId: props.state.openedConvID, openConvHandler: props.openConvHandler}, token, user);
     if (!errorLog)
       return ;
     errorLog.substring(0, 5) === "Error" ? setAlert(errorLog, "error") : setAlert(errorLog, "success");
