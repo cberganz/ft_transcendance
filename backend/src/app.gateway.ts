@@ -59,13 +59,11 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleConnection(socket: Socket) {}
 
-
   isAlreadyConnected(userId: number): Socket {
-    for (let [ socket, id ] of this.usersSockets) {
-      if (id === userId)
-        return (socket);
+    for (let [socket, id] of this.usersSockets) {
+      if (id === userId) return socket;
     }
-    return (null);
+    return null;
   }
 
   /** Profiles */
@@ -121,9 +119,8 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       undefined
     )
       socket.emit("firstConnectionFromServer");
-    let status = this.getProfile(this.usersSockets.get(socket)).status; 
-    if (status !== "offline")
-      data.status = status;
+    let status = this.getProfile(this.usersSockets.get(socket)).status;
+    if (status !== "offline") data.status = status;
     this.setProfile(data);
     this.server.emit("updateStatusFromServer", this.usersProfiles);
     this.server.emit("updateSearchBarUserList", this.usersProfiles);
@@ -158,9 +155,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /** Game */
   @SubscribeMessage("invitePlayer")
   handleInvitePlayer(socket: Socket, invitedPlayerId: number) {
-    console.log(invitedPlayerId);
     for (let [sock, id] of this.usersSockets) {
-      console.log(`socket: ${sock.id} === player: ${id}`)
       if (id === invitedPlayerId) {
         this.server.to(sock.id).emit("invitePlayerClient"); // check si le user est pas deja dans une invite
         this.server.to(socket.id).emit("hasInvitedClient");

@@ -163,6 +163,7 @@ function Game() {
     start: boolean;
     custom: boolean;
   }) => {
+    socket.emit("debug", param.custom);
     if (!ready && param.ready) {
       setReady(true);
       usersStatusSocket.emit("updateStatus", "waiting for game");
@@ -562,7 +563,6 @@ function Game() {
     gameInfo.player2Id = param.p2Id;
     gameInfo.player1_score = p1.getScore();
     gameInfo.player2_score = p2.getScore();
-    console.log(gameInfo);
     p1.setScore(0);
     p2.setScore(0);
     socket.emit("updateScoreServer", {
@@ -623,11 +623,11 @@ function Game() {
         {!start && (
           <>
             <FindGameButton
-              statusRef={statusRef}
               ready={ready}
               setReady={setReady}
               setStart={setStart}
               socket={socket}
+              customGame={customGame}
             />
             <div className="customButton">
               <FormGroup>
