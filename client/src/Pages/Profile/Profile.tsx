@@ -9,6 +9,10 @@ import { useSelector } from "react-redux"
 import { selectCurrentToken } from '../../Hooks/authSlice'
 import StatCard from "./components/StatCard"
 
+function TrimStringMoreThanElevenChar(string: string) {
+	return `${string.substring(0, 11)}${string.length <= 11 ? "" : "..."}`
+}
+
 function ProfileHook(component: any) {
 	return function WrappedProfile(props: any) {
 		const [searchParams] = useSearchParams()
@@ -62,7 +66,7 @@ class Profile extends React.Component<{ navigate: any, token: string, userId: st
 							<Grid container spacing={3}>
 								<Grid item xs={12} sm={12} md={12}>
 									<PlayerInfos
-										username={this.state.data.username}
+										username={TrimStringMoreThanElevenChar(this.state.data.username)}
 										avatar={this.state.data.avatar}
 										userId={this.state.userId}
 									/>

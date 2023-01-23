@@ -22,6 +22,7 @@ interface allUsers {
 	playgame: string,
 }
 
+
 function UserCard() {
 	const currentUser = useSelector(selectCurrentUser)
 
@@ -40,7 +41,10 @@ function UserCard() {
 				<Avatar src={currentUser.avatar} alt="photoURL" />
 				<Box sx={{ ml: 2 }}>
 				<Typography variant="subtitle2" sx={{ color: 'text.primary', fontWeight: 'bold' }}>
-					{currentUser.username}
+					{
+						`${currentUser.username.substring(0, 11)}${
+						currentUser.username.length <= 11 ? "" : "..."}`
+					}
 				</Typography>
 				<Typography variant="body2" sx={{ color: 'text.secondary' }}>
 					{currentUser.login}
@@ -51,7 +55,6 @@ function UserCard() {
 		</Box>
 	)
 }
-
 
 export default function Dashboard() {
 	const navigate 		= useNavigate();
