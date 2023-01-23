@@ -59,6 +59,15 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleConnection(socket: Socket) {}
 
+
+  isAlreadyConnected(userId: number): Socket {
+    for (let [ socket, id ] of this.usersSockets) {
+      if (id === userId)
+        return (socket);
+    }
+    return (null);
+  }
+
   /** Profiles */
   getProfile(id: number): userProfile {
     for (let profile of this.usersProfiles) {
@@ -102,12 +111,16 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /** Connection */
   @SubscribeMessage("connection")
   handleInitTable(socket: Socket, data: userProfile) {
+    const alreadyConnectedSocket = this.isAlreadyConnected(data.id);
+
+    if (alreadyConnectedSocket)
+      this.usersSockets.delete(alreadyConnectedSocket);
+    this.usersSockets.set(socket, data.id);
     if (
       this.usersProfiles.find((userProfile) => userProfile.id === data.id) ===
       undefined
     )
       socket.emit("firstConnectionFromServer");
-    this.usersSockets.set(socket, data.id);
     let status = this.getProfile(this.usersSockets.get(socket)).status; 
     if (status !== "offline")
       data.status = status;
@@ -145,7 +158,9 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /** Game */
   @SubscribeMessage("invitePlayer")
   handleInvitePlayer(socket: Socket, invitedPlayerId: number) {
+    console.log(invitedPlayerId);
     for (let [sock, id] of this.usersSockets) {
+      console.log(`socket: ${sock.id} === player: ${id}`)
       if (id === invitedPlayerId) {
         this.server.to(sock.id).emit("invitePlayerClient"); // check si le user est pas deja dans une invite
         this.server.to(socket.id).emit("hasInvitedClient");
@@ -226,5 +241,6 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.setProfile({ id: userId, status: "offline" });
     this.server.emit("updateStatusFromServer", this.usersProfiles);
     this.server.emit("updateSearchBarUserList", this.usersProfiles);
+    this.usersSockets.delete(socket);
   }
 }
