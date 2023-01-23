@@ -15,18 +15,26 @@ import { Socket, Server } from 'socket.io';
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
 {
-  private userSockets: Map<Socket, string>
+  private userSockets: Map<Socket, number>
   @WebSocketServer() public server: Server;
 
   constructor() {
-    this.userSockets = new Map<Socket, string>
+    this.userSockets = new Map<Socket, number>
+  }
+
+  getSocket(idToFind: number): Socket {
+    for (let [ socket, id ] of this.userSockets) {
+      if (id === idToFind)
+        return (socket);
+    }
+    return (undefined);
   }
 
   handleConnection(socket: Socket) {}
 
   @SubscribeMessage('initTable')
-  handleInitTable(socket: Socket, login: string) {
-    this.userSockets.set(socket, login)
+  handleInitTable(socket: Socket, userId: number) {
+    this.userSockets.set(socket, userId)
   }
 
   handleDisconnect(socket: Socket) {
@@ -43,12 +51,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
     if (chan.type === "dm"){
       let user2;
         
-      if (chan.members[0].login === this.userSockets.get(socket))
-        user2 = chan.members[1].login;
+      if (chan.members[0].id === this.userSockets.get(socket))
+        user2 = chan.members[1].id;
       else
-        user2 = chan.members[0].login;
-      for (let [userSocket, login] of this.userSockets) {
-        if (login === user2)
+        user2 = chan.members[0].id;
+      for (let [userSocket, id] of this.userSockets) {
+        if (id === user2)
           userSocket.join("chat" + chan.id)
       }
     this.server.to("chat" + chan.id).emit('newChanFromServer', chan)
@@ -59,7 +67,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
       delete withoutMessageChan.Message;
       
       this.server.to("chat" + chan.id).emit('newChanFromServer', chan)
-      for (let [userSocket, login] of this.userSockets) {
+      for (let [userSocket, id] of this.userSockets) {
         isInChan = false;
         for (let room of userSocket.rooms) {
           if (room === "chat" + chan.id) {
@@ -80,7 +88,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
     delete withoutMessageChan.Message;
 
     this.server.to("chat" + chan.id).emit('updateChanFromServer', chan)
-    for (let [userSocket, login] of this.userSockets) {
+    for (let [userSocket, id] of this.userSockets) {
       isInChan = false;
       for (let room of userSocket.rooms) {
         if (room === "chat" + chan.id) {
@@ -109,13 +117,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   @SubscribeMessage('banFromClient')
-  banUser(socket: Socket, data: {bannedLogin: string, chanId: number}): void {
-    for (let [userSocket, login] of this.userSockets) {
-      if (login === data.bannedLogin) {
-        userSocket.leave("chat" + data.chanId);
-        break ;
-      }
-    }
+  banUser(socket: Socket, data: {bannedId: number, chanId: number}): void {
+    this.getSocket(data.bannedId).leave("chat" + data.chanId);
+  }
+
+  @SubscribeMessage('blockFromClient')
+  blockUser(socket: Socket, data: any): void {
+    const targetSocket = this.getSocket(data.target_id);
+
+    if (targetSocket)
+      targetSocket.emit('blockFromServer', data);
+  }
+
+  @SubscribeMessage('unblockFromClient')
+  unblockUser(socket: Socket, data: any): void {
+    const targetSocket = this.getSocket(data.target_id);
+
+    if (targetSocket)
+      targetSocket.emit('unblockFromServer', data.id);
   }
   
 }

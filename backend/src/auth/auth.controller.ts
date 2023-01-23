@@ -59,8 +59,8 @@ export class AuthController {
 			id: user.id,
 			isTFAEnabled: user.isTFAEnabled,
 			friends: user.friends,
-			blacklist: req.user.blacklist,
-			blacklisted: req.user.blacklisted,
+			blacklist: user.blacklist,
+			blacklisted: user.blacklisted,
 		}
 		const jwt_tokens = await this.authService.refreshTokens(user)
 		return { user: userDataResp, jwt_token: jwt_tokens.access_token };
