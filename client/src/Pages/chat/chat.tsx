@@ -60,7 +60,6 @@ class Chat extends React.Component<Props, ChatState> {
     for (const chan of ChatData.joinedChans) 
       chatSocket.emit('joinChatRoom', chan.id)
     this.emitNewChan();
-    usersStatusSocket.emit("updateStatus", "online");
     chatSocket.emit('initTable', this.props.user.id)
   }
 
