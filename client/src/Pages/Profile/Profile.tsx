@@ -3,7 +3,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { Grid, Container, Box } from '@mui/material'
 import PlayerInfos from './components/PlayerInfos'
 import PlayedGames from './components/PlayedGames'
-import axios from "axios"
+import axios from 'axios'
 import { useSearchParams, useNavigate } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { selectCurrentToken } from '../../Hooks/authSlice'

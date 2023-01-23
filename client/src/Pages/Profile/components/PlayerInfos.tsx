@@ -9,7 +9,7 @@ import Typography from '@mui/material/Typography';
 import { selectCurrentUser, selectCurrentToken, setCredentials } from '../../../Hooks/authSlice'
 import { useSelector, useDispatch } from "react-redux"
 import { useNavigate } from 'react-router-dom'
-import axios from "axios"
+import axios from 'axios';
 
 function PlayerInfosHook(component: any) {
 	return function WrappedPlayerInfos(props: any) {

@@ -5,7 +5,7 @@ import {
 	Stack,
 	Typography,
 } from '@mui/material';
-import axios from 'axios';
+import axios from "../../Api/Axios";
 import { useLocation, Navigate, useNavigate } from "react-router-dom";
 
 interface Props {
