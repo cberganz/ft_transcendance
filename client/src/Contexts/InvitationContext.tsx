@@ -1,30 +1,11 @@
-import { createContext, useState } from 'react';
+import { createContext } from 'react';
 
-interface InvitationHooksType {
-	isOpen: boolean,
-}
-const initialState: InvitationHooksType = {
-	isOpen: false,
-};
-
-const InvitationContext = createContext({
-	...initialState,
-	setInvitation: (isOpen: boolean ) => {(void isOpen)},
-});
+const InvitationContext = createContext({});
 
 export const InvitationProvider = ({ children } : any) => {
-	const [isOpen, setOpen] = useState(false);
-
-	const setInvitation = (isOpen: boolean ) => {
-		setOpen(isOpen);
-	};
-
 	return (
 		<InvitationContext.Provider
-		value={{
-			isOpen,
-			setInvitation,
-		}}
+		value={{}}
 		>
 		{children}
 		</InvitationContext.Provider>
