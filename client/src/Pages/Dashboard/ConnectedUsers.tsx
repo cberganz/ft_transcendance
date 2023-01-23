@@ -11,24 +11,28 @@ import { selectUserlist } from '../../Hooks/userListSlice'
 import { useSelector } from "react-redux"
 import { selectCurrentUser } from "../../Hooks/authSlice";
 import useAlert from "../../Hooks/useAlert";
+import useInvitation from "../../Hooks/useInvitation";
+
 
 export default function ConnectedUsers(props: any) {
-  const { setAlert }  = useAlert();
-	const currentUser = useSelector(selectCurrentUser)
-	const userList 		= useSelector(selectUserlist).userList
-  const navigate    = useNavigate();
-  const getId       = (username: string) => {
-    for (let user of props.allUsersTab) {
-      if (user.User === username) return user.id;
-    }
-    return -1;
-  };
+	const { setAlert }  	= useAlert()
+	const { setInvitation }	= useInvitation()
+	const currentUser 		= useSelector(selectCurrentUser)
+	const userList 			= useSelector(selectUserlist).userList
+	const navigate    		= useNavigate();
+	const getId       		= (username: string) => {
+		for (let user of props.allUsersTab) {
+		if (user.User === username) return user.id;
+		}
+		return -1;
+	};
 
   const handleClickGame = (param: any) => {
     if (userList.find((user: any) => user.id === currentUser.id).status !== 'online')
-      return setAlert("Error: you are already in game.", "error"); 
-    navigate("/game");
-    invitationGame(param);
+      return setAlert("Error: you are already in game.", "error");
+	setInvitation(true)
+    // navigate("/game");
+    // invitationGame(param);
   };
 
   const handleClickView = (param: any) => {

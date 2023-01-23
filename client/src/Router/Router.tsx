@@ -14,6 +14,7 @@ import BadRequestPage from "../Pages/Error/400";
 import PersistLogin from "../Hooks/persistLogin";
 import { selectCurrentToken } from "../Hooks/authSlice";
 import AlertPopup from "../Components/AlertPopup";
+import InvitationPopup from "../Components/InvitationPopup";
 import { selectCurrentUser } from "../Hooks/authSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { io } from "socket.io-client";
@@ -38,11 +39,14 @@ function connectGlobalSocket(user: any) {
 
 function OutletRoute() {
   return (
-    <div>
-      <PrimarySearchAppBar />
-      <Outlet />
-      <AlertPopup />
-    </div>
+	<>
+		<div>
+		<PrimarySearchAppBar />
+		<Outlet />
+		<AlertPopup />
+		<InvitationPopup />
+		</div>
+	</>
   );
 }
 
@@ -63,7 +67,7 @@ function PrivateRoutes() {
       dispatch(setUserlist(userList));
     });
   return isTokenValidated === "valid" ? (
-    <OutletRoute />
+	<OutletRoute />
   ) : (
     <Navigate to="/login" />
   );
