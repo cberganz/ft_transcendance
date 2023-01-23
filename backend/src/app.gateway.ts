@@ -102,8 +102,11 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /** Connection */
   @SubscribeMessage("connection")
   handleInitTable(socket: Socket, data: userProfile) {
-    if (this.usersProfiles.find(userProfile => userProfile.id === data.id) === undefined)
-        socket.emit("firstConnectionFromServer");
+    if (
+      this.usersProfiles.find((userProfile) => userProfile.id === data.id) ===
+      undefined
+    )
+      socket.emit("firstConnectionFromServer");
     this.usersSockets.set(socket, data.id);
     this.setProfile(data);
     this.server.emit("updateStatusFromServer", this.usersProfiles);
@@ -111,29 +114,26 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // so that socket signal received by search bar doesnt get mixed up as it is rendered everywhere
   }
 
-
   /** update to anything: online, offline, in game... */
   @SubscribeMessage("updateStatus")
   handleUpdateStatus(socket: Socket, status: string) {
-    if (!this.usersSockets.get(socket))
-      return ;
+    if (!this.usersSockets.get(socket)) return;
     this.setProfile({ id: this.usersSockets.get(socket), status: status });
     this.server.emit("updateStatusFromServer", this.usersProfiles);
     this.server.emit("updateSearchBarUserList", this.usersProfiles);
+    this.server.to(socket.id).emit("updateStatusGame", status);
   }
 
   @SubscribeMessage("updateUsername")
   handleUpdateUsername(socket: Socket, username: string) {
-    if (!this.usersSockets.get(socket))
-      return ;
+    if (!this.usersSockets.get(socket)) return;
     this.setProfile({ id: this.usersSockets.get(socket), username: username });
     this.server.emit("updateStatusFromServer", this.usersProfiles);
     this.server.emit("updateSearchBarUserList", this.usersProfiles);
   }
   @SubscribeMessage("updateAvatar")
   handleUpdateAvatar(socket: Socket, avatar: string) {
-    if (!this.usersSockets.get(socket))
-      return ;
+    if (!this.usersSockets.get(socket)) return;
     this.setProfile({ id: this.usersSockets.get(socket), avatar: avatar });
     this.server.emit("updateStatusFromServer", this.usersProfiles);
     this.server.emit("updateSearchBarUserList", this.usersProfiles);
@@ -145,10 +145,12 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     for (let [sock, id] of this.usersSockets) {
       if (id === invitedPlayerId) {
         this.server.to(sock.id).emit("invitePlayerClient"); // check si le user est pas deja dans une invite
+        this.server.to(socket.id).emit("hasInvitedClient");
         this.usersInvited.set(randomUUID(), {
           id1: this.usersSockets.get(socket),
           id2: id,
         });
+        return;
       }
     }
   }
@@ -156,11 +158,33 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage("acceptInvitationServer")
   handleAcceptInvitation(socket: Socket) {
     const socketId = this.usersSockets.get(socket);
+
     for (let [id, pair] of this.usersInvited) {
       if (pair.id1 === socketId || pair.id2 === socketId) {
         for (let [sock, sockId] of this.usersSockets) {
           if (sockId === pair.id1 || sockId === pair.id2) {
             this.server.to(sock.id).emit("invitationGameClient", id);
+          }
+        }
+      }
+    }
+  }
+
+  @SubscribeMessage("declineInvitationServer")
+  handleDeclineInvitation(socket: Socket) {
+    const socketId = this.usersSockets.get(socket);
+    let invitingPlayerId: number;
+
+    for (let [id, pair] of this.usersInvited) {
+      if (pair.id1 === socketId || pair.id2 === socketId) {
+        for (let [sock, sockId] of this.usersSockets) {
+          if (sockId === pair.id1 || sockId === pair.id2) {
+            invitingPlayerId = pair.id1;
+            for (let [sock2, sockId] of this.usersSockets) {
+              if (invitingPlayerId === sockId) {
+                socket.to(sock2.id).emit("declineInvitationClient");
+              }
+            }
           }
         }
       }

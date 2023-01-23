@@ -33,8 +33,8 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import Button from "@mui/material/Button";
-import { selectUserlist } from '../Hooks/userListSlice'
-import { useSelector } from "react-redux"
+import { selectUserlist } from "../Hooks/userListSlice";
+import { useSelector } from "react-redux";
 import { usersStatusSocket } from "../Router/Router";
 
 interface PropsUsername {
@@ -45,8 +45,8 @@ function LogoutButton() {
   const [logoutUser] = useLogoutMutation();
   const [token, setCookie, removeCookie] = useCookies();
 
-  void token
-  void setCookie
+  void token;
+  void setCookie;
   const handleLogout = (e: any) => {
     removeCookie("jwt", { path: "/" });
     logoutUser({});
@@ -178,9 +178,9 @@ function ProfileBox() {
 }
 
 function SearchBar() {
-	const userList 		  = useSelector(selectUserlist).userList
-  const { setAlert }  = useAlert();
-  const navigate      = useNavigate();
+  const userList = useSelector(selectUserlist).userList;
+  const { setAlert } = useAlert();
+  const navigate = useNavigate();
 
   const getProfile = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -254,6 +254,7 @@ export default function PrimarySearchAppBar() {
   const handleDecline = () => {
     setInvitation(false);
     setOpen(false);
+    usersStatusSocket.emit("declineInvitationServer");
   };
 
   return (
