@@ -100,8 +100,7 @@ export default function Dashboard() {
 					<div className="userCol">
 						<UserCard/>
 						{currentUser.friends.length
-							? 
-								<div>
+							? <div>
 									<Typography sx={{ color: 'text.primary', fontWeight: 'bold' }}>
 										Friends:
 									</Typography>

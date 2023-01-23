@@ -12,6 +12,7 @@ import {
   UnprocessableEntityException,
   UseGuards,
   BadRequestException,
+  NotFoundException,
   UsePipes,
   ValidationPipe,
 } from "@nestjs/common";
@@ -75,7 +76,9 @@ export class UserController {
   @Get("/stats/:id")
   @UseGuards(JwtAuthGuard)
   async getUserStats(@Param("id") id: string): Promise<UserStats> {
-    let user = (await this.userService.user({ id: Number(id) })) as any;
+	let user = (await this.userService.user({ id: Number(id) })) as any;
+	if (!user)
+		throw new NotFoundException()
     let games = [...user.p1_games, ...user.p2_games];
     let gamesPlayed = games.map((game) => {
       let player = game.player1Id === user.id ? 1 : 2;

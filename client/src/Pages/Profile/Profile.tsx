@@ -4,7 +4,7 @@ import { Grid, Container, Box } from '@mui/material'
 import PlayerInfos from './components/PlayerInfos'
 import PlayedGames from './components/PlayedGames'
 import axios from "axios"
-import { useSearchParams } from "react-router-dom"
+import { useSearchParams, useNavigate } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { selectCurrentToken } from '../../Hooks/authSlice'
 import StatCard from "./components/StatCard"
@@ -13,12 +13,13 @@ function ProfileHook(component: any) {
 	return function WrappedProfile(props: any) {
 		const [searchParams] = useSearchParams()
 		const userId = searchParams.get("userId")
-		const token = useSelector(selectCurrentToken);
-		return (<Profile token={token} userId={userId ? userId : ""} />)
+		const token = useSelector(selectCurrentToken)
+		const navigate = useNavigate()
+		return (<Profile navigate={navigate} token={token} userId={userId ? userId : ""} />)
 	}
 }
 
-class Profile extends React.Component<{ token: string, userId: string }, {}> {
+class Profile extends React.Component<{ navigate: any, token: string, userId: string }, {}> {
 	state = {
 		data: {
 			id: undefined,
@@ -38,7 +39,7 @@ class Profile extends React.Component<{ token: string, userId: string }, {}> {
 			{withCredentials: true, headers: {Authorization: `Bearer ${this.props.token}`}})
 			.then(response => response.data)
 			.then(Profile => { this.setState({ data: Profile }); })
-			.catch(error => alert("Profile " + error.status + ": " + error.message))
+			.catch(error => (error.response.status === 404) ? this.props.navigate("/404") : this.props.navigate("/400"))
 	}
 
 	async componentDidUpdate(prevProps: any) {

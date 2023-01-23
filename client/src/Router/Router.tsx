@@ -9,6 +9,8 @@ import Profile from "../Pages/Profile/Profile";
 import Signup from "../Pages/Auth/SignUp";
 import TfaAuth from "../Pages/Auth/TfaAuth";
 import TfaSettings from "../Pages/Auth/TfaSettings";
+import NotFoundPage from "../Pages/Error/404";
+import BadRequestPage from "../Pages/Error/400";
 import PersistLogin from "../Hooks/persistLogin";
 import { selectCurrentToken } from "../Hooks/authSlice";
 import AlertPopup from "../Components/AlertPopup";
@@ -71,6 +73,7 @@ export default function Router() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/400" element={<BadRequestPage />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/authenticator" element={<TfaAuth />} />
       <Route element={<PersistLogin />}>
@@ -83,8 +86,7 @@ export default function Router() {
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>
-      <Route path="*" element={<Login />} />
-      {/* Handle 404 */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
