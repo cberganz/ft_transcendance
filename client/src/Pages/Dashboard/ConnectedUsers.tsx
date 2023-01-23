@@ -7,10 +7,17 @@ import invitationGame from "../Game/components/Invitation/Invitation";
 import { useNavigate } from "react-router-dom";
 import spectateGame from "../Game/components/Spectate/Spectate";
 import Label from './Label';
+import { selectUserlist } from '../../Hooks/userListSlice'
+import { useSelector } from "react-redux"
+import { selectCurrentUser } from "../../Hooks/authSlice";
+import useAlert from "../../Hooks/useAlert";
 
 export default function ConnectedUsers(props: any) {
-  const navigate = useNavigate();
-  const getId = (username: string) => {
+  const { setAlert }  = useAlert();
+	const currentUser = useSelector(selectCurrentUser)
+	const userList 		= useSelector(selectUserlist).userList
+  const navigate    = useNavigate();
+  const getId       = (username: string) => {
     for (let user of props.allUsersTab) {
       if (user.User === username) return user.id;
     }
@@ -18,11 +25,15 @@ export default function ConnectedUsers(props: any) {
   };
 
   const handleClickGame = (param: any) => {
+    if (userList.find((user: any) => user.id === currentUser.id).status !== 'online')
+      return setAlert("Error: you are already in game.", "error"); 
     navigate("/game");
     invitationGame(param);
   };
 
   const handleClickView = (param: any) => {
+    if (userList.find((user: any) => user.id === currentUser.id).status !== 'online')
+      return setAlert("Error: you can't view your own game.", "error"); 
     navigate("/game");
     spectateGame(param);
   };
@@ -58,10 +69,20 @@ export default function ConnectedUsers(props: any) {
       align: "center",
       headerAlign: "center",
       renderCell: (params) => {
-        let label_color: "success" | "error";
-        params.value === "offline"
-          ? (label_color = "error")
-          : (label_color = "success");
+        let label_color: "success" | "error" | "info" | "warning";
+        switch (params.value) {
+          case "offline":
+            label_color = "error";
+            break ;
+          case "online":
+            label_color = "success";
+            break ;
+          case "in game":
+            label_color = "warning";
+            break ;
+          default:
+            label_color = "info";
+        }
 		return<Label color={label_color}>{params.value}</Label>
       },
     },
@@ -83,10 +104,16 @@ export default function ConnectedUsers(props: any) {
             {" "}
             {params.value}{" "}
           </Button>
-        ) : (
+        ) : 
+        params.value === "View" ? (
           <Button onClick={() => handleClickView(params.id)} color={chip_color}>
             {" "}
             {params.value}{" "}
+          </Button>
+        ) :  (
+          <Button disabled>
+            {" "}
+            {"PLAY"}
           </Button>
         );
       },

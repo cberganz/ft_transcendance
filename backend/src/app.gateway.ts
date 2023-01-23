@@ -108,6 +108,9 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     )
       socket.emit("firstConnectionFromServer");
     this.usersSockets.set(socket, data.id);
+    let status = this.getProfile(this.usersSockets.get(socket)).status; 
+    if (status !== "offline")
+      data.status = status;
     this.setProfile(data);
     this.server.emit("updateStatusFromServer", this.usersProfiles);
     this.server.emit("updateSearchBarUserList", this.usersProfiles);

@@ -10,8 +10,18 @@ import { selectUserlist } from '../../../../Hooks/userListSlice'
 import { selectCurrentToken, selectCurrentUser } from '../../../../Hooks/authSlice'
 import { Avatar } from "@mui/material";
 
+function isAvailableForGame(currentUser: any, dmUser: any, userList: any): boolean {
+  console.log(userList)
+  let userStatus = userList.find((user: any) => user.id === currentUser.id).status;
+
+  if (dmUser && dmUser.status === "online" && userStatus === "online")
+    return (true);
+  return (false);
+}
+
 function RightDmHeader(props: {state: ChatState, dmUser: User, chatCmd: any}) {
-  const user = useSelector(selectCurrentUser);
+  const user      = useSelector(selectCurrentUser);
+  const userList  = useSelector(selectUserlist).userList;
   return (
     <>
     {
@@ -20,7 +30,7 @@ function RightDmHeader(props: {state: ChatState, dmUser: User, chatCmd: any}) {
         : (
             <>
               {
-                isBlacklisted(props.dmUser?.id, user) ? null :
+                isBlacklisted(props.dmUser?.id, user) || !isAvailableForGame(user, props.dmUser, userList) ? null :
                   <chatIcons.ChatGameIcon id={props.dmUser?.id} />
               }
               <chatIcons.ChatBlockIcon chatCmd={props.chatCmd} user={props.dmUser.username} />

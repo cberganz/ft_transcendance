@@ -77,7 +77,7 @@ export default function Dashboard() {
 				id: user.id,
 				User: user.username,
 				status: user.status,
-				playgame: user.status === "in game" ? "View" : "Play",
+				playgame: user.status === "in game" ? "View" : user.status === "online" ? "Play" : "",
 			}
 			allUsers.push(tmp);
 		}
