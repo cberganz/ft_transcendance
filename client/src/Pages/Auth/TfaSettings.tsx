@@ -35,7 +35,7 @@ const TfaQrCode = (Props: Props) => {
 			)
 		})
 		.catch(() => Props.setAlert("Failed fetch QRcode", "error"))	
-	  }, []);
+	  }, [Props]);
 
 	return qrCodeContent
 }

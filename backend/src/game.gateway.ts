@@ -40,7 +40,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleConnection(client: Socket, ...args: any[]) {}
 
   handleDisconnect(client: Socket) {
-    this.logger.log(`Client disconnected: ${client.id}`);
     if (this.findRoomIndex(client) === -1) {
       return;
     }
@@ -51,26 +50,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  @SubscribeMessage("debug")
-  handleDebug(client: Socket, message: any) {
-    console.log(`DEBUG: ${message}`);
-  }
-
   @SubscribeMessage("firstConnect")
   handleFirstConnect(client: Socket, userId: number) {
-    // const sockets = await this.server.fetchSockets();
-    // console.log(sockets.length);
-
-    // if (this.users.has(client)) {
-    //   return;
-    // }
     if (this.isAlreadyConnected(userId)) {
       this.users.delete(this.isAlreadyConnected(userId));
     }
     this.users.set(client, userId.toString());
     this.reconnectRoom(client);
-
-    this.logger.log(`Client connected: ${this.users.get(client)}`);
   }
 
   @SubscribeMessage("updateReadyServer")
@@ -87,7 +73,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.roomReady(client)[1] = true;
     }
     client.join(this.roomId(client));
-    this.logRoom();
     if (this.roomIsFull(client)) {
       this.server.to(this.roomId(client)).emit("updateStartClient");
     }
@@ -272,7 +257,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.rooms[this.findRoomById(id)].players[1] = this.users.get(client);
     }
     client.join(this.roomId(client));
-    this.logRoom();
     if (this.roomIsFull(client)) {
       this.server.to(this.roomId(client)).emit("updateStartClient");
       this.roomReady(client)[0] = true;
@@ -293,7 +277,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.users.get(client)
     );
     client.join(roomToSpectate);
-    this.logRoom();
   }
 
   reconnectRoom(client: Socket): boolean {
@@ -385,8 +368,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       }
     }
-    //voir si enlever le user du tableau de users
-    this.logRoom();
   }
 
   createRoom(id?: string): void {
@@ -406,18 +387,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       finish: false,
     };
     this.rooms.push(newRoom);
-  }
-
-  logRoom(): void {
-    for (const room of this.rooms) {
-      this.logger.log(
-        `Rooms status:
-  room ID: ${room.roomId}
-  P1: ${room.players[0]}
-  P2: ${room.players[1]}
-  Spectators: ${room.spectators}`
-      );
-    }
   }
 
   findRoomById(id: string): number {

@@ -7,7 +7,6 @@ const InvitationPopup = () => {
 	const navigate = useNavigate();
 	const [invitation, setInvitation] = useState(false);
   
-	console.log("test")
 	const handleInvitePlayer = () => {
 		setInvitation(true);
 	};

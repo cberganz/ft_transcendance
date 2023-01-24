@@ -11,7 +11,6 @@ import { selectCurrentToken, selectCurrentUser } from '../../../../Hooks/authSli
 import { Avatar } from "@mui/material";
 
 function isAvailableForGame(currentUser: any, dmUser: any, userList: any): boolean {
-  console.log(userList)
   let userStatus = userList.find((user: any) => user.id === currentUser.id).status;
 
   if (dmUser && dmUser.status === "online" && userStatus === "online")

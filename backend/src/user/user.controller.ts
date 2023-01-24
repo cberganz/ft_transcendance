@@ -200,7 +200,6 @@ export class UserController {
   ): Promise<UserMode1> {
     if (body.username.indexOf(" ") !== -1) throw new BadRequestException();
     const user = await this.userService.user({ id: Number(id) });
-    console.log("-----------------------------------------");
     const userWithSameUsername = await this.userService.user({
       username: String(body.username),
     });
