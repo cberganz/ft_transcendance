@@ -6,7 +6,6 @@ import PrimarySearchAppBar from "../Components/TopBar";
 import Game from "../Pages/Game/Game";
 import Chat from "../Pages/chat/chat";
 import Profile from "../Pages/Profile/Profile";
-import Signup from "../Pages/Auth/SignUp";
 import TfaAuth from "../Pages/Auth/TfaAuth";
 import TfaSettings from "../Pages/Auth/TfaSettings";
 import NotFoundPage from "../Pages/Error/404";
@@ -78,7 +77,6 @@ export default function Router() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/400" element={<BadRequestPage />} />
-      <Route path="/signup" element={<Signup />} />
       <Route path="/authenticator" element={<TfaAuth />} />
       <Route element={<PersistLogin />}>
         <Route path="/" element={<PrivateRoutes />}>

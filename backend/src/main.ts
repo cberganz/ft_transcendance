@@ -19,13 +19,10 @@ async function bootstrap() {
   app.use(cookieParser())
   app.use(passport.initialize());
   app.useGlobalFilters(new BackendException())
-//   app.useGlobalPipes(new ValidationPipe({forbidUnknownValues: true, whitelist: true,  })); 
-//	pose pb pour signup mais devrait etre mis voir si pb quand on remet
-
   app.enableCors({
 	credentials: true,
 	origin: ['http://localhost:3001', 'http://127.0.0.1:3001']
-  });// a verifier
+  });
   const config = new DocumentBuilder()
     .setTitle('Median')
     .setDescription('The Median API description')
