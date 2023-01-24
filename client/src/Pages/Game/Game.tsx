@@ -650,10 +650,8 @@ function Game() {
         {start && (
           <>
             <canvas
-              // className={`${!start && "display-none"}`}
               ref={canvasRef}
             ></canvas>
-            {/* <LeaveButton endGame={endGame} socket={socket} /> */}
           </>
         )}
         {ready && <LeaveButton endGame={endGame} socket={socket} />}

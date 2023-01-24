@@ -52,7 +52,7 @@ function OutletRoute() {
 function PrivateRoutes() {
   const isTokenValidated = useSelector(selectCurrentToken)
     ? "valid"
-    : "invalid"; //useToken();
+    : "invalid";
   const user = useSelector(selectCurrentUser);
   const dispatch = useDispatch();
 

@@ -6,7 +6,6 @@ import { jwtRefreshConstants, jwt2faConstants } from './constants';
 import {authenticator} from 'otplib'
 import jwt from 'jsonwebtoken';
 import jwt_decode from "jwt-decode";
-import { toDataURL } from 'qrcode';
 
 
 @Injectable()
@@ -19,8 +18,7 @@ export class AuthService {
 	async validateUser(username: string, login: string): Promise<UserMode1 | null> {
 		const user = await this.userService.user({username: username});
 
-		if (user && user.login === login) { // remplace by hash compare
-			// const { password, ...result } = user; => permet de supprimer password de la reponse
+		if (user && user.login === login) {
 			return user;
 		}
 		return null;
