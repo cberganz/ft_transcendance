@@ -12,7 +12,6 @@ import {
   ListItemIcon,
   Divider,
   Grid,
-  Dialog,
 } from "@mui/material";
 import SwipeableTemporaryDrawer from "./MenuDrawer";
 import SearchIcon from "@mui/icons-material/Search";
@@ -25,17 +24,11 @@ import { SearchIconWrapper, Search, StyledInputBase } from "./topBarStyle";
 import { useCookies } from "react-cookie";
 import { useLogoutMutation } from "../Api/Auth/authApiSlice";
 import { logOut } from "../Hooks/authSlice";
-import { useState } from "react";
 import useAlert from "../Hooks/useAlert";
 import KeyIcon from "@mui/icons-material/Key";
 import { useNavigate } from "react-router-dom";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import Button from "@mui/material/Button";
 import { selectUserlist } from "../Hooks/userListSlice";
 import { useSelector } from "react-redux";
-import { usersStatusSocket } from "../Router/Router";
 
 interface PropsUsername {
   username: string;
@@ -151,11 +144,11 @@ function ProfileBox() {
             cursor: "pointer",
           }}
         >
-          <Grid item sx={{ marginRight: 1 }} xs={0}>
-            <Avatar src={user.avatar} />
+          <Grid item sx={{ marginRight: 2 }} xs={0}>
+            <UserNameTypographie username={user.username} />
           </Grid>
           <Grid item xs={0}>
-            <UserNameTypographie username={user.username} />
+            <Avatar src={user.avatar} />
           </Grid>
         </Grid>
       </Box>
@@ -178,9 +171,9 @@ function ProfileBox() {
 }
 
 function SearchBar() {
-  const userList = useSelector(selectUserlist).userList;
-  const { setAlert } = useAlert();
-  const navigate = useNavigate();
+	const userList 	  = useSelector(selectUserlist).userList
+  const { setAlert }  = useAlert();
+  const navigate      = useNavigate();
 
   const getProfile = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -226,67 +219,11 @@ function SearchBar() {
 }
 
 export default function PrimarySearchAppBar() {
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [invitation, setInvitation] = useState(false);
-
-  const handleInvitePlayer = () => {
-    setInvitation(true);
-  };
-
-  usersStatusSocket.on("invitePlayerClient", handleInvitePlayer);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleAccept = () => {
-    navigate("/game");
-    setInvitation(false);
-    setOpen(false);
-    usersStatusSocket.emit("acceptInvitationServer");
-  };
-
-  const handleDecline = () => {
-    setInvitation(false);
-    setOpen(false);
-    usersStatusSocket.emit("declineInvitationServer");
-  };
-
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" color="default" sx={{ boxShadow: 0 }}>
+      <AppBar position="static" color="default" sx={{ backgroundColor: "white", borderBottom: "solid 1px #f4f4f4", boxShadow: 0 }}>
         <Toolbar>
           <SwipeableTemporaryDrawer />
-          {invitation && (
-            <>
-              <Button variant="outlined" onClick={handleClickOpen}>
-                You have an invitation
-              </Button>
-              <Dialog
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-              >
-                <DialogContent>
-                  <DialogContentText id="alert-dialog-description">
-                    A player wants to play with you
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleAccept}>Accept</Button>
-                  <Button onClick={handleDecline} autoFocus>
-                    Decline
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            </>
-          )}
           <SearchBar />
           <ProfileBox />
         </Toolbar>

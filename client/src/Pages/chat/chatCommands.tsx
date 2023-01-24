@@ -1,5 +1,5 @@
 import { ChatState, userProfile } from './stateInterface'
-import axios from 'axios'
+import axios from 'axios';
 import { getChan } from './utils';
 import { chatSocket } from './chat';
 import { store } from '../../Store/store';

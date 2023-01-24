@@ -40,33 +40,34 @@ const StyledBadge = styled(Badge)<BadgeProps>(({ theme }) => ({
 }));
 
 function FriendList({ item }: any) {
-  const { username, avatar, id, status } = item;
+	let { username, avatar, id, status } = item;
 
-  return (
-    <StyledFriendItem
-      component={RouterLink}
-      to={`profile?userId=${id}`}
-      sx={{
-		padding: "20px",
-        '&.active': {
-          color: 'text.primary',
-          bgcolor: 'action.selected',
-          fontWeight: 'fontWeightBold',
-        },
-      }}
-    >
-		<Stack direction="row" spacing={2}>
-			{status === "offline"
-				? <StyledBadge color="error" badgeContent="" variant="dot"></StyledBadge>
-				: <StyledBadge color="success" badgeContent="" variant="dot"></StyledBadge>
-			} 
-			<Avatar
-			src={avatar}
-			alt="photoURL"
-			sx={{ width: 20, height: 20 }}
-			/>		
-			<ListItemText disableTypography primary={username} />
-		</Stack>
-    </StyledFriendItem>
-  );
+	username = `${username.substring(0, 11)}${username.length <= 11 ? "" : "..."}`
+	return (
+		<StyledFriendItem
+		component={RouterLink}
+		to={`profile?userId=${id}`}
+		sx={{
+			padding: "20px",
+			'&.active': {
+			color: 'text.primary',
+			bgcolor: 'action.selected',
+			fontWeight: 'fontWeightBold',
+			},
+		}}
+		>
+			<Stack direction="row" spacing={2}>
+				{status === "offline"
+					? <StyledBadge color="error" badgeContent="" variant="dot"></StyledBadge>
+					: <StyledBadge color="success" badgeContent="" variant="dot"></StyledBadge>
+				} 
+				<Avatar
+				src={avatar}
+				alt="photoURL"
+				sx={{ width: 20, height: 20 }}
+				/>		
+				<ListItemText disableTypography primary={username} />
+			</Stack>
+		</StyledFriendItem>
+	);
 }

@@ -7,7 +7,7 @@ import './chat.css'
 import React from "react";
 import { ChatState, Channel, Message } from "./stateInterface";
 import io from "socket.io-client";
-import axios from "axios"
+import axios from "axios";
 import { getChan, userIsInChan, sortChannels } from './utils'
 import { InfoDialog } from "./channel/infoDialog"
 import { selectCurrentUser, setCredentials } from '../../Hooks/authSlice'

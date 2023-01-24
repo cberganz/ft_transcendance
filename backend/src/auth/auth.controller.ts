@@ -39,7 +39,7 @@ export class AuthController {
 			'jwt',
 			jwt_tokens.refresh_token,
 			{
-				maxAge: 3600000,
+				maxAge: 18000000,
 				httpOnly: true,
 				sameSite: 'none',
 				secure: true

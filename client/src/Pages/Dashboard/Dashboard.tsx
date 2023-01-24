@@ -9,11 +9,11 @@ import {
 	Typography
 } from '@mui/material';
 
-import './Dashboard.css'
 import { userProfile } from '../chat/stateInterface';
 import { useNavigate } from "react-router-dom";
 import { styled, alpha } from '@mui/material/styles';
 import FriendSection from "./FriendList";
+import './Dashboard.css'
 
 interface allUsers {
 	id: number,
@@ -21,6 +21,7 @@ interface allUsers {
 	status: string,
 	playgame: string,
 }
+
 
 function UserCard() {
 	const currentUser = useSelector(selectCurrentUser)
@@ -40,7 +41,10 @@ function UserCard() {
 				<Avatar src={currentUser.avatar} alt="photoURL" />
 				<Box sx={{ ml: 2 }}>
 				<Typography variant="subtitle2" sx={{ color: 'text.primary', fontWeight: 'bold' }}>
-					{currentUser.username}
+					{
+						`${currentUser.username.substring(0, 11)}${
+						currentUser.username.length <= 11 ? "" : "..."}`
+					}
 				</Typography>
 				<Typography variant="body2" sx={{ color: 'text.secondary' }}>
 					{currentUser.login}
@@ -51,7 +55,6 @@ function UserCard() {
 		</Box>
 	)
 }
-
 
 export default function Dashboard() {
 	const navigate 		= useNavigate();
@@ -67,7 +70,6 @@ export default function Dashboard() {
 		}
 		return (ret);
 	}
-
 	const getAllUsersTab = () => {
 		let allUsers: allUsers[] = [];
 		let userListWithoutCurrentUserArr = userListWithoutCurrentUser();
@@ -101,8 +103,7 @@ export default function Dashboard() {
 					<div className="userCol">
 						<UserCard/>
 						{currentUser.friends.length
-							? 
-								<div>
+							? <div>
 									<Typography sx={{ color: 'text.primary', fontWeight: 'bold' }}>
 										Friends:
 									</Typography>
